@@ -9,9 +9,11 @@ namespace CityCrm.Api.Entities
     {
         public int Id { get; set; }
         
-        [Required]
-        public string Address { get; set; } = string.Empty;
-        
+        public string StreetType { get; set; } = "вул."; 
+        public string StreetName { get; set; } = string.Empty;
+        public string BuildingNumber { get; set; } = string.Empty;
+        public string? CoopNumber { get; set; }
+
         public string BuildingType { get; set; } = string.Empty; 
         public string Condition { get; set; } = "В експлуатації";
 

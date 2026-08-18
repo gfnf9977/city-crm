@@ -1,6 +1,7 @@
 using CityCrm.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -37,8 +38,12 @@ using (var scope = app.Services.CreateScope())
         
         var testBuilding = new CityCrm.Api.Entities.Building
         {
-            Address = "Чернігів, проспект Миру, 15",
+            StreetType = "просп.",
+            StreetName = "Миру",
+            BuildingNumber = "15",
+            
             BuildingType = "Багатоповерхівка",
+            Condition = "В експлуатації", 
             Location = geometryFactory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(31.2953, 51.4938)),
             
             Premises = new List<CityCrm.Api.Entities.Premise>

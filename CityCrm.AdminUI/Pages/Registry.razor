@@ -38,7 +38,7 @@
                         </button>
                     </td>
                     <td>@building.Id</td>
-                    <td class="fw-bold">@building.Address</td>
+                    <td class="fw-bold">@building.FullAddress</td>
                     <td>@building.BuildingType</td>
                     <td>
                         <span class="badge @GetBuildingConditionBadge(building.Condition)">
@@ -63,7 +63,7 @@
                             <div class="p-3 bg-white border-start border-3 border-primary shadow-sm">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="mb-0 text-primary">
-                                        @(building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр" ? "Візуалізація під'їздів та поверхів:" : "Приміщення у цій будівлі:")
+                                        @(building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр" ? "Візуалізація під'їздів та поверхів:" : building.BuildingType == "Гаражний кооператив" ? "Схема гаражних рядів:" : "Приміщення у цій будівлі:")
                                     </h6>
                                     <button class="btn btn-sm btn-primary" @onclick="() => ShowAddPremiseModal(building.Id)">
                                         <i class="bi bi-plus"></i> Додати приміщення
@@ -119,6 +119,38 @@
                                         </div>
                                     }
                                 }
+                                else if (building.BuildingType == "Гаражний кооператив")
+                                {
+                                    var lines = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(l => l).ToList();
+                                    
+                                    if (!lines.Any())
+                                    {
+                                        <div class="alert alert-info">Додайте перший гараж і вкажіть його лінію/ряд.</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light p-3 rounded border">
+                                            @foreach (var line in lines)
+                                            {
+                                                <h6 class="text-secondary border-bottom pb-1 mb-2">Лінія (Ряд) @line</h6>
+                                                <div class="d-flex flex-wrap gap-2 mb-4">
+                                                    @foreach(var premise in building.Premises.Where(p => p.Entrance == line).OrderBy(p => p.PremiseNumber))
+                                                    {
+                                                        <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)" 
+                                                             style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                                                             @onclick="() => ShowEditPremiseModal(premise)"
+                                                             title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                                                            <div class="card-body p-2">
+                                                                <div class="fw-bold">№ @premise.PremiseNumber</div>
+                                                                <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
                                 else
                                 {
                                     <table class="table table-sm table-bordered mb-0">
@@ -162,9 +194,8 @@
                 </div>
                 <div class="modal-body">
                     <EditForm Model="newBuilding" OnSubmit="SaveBuilding">
-                        <div class="mb-3"><label>Адреса</label><InputText class="form-control" @bind-Value="newBuilding.Address" required /></div>
                         <div class="mb-3">
-                            <label>Тип забудови</label>
+                            <label class="fw-bold">Тип забудови</label>
                             <InputSelect class="form-select" @bind-Value="newBuilding.BuildingType">
                                 <option value="Багатоповерхівка">Багатоповерхівка (Житлова)</option>
                                 <option value="Офісний/Бізнес центр">Офісний/Бізнес центр</option>
@@ -174,6 +205,40 @@
                                 <option value="Гаражний кооператив">Гаражний кооператив</option>
                             </InputSelect>
                         </div>
+
+                        <div class="card p-3 mb-3 bg-light border-0 shadow-sm">
+                            @if (newBuilding.BuildingType == "Гаражний кооператив")
+                            {
+                                <div class="mb-3">
+                                    <label class="fw-bold text-primary">Номер кооперативу (АК №)</label>
+                                    <InputText class="form-control border-primary" @bind-Value="newBuilding.CoopNumber" placeholder="Наприклад: 27" />
+                                </div>
+                            }
+                            
+                            <div class="row mb-2">
+                                <div class="col-4">
+                                    <label>Тип</label>
+                                    <InputSelect class="form-select" @bind-Value="newBuilding.StreetType">
+                                        <option value="вул.">вул.</option>
+                                        <option value="просп.">просп.</option>
+                                        <option value="пров.">пров.</option>
+                                        <option value="площа">площа</option>
+                                        <option value="бульв.">бульв.</option>
+                                    </InputSelect>
+                                </div>
+                                <div class="col-8">
+                                    <label>Назва (напр. Миру)</label>
+                                    <InputText class="form-control" @bind-Value="newBuilding.StreetName" required />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label>Номер будинку / об'єкту</label>
+                                    <InputText class="form-control" @bind-Value="newBuilding.BuildingNumber" required placeholder="Наприклад: 15-А" />
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label>Технічний стан</label>
                             <InputSelect class="form-select" @bind-Value="newBuilding.Condition">
@@ -187,6 +252,7 @@
                             <div class="col-6 mb-3"><label>Широта (Lat)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lat" required /></div>
                             <div class="col-6 mb-3"><label>Довгота (Lng)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lng" required /></div>
                         </div>
+                        
                         <div class="text-end">
                             <button type="button" class="btn btn-secondary" @onclick="CloseBuildingModal">Скасувати</button>
                             <button type="submit" class="btn btn-primary">Зберегти</button>
@@ -216,15 +282,29 @@
                     <EditForm Model="newPremise" OnSubmit="SavePremise">
                         <div class="mb-3"><label>№ квартири / офісу</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
                         
+                        @{
+                            var bType = buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId)?.BuildingType;
+                        }
+                        
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Під'їзд</label>
-                                <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label>Поверх</label>
-                                <InputNumber class="form-control" @bind-Value="newPremise.Floor" />
-                            </div>
+                            @if (bType == "Гаражний кооператив")
+                            {
+                                <div class="col-md-12 mb-3">
+                                    <label>Ряд / Лінія (Тільки цифра)</label>
+                                    <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
+                                </div>
+                            }
+                            else if (bType == "Багатоповерхівка" || bType == "Офісний/Бізнес центр")
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label>Під'їзд</label>
+                                    <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Поверх</label>
+                                    <InputNumber class="form-control" @bind-Value="newPremise.Floor" />
+                                </div>
+                            }
                         </div>
 
                         <div class="mb-3"><label>Площа (кв.м)</label><InputNumber class="form-control" @bind-Value="newPremise.Area" required /></div>
@@ -340,23 +420,27 @@
 
     private void ShowAddBuildingModal() 
     { 
-        newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації" }; 
+        newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." }; 
         showBuildingModal = true; 
     }
     
     private void ShowEditBuildingModal(Building b) 
     { 
-        newBuilding = new Building { Id = b.Id, Address = b.Address, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng }; 
+        newBuilding = new Building { Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng, StreetType = b.StreetType, StreetName = b.StreetName, BuildingNumber = b.BuildingNumber, CoopNumber = b.CoopNumber }; 
         showBuildingModal = true; 
     }
-    
+
     private void CloseBuildingModal() => showBuildingModal = false;
     
     private async Task SaveBuilding()
     {
-        var response = newBuilding.Id == 0 ? await Http.PostAsJsonAsync("api/buildings", newBuilding) : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
+        var response = newBuilding.Id == 0 
+            ? await Http.PostAsJsonAsync("api/buildings", newBuilding) 
+            : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
+            
         if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
     }
+    
     private async Task DeleteBuilding(int id) { if ((await Http.DeleteAsync($"api/buildings/{id}")).IsSuccessStatusCode) await LoadBuildings(); }
 
     private void ShowAddPremiseModal(int buildingId) 
