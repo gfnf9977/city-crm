@@ -29,8 +29,8 @@ namespace CityCrm.Api.Controllers
             {
                 if (b.Location != null)
                 {
-                    b.Lat = b.Location.Y;
-                    b.Lng = b.Location.X;
+                    b.Lat = b.Location != null ? b.Location.Centroid.Y : 0;
+                    b.Lng = b.Location != null ? b.Location.Centroid.X : 0;
                 }
             }
             return buildings;

@@ -18,7 +18,7 @@ namespace CityCrm.Api.Entities
         public string Condition { get; set; } = "В експлуатації";
 
         [JsonIgnore]
-        public Point? Location { get; set; }
+        public Geometry? Location { get; set; }
 
         [NotMapped] 
         public double Lat { get; set; }

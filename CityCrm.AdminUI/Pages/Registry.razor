@@ -1,6 +1,7 @@
 @page "/registry"
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <PageTitle>Реєстр нерухомості</PageTitle>
 
@@ -262,9 +263,19 @@
                                 <option value="Занедбана будівля">Занедбана будівля (Покинуто)</option>
                             </InputSelect>
                         </div>
-                        <div class="row">
-                            <div class="col-6 mb-3"><label>Широта (Lat)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lat" required /></div>
-                            <div class="col-6 mb-3"><label>Довгота (Lng)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lng" required /></div>
+                        
+                        <div class="mb-3">
+                            <label class="fw-bold">Клікніть на карті, щоб вказати розташування:</label>
+                            <div id="mapPicker" style="height: 250px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1000;"></div>
+                            
+                            @if (newBuilding.Lat != 0)
+                            {
+                                <small class="text-success"><i class="bi bi-geo-alt-fill"></i> Точку зафіксовано: @newBuilding.Lat, @newBuilding.Lng</small>
+                            }
+                            else
+                            {
+                                <small class="text-danger"><i class="bi bi-exclamation-triangle"></i> Розташування не обрано!</small>
+                            }
                         </div>
                         
                         <div class="text-end">
@@ -416,7 +427,22 @@
     private string streetSearchQuery = "";
     private List<Street> streetSuggestions = new();
 
+    private DotNetObjectReference<Registry>? objRef;
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+    }
+
     protected override async Task OnInitializedAsync() => await LoadBuildings();
+
+    [JSInvokable]
+    public void SetPickedCoordinates(double lat, double lng)
+    {
+        newBuilding.Lat = lat;
+        newBuilding.Lng = lng;
+        StateHasChanged();
+    }
 
     private async Task LoadBuildings()
     {
@@ -459,20 +485,26 @@
         streetSuggestions.Clear(); 
     }
 
-    private void ShowAddBuildingModal() 
+    private async Task ShowAddBuildingModal() 
     { 
         newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." }; 
         streetSearchQuery = "";
         streetSuggestions.Clear();
         showBuildingModal = true; 
+        
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("initMapPicker", 0, 0, objRef);
     }
     
-    private void ShowEditBuildingModal(Building b) 
+    private async Task ShowEditBuildingModal(Building b) 
     { 
         newBuilding = new Building { Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng, StreetType = b.StreetType, StreetName = b.StreetName, BuildingNumber = b.BuildingNumber, CoopNumber = b.CoopNumber }; 
         streetSearchQuery = $"{b.StreetType} {b.StreetName}";
         streetSuggestions.Clear();
         showBuildingModal = true; 
+        
+        await Task.Delay(100);
+        await JS.InvokeVoidAsync("initMapPicker", b.Lat, b.Lng, objRef);
     }
 
     private void CloseBuildingModal() => showBuildingModal = false;
