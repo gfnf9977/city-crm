@@ -1,0 +1,42 @@
+@page "/map"
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Карта об'єктів</PageTitle>
+
+<h1>Просторова мапа нерухомості</h1>
+
+<div id="map" style="height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc;"></div>
+
+@code {
+    private List<Building> buildings = new();
+    private bool isMapInitialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Тепер ми завантажуємо Building, бо саме там лежать координати
+            var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
+            if (result != null)
+            {
+                buildings = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Помилка завантаження даних для карти: {ex.Message}");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (buildings.Any() && !isMapInitialized)
+        {
+            // Передаємо масив будівель у JavaScript
+            await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", buildings);
+            isMapInitialized = true;
+        }
+    }
+}

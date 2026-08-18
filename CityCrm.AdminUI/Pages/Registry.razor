@@ -1,0 +1,437 @@
+@page "/registry"
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+
+<PageTitle>Реєстр нерухомості</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Реєстр муніципальної нерухомості</h1>
+    <button class="btn btn-success" @onclick="ShowAddBuildingModal">
+        <i class="bi bi-plus-circle"></i> Додати будівлю
+    </button>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th style="width: 50px;"></th>
+            <th>ID</th>
+            <th>Адреса будівлі</th>
+            <th>Тип забудови</th>
+            <th>Стан</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!buildings.Any())
+        {
+            <tr><td colspan="6" class="text-center text-muted">Немає даних...</td></tr>
+        }
+        else
+        {
+            @foreach (var building in buildings)
+            {
+                <tr class="table-light">
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleBuilding(building.Id)">
+                            <i class="bi @(expandedBuildings.Contains(building.Id) ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                        </button>
+                    </td>
+                    <td>@building.Id</td>
+                    <td class="fw-bold">@building.Address</td>
+                    <td>@building.BuildingType</td>
+                    <td>
+                        <span class="badge @GetBuildingConditionBadge(building.Condition)">
+                            @building.Condition
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditBuildingModal(building)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteBuilding(building.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                @if (expandedBuildings.Contains(building.Id))
+                {
+                    <tr>
+                        <td></td>
+                        <td colspan="5" class="p-0">
+                            <div class="p-3 bg-white border-start border-3 border-primary shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0 text-primary">
+                                        @(building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр" ? "Візуалізація під'їздів та поверхів:" : "Приміщення у цій будівлі:")
+                                    </h6>
+                                    <button class="btn btn-sm btn-primary" @onclick="() => ShowAddPremiseModal(building.Id)">
+                                        <i class="bi bi-plus"></i> Додати приміщення
+                                    </button>
+                                </div>
+
+                                @if (building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр")
+                                {
+                                    var entrances = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(e => e).ToList();
+                                    
+                                    if (!entrances.Any())
+                                    {
+                                        <div class="alert alert-info">Додайте першу квартиру і вкажіть її під'їзд та поверх, щоб побачити сітку.</div>
+                                    }
+                                    else
+                                    {
+                                        int activeEntrance = selectedEntrances.ContainsKey(building.Id) ? selectedEntrances[building.Id] : entrances.First();
+
+                                        <ul class="nav nav-tabs mb-3">
+                                            @foreach (var ent in entrances)
+                                            {
+                                                <li class="nav-item">
+                                                    <a class="nav-link @(activeEntrance == ent ? "active fw-bold" : "")" 
+                                                       style="cursor:pointer;" 
+                                                       @onclick="() => SelectEntrance(building.Id, ent)">Під'їзд @ent</a>
+                                                </li>
+                                            }
+                                        </ul>
+
+                                        var floors = building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor.HasValue).Select(p => p.Floor.Value).Distinct().OrderByDescending(f => f);
+                                        
+                                        <div class="bg-light p-3 rounded border">
+                                            @foreach (var floor in floors)
+                                            {
+                                                <div class="d-flex align-items-center mb-2 border-bottom pb-2">
+                                                    <div class="me-3 text-muted fw-bold" style="width: 70px;">Пов. @floor</div>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        @foreach(var premise in building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor == floor).OrderBy(p => p.PremiseNumber))
+                                                        {
+                                                            <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)" 
+                                                                 style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                                                                 @onclick="() => ShowEditPremiseModal(premise)"
+                                                                 title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                                                                <div class="card-body p-2">
+                                                                    <div class="fw-bold fs-5">@premise.PremiseNumber</div>
+                                                                    <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                            <tr><th>№ / Назва</th><th>Площа</th><th>Тип</th><th>Статус</th><th>Дії</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var premise in building.Premises)
+                                            {
+                                                <tr>
+                                                    <td>@premise.PremiseNumber</td>
+                                                    <td>@premise.Area кв.м</td>
+                                                    <td>@premise.Type</td>
+                                                    <td><span class="badge bg-secondary">@premise.Status</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditPremiseModal(premise)"><i class="bi bi-pencil"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePremise(premise.Id)"><i class="bi bi-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+@if (showBuildingModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Будівля</h5>
+                    <button type="button" class="btn-close" @onclick="CloseBuildingModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="newBuilding" OnSubmit="SaveBuilding">
+                        <div class="mb-3"><label>Адреса</label><InputText class="form-control" @bind-Value="newBuilding.Address" required /></div>
+                        <div class="mb-3">
+                            <label>Тип забудови</label>
+                            <InputSelect class="form-select" @bind-Value="newBuilding.BuildingType">
+                                <option value="Багатоповерхівка">Багатоповерхівка (Житлова)</option>
+                                <option value="Офісний/Бізнес центр">Офісний/Бізнес центр</option>
+                                <option value="Громадська будівля">Громадська будівля (Школа, Лікарня)</option>
+                                <option value="Приватний будинок">Приватний будинок</option>
+                                <option value="Промисловий/Складський об'єкт">Промисловий/Складський об'єкт</option>
+                                <option value="Гаражний кооператив">Гаражний кооператив</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label>Технічний стан</label>
+                            <InputSelect class="form-select" @bind-Value="newBuilding.Condition">
+                                <option value="В експлуатації">В експлуатації (Нормальний)</option>
+                                <option value="В процесі будівництва">В процесі будівництва</option>
+                                <option value="Зруйновано (бойові дії)">Зруйновано (бойові дії)</option>
+                                <option value="Занедбана будівля">Занедбана будівля (Покинуто)</option>
+                            </InputSelect>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3"><label>Широта (Lat)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lat" required /></div>
+                            <div class="col-6 mb-3"><label>Довгота (Lng)</label><InputNumber class="form-control" @bind-Value="newBuilding.Lng" required /></div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseBuildingModal">Скасувати</button>
+                            <button type="submit" class="btn btn-primary">Зберегти</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showPremiseModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(newPremise.Id == 0 ? "Додати приміщення" : "Редагувати приміщення")</h5>
+                    <button type="button" class="btn-close" @onclick="ClosePremiseModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger p-2 mb-3">@errorMessage</div>
+                    }
+
+                    <EditForm Model="newPremise" OnSubmit="SavePremise">
+                        <div class="mb-3"><label>№ квартири / офісу</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Під'їзд</label>
+                                <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Поверх</label>
+                                <InputNumber class="form-control" @bind-Value="newPremise.Floor" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3"><label>Площа (кв.м)</label><InputNumber class="form-control" @bind-Value="newPremise.Area" required /></div>
+                        <div class="mb-3">
+                            <label>Тип</label>
+                            <InputSelect class="form-select" @bind-Value="newPremise.Type">
+                                <option value="Житлова">Житлова</option>
+                                <option value="Комерційна">Комерційна</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label>Статус</label>
+                            <InputSelect class="form-select" @bind-Value="newPremise.Status">
+                                <option value="Вільне">Вільне (очікує аукціону)</option>
+                                <option value="Орендоване">Орендоване</option>
+                                <option value="Службове">Службове (ЦНАП, ЖЕК тощо)</option>
+                                <option value="В експлуатації">В експлуатації (Приватне)</option>
+                                <option value="Аварійне">Аварійне</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label>Власність</label>
+                            <InputSelect class="form-select" @bind-Value="newPremise.Ownership">
+                                <option value="Комунальна">Комунальна (Місто)</option>
+                                <option value="Приватна">Приватна</option>
+                                <option value="Державна">Державна</option>
+                            </InputSelect>
+                        </div>
+
+                        @if (newPremise.Ownership == "Приватна" || newPremise.Ownership == "Державна")
+                        {
+                            <div class="card card-body bg-light border-secondary mb-3 shadow-sm p-3">
+                                <h6 class="text-secondary border-bottom pb-2">Дані з реєстру прав:</h6>
+                                <div class="mb-2">
+                                    <label>Власник (ПІБ або Назва установи)</label>
+                                    <InputText class="form-control" @bind-Value="newPremise.OwnerName" />
+                                </div>
+                                <div>
+                                    <label>Дата реєстрації права власності</label>
+                                    <InputDate class="form-control" @bind-Value="newPremise.RegistrationDate" />
+                                </div>
+                            </div>
+                        }
+                        else if (newPremise.Ownership == "Комунальна" && newPremise.Status == "Орендоване")
+                        {
+                            <div class="card card-body bg-light border-primary mb-3 shadow-sm p-3">
+                                <h6 class="text-primary border-bottom pb-2">Дані договору оренди:</h6>
+                                <div class="mb-2">
+                                    <label>Орендар (Назва компанії / ФОП)</label>
+                                    <InputText class="form-control" @bind-Value="newPremise.OwnerName" />
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label>Початок оренди</label>
+                                        <InputDate class="form-control" @bind-Value="newPremise.RegistrationDate" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label>Кінець оренди</label>
+                                        <InputDate class="form-control" @bind-Value="newPremise.RentEndDate" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <div>
+                                @if (newPremise.Id > 0)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" @onclick="() => DeletePremise(newPremise.Id)">Видалити</button>
+                                }
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-secondary me-2" @onclick="ClosePremiseModal">Скасувати</button>
+                                <button type="submit" class="btn btn-primary">Зберегти</button>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Building> buildings = new();
+    private HashSet<int> expandedBuildings = new();
+    private Dictionary<int, int> selectedEntrances = new();
+
+    private bool showBuildingModal = false;
+    private bool showPremiseModal = false;
+    private Building newBuilding = new();
+    private Premise newPremise = new();
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync() => await LoadBuildings();
+
+    private async Task LoadBuildings()
+    {
+        var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
+        if (result != null) buildings = result;
+    }
+
+    private void ToggleBuilding(int id)
+    {
+        if (expandedBuildings.Contains(id)) expandedBuildings.Remove(id);
+        else expandedBuildings.Add(id);
+    }
+
+    private void SelectEntrance(int buildingId, int entrance)
+    {
+        selectedEntrances[buildingId] = entrance;
+    }
+
+    private void ShowAddBuildingModal() 
+    { 
+        newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації" }; 
+        showBuildingModal = true; 
+    }
+    
+    private void ShowEditBuildingModal(Building b) 
+    { 
+        newBuilding = new Building { Id = b.Id, Address = b.Address, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng }; 
+        showBuildingModal = true; 
+    }
+    
+    private void CloseBuildingModal() => showBuildingModal = false;
+    
+    private async Task SaveBuilding()
+    {
+        var response = newBuilding.Id == 0 ? await Http.PostAsJsonAsync("api/buildings", newBuilding) : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
+        if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
+    }
+    private async Task DeleteBuilding(int id) { if ((await Http.DeleteAsync($"api/buildings/{id}")).IsSuccessStatusCode) await LoadBuildings(); }
+
+    private void ShowAddPremiseModal(int buildingId) 
+    { 
+        errorMessage = "";
+        newPremise = new Premise { BuildingId = buildingId, Type = "Житлова", Status = "Вільне", Ownership = "Комунальна" }; 
+        showPremiseModal = true; 
+    }
+    
+    private void ShowEditPremiseModal(Premise p) 
+    { 
+        errorMessage = ""; 
+        newPremise = new Premise { Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber, Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type, Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName, RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate }; 
+        showPremiseModal = true; 
+    }
+    
+    private void ClosePremiseModal() => showPremiseModal = false;
+
+    private async Task SavePremise()
+    {
+        errorMessage = "";
+        
+        var currentBuilding = buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId);
+        if (currentBuilding != null && !string.IsNullOrWhiteSpace(newPremise.PremiseNumber))
+        {
+            bool isDuplicate = currentBuilding.Premises.Any(p => 
+                p.Id != newPremise.Id && 
+                p.PremiseNumber.Trim().ToLower() == newPremise.PremiseNumber.Trim().ToLower());
+                
+            if (isDuplicate)
+            {
+                errorMessage = $"Увага! Приміщення з номером {newPremise.PremiseNumber} вже існує у цій будівлі.";
+                return;
+            }
+        }
+
+        var response = newPremise.Id == 0 
+            ? await Http.PostAsJsonAsync("api/premises", newPremise) 
+            : await Http.PutAsJsonAsync($"api/premises/{newPremise.Id}", newPremise);
+            
+        if (response.IsSuccessStatusCode) 
+        { 
+            await LoadBuildings(); 
+            showPremiseModal = false; 
+        }
+        else
+        {
+            errorMessage = "Сервер відхилив запит. Перевірте дані.";
+        }
+    }
+    
+    private async Task DeletePremise(int id) 
+    { 
+        var response = await Http.DeleteAsync($"api/premises/{id}");
+        if (response.IsSuccessStatusCode) 
+        {
+            await LoadBuildings();
+            showPremiseModal = false;
+        }
+    }
+
+    private string GetPremiseColorClass(string status) => status switch
+    {
+        "Вільне" => "bg-success border-success",
+        "Аварійне" => "bg-danger border-danger",
+        "Орендоване" => "bg-primary border-primary",
+        _ => "bg-secondary border-secondary"
+    };
+
+    private string GetBuildingConditionBadge(string condition) => condition switch
+    {
+        "В експлуатації" => "bg-success",
+        "В процесі будівництва" => "bg-warning text-dark",
+        "Зруйновано (бойові дії)" => "bg-danger",
+        "Занедбана будівля" => "bg-secondary",
+        _ => "bg-light text-dark"
+    };
+}
