@@ -62,6 +62,19 @@ using (var scope = app.Services.CreateScope())
         context.Buildings.Add(testBuilding);
         context.SaveChanges();
     }
+    
+    if (!context.Streets.Any())
+    {
+        context.Streets.AddRange(
+            new CityCrm.Api.Entities.Street { StreetType = "вул.", Name = "Василя Дуніна-Борковського", OldNames = "" },
+            new CityCrm.Api.Entities.Street { StreetType = "просп.", Name = "Левка Лук'яненка", OldNames = "Рокоссовського" },
+            new CityCrm.Api.Entities.Street { StreetType = "вул.", Name = "1-ї танкової бригади", OldNames = "Бєлова" },
+            new CityCrm.Api.Entities.Street { StreetType = "вул.", Name = "Івана Мазепи", OldNames = "Щорса" },
+            new CityCrm.Api.Entities.Street { StreetType = "просп.", Name = "Миру", OldNames = "Леніна" },
+            new CityCrm.Api.Entities.Street { StreetType = "просп.", Name = "Перемоги", OldNames = "Жовтневої революції" }
+        );
+        context.SaveChanges();
+    }
 }
 
 app.Run();

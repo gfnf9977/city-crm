@@ -215,22 +215,36 @@
                                 </div>
                             }
                             
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <label>Тип</label>
-                                    <InputSelect class="form-select" @bind-Value="newBuilding.StreetType">
-                                        <option value="вул.">вул.</option>
-                                        <option value="просп.">просп.</option>
-                                        <option value="пров.">пров.</option>
-                                        <option value="площа">площа</option>
-                                        <option value="бульв.">бульв.</option>
-                                    </InputSelect>
-                                </div>
-                                <div class="col-8">
-                                    <label>Назва (напр. Миру)</label>
-                                    <InputText class="form-control" @bind-Value="newBuilding.StreetName" required />
-                                </div>
+                            <div class="mb-3 position-relative">
+                                <label class="fw-bold">Вулиця</label>
+                                <input type="text" class="form-control" 
+                                       @bind="streetSearchQuery" 
+                                       @oninput="SearchStreet" 
+                                       placeholder="Почніть вводити назву (напр. Рокос...)" 
+                                       autocomplete="off" />
+                                
+                                @if (streetSuggestions.Any())
+                                {
+                                    <ul class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                                        @foreach(var s in streetSuggestions)
+                                        {
+                                            <li class="list-group-item list-group-item-action text-primary" 
+                                                style="cursor: pointer;" 
+                                                @onclick="() => SelectStreet(s)">
+                                                <i class="bi bi-geo-alt me-2"></i> @s.DisplayName
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(newBuilding.StreetName))
+                                {
+                                    <div class="form-text text-success">
+                                        <i class="bi bi-check-circle"></i> Обрано: @newBuilding.StreetType @newBuilding.StreetName
+                                    </div>
+                                }
                             </div>
+
                             <div class="row">
                                 <div class="col-12">
                                     <label>Номер будинку / об'єкту</label>
@@ -399,6 +413,9 @@
     private Premise newPremise = new();
     private string errorMessage = "";
 
+    private string streetSearchQuery = "";
+    private List<Street> streetSuggestions = new();
+
     protected override async Task OnInitializedAsync() => await LoadBuildings();
 
     private async Task LoadBuildings()
@@ -418,15 +435,43 @@
         selectedEntrances[buildingId] = entrance;
     }
 
+    private async Task SearchStreet(ChangeEventArgs e)
+    {
+        streetSearchQuery = e.Value?.ToString() ?? "";
+        
+        if (streetSearchQuery.Length >= 2)
+        {
+            var result = await Http.GetFromJsonAsync<List<Street>>($"api/streets/search?q={streetSearchQuery}");
+            if (result != null) streetSuggestions = result;
+        }
+        else
+        {
+            streetSuggestions.Clear();
+        }
+    }
+
+    private void SelectStreet(Street street)
+    {
+        newBuilding.StreetType = street.StreetType;
+        newBuilding.StreetName = street.Name;
+        
+        streetSearchQuery = street.DisplayName; 
+        streetSuggestions.Clear(); 
+    }
+
     private void ShowAddBuildingModal() 
     { 
         newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." }; 
+        streetSearchQuery = "";
+        streetSuggestions.Clear();
         showBuildingModal = true; 
     }
     
     private void ShowEditBuildingModal(Building b) 
     { 
         newBuilding = new Building { Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng, StreetType = b.StreetType, StreetName = b.StreetName, BuildingNumber = b.BuildingNumber, CoopNumber = b.CoopNumber }; 
+        streetSearchQuery = $"{b.StreetType} {b.StreetName}";
+        streetSuggestions.Clear();
         showBuildingModal = true; 
     }
 

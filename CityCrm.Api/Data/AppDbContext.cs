@@ -8,19 +8,19 @@ namespace CityCrm.Api.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Building> Buildings => Set<Building>();
-        public DbSet<Premise> Premises => Set<Premise>(); // Додали нову таблицю
+        public DbSet<Premise> Premises => Set<Premise>(); 
+        public DbSet<Street> Streets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("postgis");
 
-            // Явно вказуємо зв'язок (хоча EF Core зазвичай розуміє це сам)
             modelBuilder.Entity<Premise>()
                 .HasOne(p => p.Building)
                 .WithMany(b => b.Premises)
                 .HasForeignKey(p => p.BuildingId)
-                .OnDelete(DeleteBehavior.Cascade); // Якщо видалити будівлю, видаляться і всі її приміщення
+                .OnDelete(DeleteBehavior.Cascade); 
         }
     }
 }
