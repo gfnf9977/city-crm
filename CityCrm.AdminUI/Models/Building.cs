@@ -16,6 +16,7 @@ namespace CityCrm.AdminUI.Models
         
         public double Lat { get; set; }
         public double Lng { get; set; }
+        public string? GeoJson { get; set; }
 
         public List<Premise> Premises { get; set; } = new();
 

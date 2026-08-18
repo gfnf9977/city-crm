@@ -34,6 +34,7 @@
     <script>
         let pickerMap = null;
         let pickerMarker = null;
+        let pickerPolygon = null;
 
         window.initMapPicker = (lat, lng, dotNetHelper) => {
             if (pickerMap !== null) { pickerMap.remove(); }
@@ -58,6 +59,21 @@
             });
 
             setTimeout(() => { pickerMap.invalidateSize(); }, 300);
+        };
+
+        window.drawOsmPolygon = (geoJsonStr) => {
+            if (!pickerMap) return;
+
+            let geoJson = JSON.parse(geoJsonStr);
+
+            if (pickerMarker) { pickerMap.removeLayer(pickerMarker); pickerMarker = null; }
+            if (pickerPolygon) { pickerMap.removeLayer(pickerPolygon); }
+
+            pickerPolygon = L.geoJSON(geoJson, {
+                style: { color: '#007bff', weight: 2, fillOpacity: 0.5 }
+            }).addTo(pickerMap);
+
+            pickerMap.fitBounds(pickerPolygon.getBounds());
         };
     </script>
 </body>

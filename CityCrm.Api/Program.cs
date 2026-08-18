@@ -21,6 +21,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient<CityCrm.Api.Services.OsmService>();
 var app = builder.Build();
 
 app.UseHttpsRedirection();

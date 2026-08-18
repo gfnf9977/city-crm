@@ -26,6 +26,9 @@ namespace CityCrm.Api.Entities
         [NotMapped]
         public double Lng { get; set; }
 
+        [NotMapped]
+        public string? GeoJson { get; set; }
+
         public List<Premise> Premises { get; set; } = new();
     }
 }

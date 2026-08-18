@@ -249,7 +249,18 @@
                             <div class="row">
                                 <div class="col-12">
                                     <label>Номер будинку / об'єкту</label>
-                                    <InputText class="form-control" @bind-Value="newBuilding.BuildingNumber" required placeholder="Наприклад: 15-А" />
+                                    <div class="input-group mb-1">
+                                        <InputText class="form-control" @bind-Value="newBuilding.BuildingNumber" placeholder="Напр. 15-А" />
+                                        
+                                        <button type="button" class="btn btn-outline-primary fw-bold" @onclick="FetchOsmContour" disabled="@isFetchingOsm">
+                                            @if(isFetchingOsm) { <span class="spinner-border spinner-border-sm"></span> }
+                                            else { <span>🪄 Знайти контур</span> }
+                                        </button>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(osmMessage))
+                                    {
+                                        <small class="text-info fw-bold">@osmMessage</small>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -429,6 +440,10 @@
 
     private DotNetObjectReference<Registry>? objRef;
 
+    private bool isFetchingOsm = false;
+    private string osmMessage = "";
+    private string? currentGeoJson = null;
+
     protected override void OnInitialized()
     {
         objRef = DotNetObjectReference.Create(this);
@@ -441,6 +456,7 @@
     {
         newBuilding.Lat = lat;
         newBuilding.Lng = lng;
+        newBuilding.GeoJson = null;
         StateHasChanged();
     }
 
@@ -485,11 +501,52 @@
         streetSuggestions.Clear(); 
     }
 
+    private async Task FetchOsmContour()
+    {
+        if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || string.IsNullOrWhiteSpace(newBuilding.BuildingNumber))
+        {
+            osmMessage = "Спочатку оберіть вулицю та вкажіть номер будинку!";
+            return;
+        }
+
+        isFetchingOsm = true;
+        osmMessage = "📡 Шукаємо контур будівлі в OpenStreetMap...";
+        StateHasChanged();
+
+        try
+        {
+            var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={newBuilding.BuildingNumber}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                currentGeoJson = await response.Content.ReadAsStringAsync();
+                newBuilding.GeoJson = currentGeoJson;
+                osmMessage = "✨ Контур знайдено і побудовано!";
+                
+                await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
+            }
+            else
+            {
+                osmMessage = "❌ В базі OSM немає контуру цього будинку. Просто клікніть на карті вручну.";
+            }
+        }
+        catch (Exception)
+        {
+            osmMessage = "⚠️ Помилка з'єднання.";
+        }
+        finally
+        {
+            isFetchingOsm = false;
+        }
+    }
+
     private async Task ShowAddBuildingModal() 
     { 
         newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." }; 
         streetSearchQuery = "";
         streetSuggestions.Clear();
+        osmMessage = "";
+        currentGeoJson = null;
         showBuildingModal = true; 
         
         await Task.Delay(100);
@@ -498,13 +555,29 @@
     
     private async Task ShowEditBuildingModal(Building b) 
     { 
-        newBuilding = new Building { Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, Lat = b.Lat, Lng = b.Lng, StreetType = b.StreetType, StreetName = b.StreetName, BuildingNumber = b.BuildingNumber, CoopNumber = b.CoopNumber }; 
+        newBuilding = new Building { 
+            Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, 
+            Lat = b.Lat, Lng = b.Lng, 
+            StreetType = b.StreetType, StreetName = b.StreetName, 
+            BuildingNumber = b.BuildingNumber, 
+            CoopNumber = b.CoopNumber,
+            GeoJson = b.GeoJson
+        }; 
+        
         streetSearchQuery = $"{b.StreetType} {b.StreetName}";
         streetSuggestions.Clear();
+        osmMessage = "";
+        currentGeoJson = null;
         showBuildingModal = true; 
         
         await Task.Delay(100);
+        
         await JS.InvokeVoidAsync("initMapPicker", b.Lat, b.Lng, objRef);
+        
+        if (!string.IsNullOrEmpty(b.GeoJson))
+        {
+            await JS.InvokeVoidAsync("drawOsmPolygon", b.GeoJson);
+        }
     }
 
     private void CloseBuildingModal() => showBuildingModal = false;

@@ -16,32 +16,58 @@ namespace CityCrm.Api.Controllers
             _context = context;
         }
 
-        // GET: api/buildings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Building>>> GetBuildings()
         {
-            // Використовуємо Include, щоб БД одразу віддала і будівлі, і їхні приміщення
-            var buildings = await _context.Buildings
-                                          .Include(b => b.Premises) 
-                                          .ToListAsync();
-            
+            var buildings = await _context.Buildings.ToListAsync();
+            var writer = new NetTopologySuite.IO.GeoJsonWriter();
+
             foreach (var b in buildings)
             {
-                if (b.Location != null)
+                b.Lat = b.Location != null ? b.Location.Centroid.Y : 0;
+                b.Lng = b.Location != null ? b.Location.Centroid.X : 0;
+
+                if (b.Location != null && b.Location.GeometryType != "Point")
                 {
-                    b.Lat = b.Location != null ? b.Location.Centroid.Y : 0;
-                    b.Lng = b.Location != null ? b.Location.Centroid.X : 0;
+                    b.GeoJson = writer.Write(b.Location);
                 }
             }
-            return buildings;
+
+            return Ok(buildings);
         }
 
-        // POST: api/buildings
+        [HttpGet("osm-contour")]
+        public async Task<IActionResult> GetOsmContour([FromServices] CityCrm.Api.Services.OsmService osmService, [FromQuery] string street, [FromQuery] string number)
+        {
+            var geometry = await osmService.GetBuildingGeometryAsync("Чернігів", street, number);
+            
+            if (geometry == null)
+                return NotFound(new { message = "Контур не знайдено в OSM. Спробуйте вказати точку на карті вручну." });
+
+            var writer = new NetTopologySuite.IO.GeoJsonWriter();
+            var geoJson = writer.Write(geometry);
+
+            return Ok(geoJson);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Building>> CreateBuilding(Building building)
         {
-            var geometryFactory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            building.Location = geometryFactory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(building.Lng, building.Lat));
+            var factory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            if (!string.IsNullOrEmpty(building.GeoJson))
+            {
+                var reader = new NetTopologySuite.IO.GeoJsonReader();
+                building.Location = reader.Read<NetTopologySuite.Geometries.Geometry>(building.GeoJson);
+            }
+            else if (building.Lat != 0 && building.Lng != 0)
+            {
+                building.Location = factory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(building.Lng, building.Lat));
+            }
+            else
+            {
+                return BadRequest("Не вказано розташування будівлі.");
+            }
 
             _context.Buildings.Add(building);
             await _context.SaveChangesAsync();
@@ -49,14 +75,26 @@ namespace CityCrm.Api.Controllers
             return CreatedAtAction(nameof(GetBuildings), new { id = building.Id }, building);
         }
 
-        // PUT: api/buildings/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBuilding(int id, Building building)
         {
             if (id != building.Id) return BadRequest("ID не співпадає.");
 
-            var geometryFactory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            building.Location = geometryFactory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(building.Lng, building.Lat));
+            var factory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            if (!string.IsNullOrEmpty(building.GeoJson))
+            {
+                var reader = new NetTopologySuite.IO.GeoJsonReader();
+                building.Location = reader.Read<NetTopologySuite.Geometries.Geometry>(building.GeoJson);
+            }
+            else if (building.Lat != 0 && building.Lng != 0)
+            {
+                building.Location = factory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(building.Lng, building.Lat));
+            }
+            else
+            {
+                return BadRequest("Не вказано розташування будівлі.");
+            }
 
             _context.Entry(building).State = EntityState.Modified;
 
@@ -73,7 +111,6 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
-        // DELETE: api/buildings/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBuilding(int id)
         {

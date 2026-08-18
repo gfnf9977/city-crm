@@ -17,7 +17,6 @@
     {
         try
         {
-            // Тепер ми завантажуємо Building, бо саме там лежать координати
             var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
             if (result != null)
             {
@@ -34,8 +33,17 @@
     {
         if (buildings.Any() && !isMapInitialized)
         {
-            // Передаємо масив будівель у JavaScript
-            await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", buildings);
+            var mapData = buildings.Select(b => new 
+            {
+                lat = b.Lat,
+                lng = b.Lng,
+                address = $"{b.StreetType} {b.StreetName}, {b.BuildingNumber}", 
+                buildingType = b.BuildingType,
+                condition = b.Condition,
+                geoJson = b.GeoJson 
+            }).ToList();
+
+            await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", mapData);
             isMapInitialized = true;
         }
     }
