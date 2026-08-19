@@ -13,6 +13,8 @@
     <link href="CityCrm.AdminUI.styles.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <script src="js/map.js"></script>
 </head>
 
@@ -37,7 +39,10 @@
         let pickerPolygon = null;
 
         window.initMapPicker = (lat, lng, dotNetHelper) => {
-            if (pickerMap !== null) { pickerMap.remove(); }
+            if (pickerMap !== null) { 
+                pickerMap.off(); 
+                pickerMap.remove(); 
+            }
             
             let startLat = lat !== 0 ? lat : 51.4938;
             let startLng = lng !== 0 ? lng : 31.2953;
@@ -45,17 +50,52 @@
             pickerMap = L.map('mapPicker').setView([startLat, startLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
 
+            pickerMap.pm.addControls({
+                position: 'topleft',
+                drawMarker: false,      
+                drawCircleMarker: false,
+                drawPolyline: false,
+                drawCircle: false,
+                drawText: false,
+                drawPolygon: true,       
+                drawRectangle: false,     
+                editMode: true,         
+                dragMode: false,
+                cutPolygon: false,
+                removalMode: true        
+            });
+
             if (lat !== 0 && lng !== 0) {
                 pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
             }
 
             pickerMap.on('click', function(e) {
-                if (pickerMarker) {
-                    pickerMarker.setLatLng(e.latlng); 
-                } else {
-                    pickerMarker = L.marker(e.latlng).addTo(pickerMap); 
-                }
+                if (pickerMap.pm.globalDrawModeEnabled()) return; 
+
+                if (pickerMarker) { pickerMarker.setLatLng(e.latlng); } 
+                else { pickerMarker = L.marker(e.latlng).addTo(pickerMap); }
                 dotNetHelper.invokeMethodAsync('SetPickedCoordinates', e.latlng.lat, e.latlng.lng);
+            });
+
+            pickerMap.on('pm:create', function(e) {
+                if (pickerMarker) { pickerMap.removeLayer(pickerMarker); pickerMarker = null; }
+                if (pickerPolygon) { pickerMap.removeLayer(pickerPolygon); pickerPolygon = null; }
+
+                let layer = e.layer;
+                
+                let geoJsonData = layer.toGeoJSON().geometry; 
+                let geoJsonStr = JSON.stringify(geoJsonData);
+
+                dotNetHelper.invokeMethodAsync('SetDrawnGeoJson', geoJsonStr);
+
+                layer.on('pm:edit', function(editEvent) {
+                    let updatedGeoJson = editEvent.target.toGeoJSON().geometry;
+                    dotNetHelper.invokeMethodAsync('SetDrawnGeoJson', JSON.stringify(updatedGeoJson));
+                });
+            });
+
+            pickerMap.on('pm:remove', function(e) {
+                dotNetHelper.invokeMethodAsync('SetDrawnGeoJson', null);
             });
 
             setTimeout(() => { pickerMap.invalidateSize(); }, 300);
@@ -63,16 +103,13 @@
 
         window.drawOsmPolygon = (geoJsonStr) => {
             if (!pickerMap) return;
-
             let geoJson = JSON.parse(geoJsonStr);
-
             if (pickerMarker) { pickerMap.removeLayer(pickerMarker); pickerMarker = null; }
             if (pickerPolygon) { pickerMap.removeLayer(pickerPolygon); }
 
             pickerPolygon = L.geoJSON(geoJson, {
                 style: { color: '#007bff', weight: 2, fillOpacity: 0.5 }
             }).addTo(pickerMap);
-
             pickerMap.fitBounds(pickerPolygon.getBounds());
         };
     </script>

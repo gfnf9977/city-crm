@@ -39,15 +39,19 @@ namespace CityCrm.Api.Controllers
         [HttpGet("osm-contour")]
         public async Task<IActionResult> GetOsmContour([FromServices] CityCrm.Api.Services.OsmService osmService, [FromQuery] string street, [FromQuery] string number)
         {
-            var geometry = await osmService.GetBuildingGeometryAsync("Чернігів", street, number);
+            var (geometry, errorMessage) = await osmService.GetBuildingGeometryAsync("Чернігів", street, number);
             
+            if (errorMessage == "RATE_LIMIT")
+                return StatusCode(429, new { message = "RATE_LIMIT" });
+                
+            if (errorMessage == "ERROR")
+                return StatusCode(502, new { message = "OSM_SERVER_DOWN" });
+
             if (geometry == null)
-                return NotFound(new { message = "Контур не знайдено в OSM. Спробуйте вказати точку на карті вручну." });
+                return NotFound();
 
             var writer = new NetTopologySuite.IO.GeoJsonWriter();
-            var geoJson = writer.Write(geometry);
-
-            return Ok(geoJson);
+            return Ok(writer.Write(geometry));
         }
 
         [HttpPost]

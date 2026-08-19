@@ -14,45 +14,101 @@ namespace CityCrm.Api.Services
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "CityCrm_StudentProject/1.0");
         }
 
-        public async Task<Geometry?> GetBuildingGeometryAsync(string cityName, string streetName, string houseNumber)
+        public async Task<(Geometry? Geometry, string? ErrorMessage)> GetBuildingGeometryAsync(string cityName, string streetName, string houseNumber)
         {
-
             string query = $@"[out:json];
                 area[""name""=""{cityName}""]->.searchArea;
-                way[""addr:street""~""{streetName}""][""addr:housenumber""=""{houseNumber}""](area.searchArea);
+                (
+                  way[""addr:street""~""{streetName}""][""addr:housenumber""=""{houseNumber}""](area.searchArea);
+                  relation[""addr:street""~""{streetName}""][""addr:housenumber""=""{houseNumber}""](area.searchArea);
+                );
                 out geom;";
 
-            var response = await _httpClient.GetAsync($"https://overpass-api.de/api/interpreter?data={Uri.EscapeDataString(query)}");
-            
-            if (!response.IsSuccessStatusCode) return null;
+            string[] endpoints = {
+                "https://overpass-api.de/api/interpreter",
+                "https://overpass.openstreetmap.fr/api/interpreter",
+                "https://overpass.kumi.systems/api/interpreter"
+            };
 
-            var jsonString = await response.Content.ReadAsStringAsync();
-            var json = JObject.Parse(jsonString);
+            string? lastErrorMessage = "ERROR";
 
-            var elements = json["elements"] as JArray;
-            if (elements == null || elements.Count == 0) return null;
-
-            var way = elements[0];
-            var geometry = way["geometry"] as JArray;
-            if (geometry == null) return null;
-
-            var coordinates = new List<Coordinate>();
-            foreach (var point in geometry)
+            foreach (var endpoint in endpoints)
             {
-                var lat = (double)point["lat"]!;
-                var lon = (double)point["lon"]!;
-                coordinates.Add(new Coordinate(lon, lat)); 
+                try
+                {
+                    var response = await _httpClient.GetAsync($"{endpoint}?data={Uri.EscapeDataString(query)}");
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    {
+                        lastErrorMessage = "RATE_LIMIT";
+                        continue;
+                    }
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        if (!jsonString.TrimStart().StartsWith("{")) continue;
+
+                        var json = JObject.Parse(jsonString);
+                        var elements = json["elements"] as JArray;
+
+                        if (elements == null || elements.Count == 0)
+                            return (null, null);
+
+                        return ParseGeometry(elements);
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
             }
+
+            return (null, lastErrorMessage);
+        }
+
+        private (Geometry? Geometry, string? ErrorMessage) ParseGeometry(JArray elements)
+        {
+            var element = elements[0];
+            var type = element["type"]?.ToString();
+            var coordinates = new List<Coordinate>();
+
+            if (type == "way")
+            {
+                var geom = element["geometry"] as JArray;
+                if (geom != null)
+                {
+                    foreach (var point in geom)
+                        coordinates.Add(new Coordinate((double)point["lon"]!, (double)point["lat"]!));
+                }
+            }
+            else if (type == "relation")
+            {
+                var members = element["members"] as JArray;
+                if (members != null)
+                {
+                    var outerWay = members.FirstOrDefault(m => m["role"]?.ToString() == "outer" && m["type"]?.ToString() == "way");
+                    if (outerWay != null)
+                    {
+                        var geom = outerWay["geometry"] as JArray;
+                        if (geom != null)
+                        {
+                            foreach (var point in geom)
+                                coordinates.Add(new Coordinate((double)point["lon"]!, (double)point["lat"]!));
+                        }
+                    }
+                }
+            }
+
+            if (coordinates.Count == 0) return (null, null);
 
             var factory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            
             if (coordinates.Count >= 4 && coordinates.First().Equals2D(coordinates.Last()))
             {
-                var linearRing = factory.CreateLinearRing(coordinates.ToArray());
-                return factory.CreatePolygon(linearRing);
+                return (factory.CreatePolygon(coordinates.ToArray()), null);
             }
-            
-            return factory.CreateLineString(coordinates.ToArray());
+
+            return (factory.CreateLineString(coordinates.ToArray()), null);
         }
     }
 }

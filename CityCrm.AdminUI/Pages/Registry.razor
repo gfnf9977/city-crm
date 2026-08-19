@@ -187,7 +187,7 @@
 @if (showBuildingModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Будівля</h5>
@@ -202,6 +202,7 @@
                                 <option value="Офісний/Бізнес центр">Офісний/Бізнес центр</option>
                                 <option value="Громадська будівля">Громадська будівля (Школа, Лікарня)</option>
                                 <option value="Приватний будинок">Приватний будинок</option>
+                                <option value="Комерційна забудова">Комерційна забудова (Готель / Офіс / ТЦ)</option>
                                 <option value="Промисловий/Складський об'єкт">Промисловий/Складський об'єкт</option>
                                 <option value="Гаражний кооператив">Гаражний кооператив</option>
                             </InputSelect>
@@ -277,7 +278,7 @@
                         
                         <div class="mb-3">
                             <label class="fw-bold">Клікніть на карті, щоб вказати розташування:</label>
-                            <div id="mapPicker" style="height: 250px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1000;"></div>
+                            <div id="mapPicker" style="height: 450px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1000;"></div>
                             
                             @if (newBuilding.Lat != 0)
                             {
@@ -460,6 +461,17 @@
         StateHasChanged();
     }
 
+    [JSInvokable]
+    public void SetDrawnGeoJson(string? geoJsonStr)
+    {
+        newBuilding.GeoJson = geoJsonStr;
+        
+        newBuilding.Lat = 0;
+        newBuilding.Lng = 0;
+        
+        StateHasChanged();
+    }
+
     private async Task LoadBuildings()
     {
         var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
@@ -521,22 +533,31 @@
             {
                 currentGeoJson = await response.Content.ReadAsStringAsync();
                 newBuilding.GeoJson = currentGeoJson;
+                newBuilding.Lat = 0; newBuilding.Lng = 0; 
                 osmMessage = "✨ Контур знайдено і побудовано!";
-                
                 await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
             }
-            else
+            else if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) 
             {
-                osmMessage = "❌ В базі OSM немає контуру цього будинку. Просто клікніть на карті вручну.";
+                osmMessage = "⏳ Забагато запитів! Сервер OSM просить почекати хвилину.";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway) 
+            {
+                osmMessage = "🌐 Сервер OSM зараз перевантажений і не відповідає. Спробуйте ще раз або намалюйте контур вручну (кнопка ⬟).";
+            }
+            else 
+            {
+                osmMessage = "❌ В базі OSM немає контуру цього будинку. Намалюйте його на карті вручну (кнопка ⬟).";
             }
         }
         catch (Exception)
         {
-            osmMessage = "⚠️ Помилка з'єднання.";
+            osmMessage = "⚠️ Помилка з'єднання з нашим бекендом.";
         }
         finally
         {
             isFetchingOsm = false;
+            StateHasChanged(); 
         }
     }
 
