@@ -207,6 +207,7 @@
                                 <option value="Комерційна забудова">Комерційна забудова (Готель / Офіс / ТЦ)</option>
                                 <option value="Промисловий/Складський об'єкт">Промисловий/Складський об'єкт</option>
                                 <option value="Гаражний кооператив">Гаражний кооператив</option>
+                                <option value="Гуртожиток">Гуртожиток</option>
                             </InputSelect>
                         </div>
 
@@ -324,7 +325,7 @@
                     <EditForm Model="newPremise" OnSubmit="SavePremise">
                         <DataAnnotationsValidator />
                         <ValidationSummary class="text-danger mb-3" />
-                        <div class="mb-3"><label>№ квартири / офісу</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
+                        <div class="mb-3"><label>№ приміщення (квартири/кімнати/офісу)</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
 
                         @{
                             var bType = buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId)?.BuildingType;
@@ -338,10 +339,10 @@
                                     <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
                                 </div>
                             }
-                            else if (bType == "Багатоповерхівка" || bType == "Офісний/Бізнес центр")
+                            else if (bType == "Багатоповерхівка" || bType == "Офісний/Бізнес центр" || bType == "Гуртожиток")
                             {
                                 <div class="col-md-6 mb-3">
-                                    <label>Під'їзд</label>
+                                    <label>Під'їзд / Блок / Секція</label>
                                     <InputNumber class="form-control" @bind-Value="newPremise.Entrance" />
                                 </div>
                                 <div class="col-md-6 mb-3">
