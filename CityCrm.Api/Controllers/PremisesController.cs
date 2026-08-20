@@ -16,11 +16,12 @@ namespace CityCrm.Api.Controllers
             _context = context;
         }
 
-        // POST: api/premises
         [HttpPost]
         public async Task<ActionResult<Premise>> CreatePremise(Premise premise)
         {
-            // Перевіряємо, чи існує будівля, до якої ми додаємо приміщення
+            var conflictError = ValidatePremiseStatusConflicts(premise);
+            if (conflictError != null) return BadRequest(conflictError);
+
             var buildingExists = await _context.Buildings.AnyAsync(b => b.Id == premise.BuildingId);
             if (!buildingExists)
             {
@@ -37,6 +38,10 @@ namespace CityCrm.Api.Controllers
         public async Task<IActionResult> UpdatePremise(int id, Premise premise)
         {
             if (id != premise.Id) return BadRequest("ID не співпадає.");
+
+            var conflictError = ValidatePremiseStatusConflicts(premise);
+            if (conflictError != null) return BadRequest(conflictError);
+
             _context.Entry(premise).State = EntityState.Modified;
             
             try { await _context.SaveChangesAsync(); }
@@ -48,7 +53,6 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
-        // DELETE: api/premises/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePremise(int id)
         {
@@ -59,6 +63,27 @@ namespace CityCrm.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private string? ValidatePremiseStatusConflicts(Premise p)
+        {
+            if (p.Ownership == "Приватна" || p.Ownership == "Державна")
+            {
+                if (p.Status != "В експлуатації" && p.Status != "Аварійне")
+                    return $"Недопустимий статус '{p.Status}' для форми власності '{p.Ownership}'.";
+            }
+            else if (p.Ownership == "Комунальна")
+            {
+                if (p.Status == "В експлуатації")
+                    return "Для комунальної власності потрібен точний статус (Вільне, Орендоване, Службове тощо).";
+                    
+                if (p.Type == "Житлова" && p.Status == "Орендоване (Комерція)")
+                    return "Житлове приміщення не може бути в комерційній оренді.";
+                    
+                if (p.Type == "Комерційна" && p.Status == "Орендоване (Соціальне)")
+                    return "Комерційне приміщення не підходить для соціальної оренди.";
+            }
+            return null;
         }
     }
 }

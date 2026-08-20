@@ -19,7 +19,7 @@ namespace CityCrm.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Building>>> GetBuildings()
         {
-            var buildings = await _context.Buildings.ToListAsync();
+            var buildings = await _context.Buildings.Include(b => b.Premises).ToListAsync();
             var writer = new NetTopologySuite.IO.GeoJsonWriter();
 
             foreach (var b in buildings)

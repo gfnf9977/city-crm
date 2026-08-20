@@ -355,10 +355,11 @@
                         <div class="mb-3">
                             <label>Статус</label>
                             <InputSelect class="form-select" @bind-Value="newPremise.Status">
-                                <option value="Вільне">Вільне (очікує аукціону)</option>
-                                <option value="Орендоване">Орендоване</option>
-                                <option value="Службове">Службове (ЦНАП, ЖЕК тощо)</option>
-                                <option value="В експлуатації">В експлуатації (Приватне)</option>
+                                <option value="Вільне">Вільне (очікує аукціону/розподілу)</option>
+                                <option value="Орендоване (Комерція)">Орендоване (Комерція)</option>
+                                <option value="Орендоване (Соціальне)">Орендоване (Муніципальне житло)</option>
+                                <option value="Службове">Службове (ЦНАП, ЖЕК, Інше)</option>
+                                <option value="В експлуатації">В експлуатації (Приватне / Державне)</option>
                                 <option value="Аварійне">Аварійне</option>
                             </InputSelect>
                         </div>
@@ -385,21 +386,23 @@
                                 </div>
                             </div>
                         }
-                        else if (newPremise.Ownership == "Комунальна" && newPremise.Status == "Орендоване")
+                        else if (newPremise.Ownership == "Комунальна" && (newPremise.Status == "Орендоване (Комерція)" || newPremise.Status == "Орендоване (Соціальне)"))
                         {
                             <div class="card card-body bg-light border-primary mb-3 shadow-sm p-3">
-                                <h6 class="text-primary border-bottom pb-2">Дані договору оренди:</h6>
+                                <h6 class="text-primary border-bottom pb-2">
+                                    Дані оренди (@(newPremise.Status == "Орендоване (Комерція)" ? "Комерційної" : "Соціальної")):
+                                </h6>
                                 <div class="mb-2">
-                                    <label>Орендар (Назва компанії / ФОП)</label>
+                                    <label>Орендар (@(newPremise.Status == "Орендоване (Комерція)" ? "Назва компанії / ФОП" : "ПІБ особи / родини"))</label>
                                     <InputText class="form-control" @bind-Value="newPremise.OwnerName" />
                                 </div>
                                 <div class="row">
                                     <div class="col-6">
-                                        <label>Початок оренди</label>
+                                        <label>Початок договору</label>
                                         <InputDate class="form-control" @bind-Value="newPremise.RegistrationDate" />
                                     </div>
                                     <div class="col-6">
-                                        <label>Кінець оренди</label>
+                                        <label>Кінець договору</label>
                                         <InputDate class="form-control" @bind-Value="newPremise.RentEndDate" />
                                     </div>
                                 </div>
@@ -648,6 +651,35 @@
             }
         }
 
+        if (newPremise.Ownership == "Приватна" || newPremise.Ownership == "Державна")
+        {
+            if (newPremise.Status != "В експлуатації" && newPremise.Status != "Аварійне")
+            {
+                errorMessage = $"Помилка сумісності! Система не веде облік оренди чи службового використання для форми власності '{newPremise.Ownership}'. Оберіть статус 'В експлуатації' або 'Аварійне'. Будь ласка, переконайтеся у правильності даних.";
+                return;
+            }
+        }
+        else if (newPremise.Ownership == "Комунальна")
+        {
+            if (newPremise.Status == "В експлуатації")
+            {
+                errorMessage = "Помилка сумісності! Статус 'В експлуатації' використовується для приватних або державних об'єктів. Для комунальної власності деталізуйте статус (напр. 'Вільне', 'Службове' або 'Орендоване').";
+                return;
+            }
+            
+            if (newPremise.Type == "Житлова" && newPremise.Status == "Орендоване (Комерція)")
+            {
+                errorMessage = "Помилка сумісності! Житлове комунальне приміщення не може здаватися в комерційну оренду. Якщо це програма муніципального житла, оберіть 'Орендоване (Соціальне)'. Переконайтеся у правильності даних.";
+                return;
+            }
+            
+            if (newPremise.Type == "Комерційна" && newPremise.Status == "Орендоване (Соціальне)")
+            {
+                errorMessage = "Помилка сумісності! Комерційне приміщення не підпадає під програму соціального муніципального житла. Оберіть 'Орендоване (Комерція)'. Переконайтеся у правильності даних.";
+                return;
+            }
+        }
+
         var response = newPremise.Id == 0 
             ? await Http.PostAsJsonAsync("api/premises", newPremise) 
             : await Http.PutAsJsonAsync($"api/premises/{newPremise.Id}", newPremise);
@@ -677,7 +709,9 @@
     {
         "Вільне" => "bg-success border-success",
         "Аварійне" => "bg-danger border-danger",
-        "Орендоване" => "bg-primary border-primary",
+        "Орендоване (Комерція)" => "bg-primary border-primary",
+        "Орендоване (Соціальне)" => "bg-info border-info text-dark",
+        "Службове" => "bg-warning border-warning text-dark",
         _ => "bg-secondary border-secondary"
     };
 
