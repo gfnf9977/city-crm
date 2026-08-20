@@ -195,6 +195,8 @@
                 </div>
                 <div class="modal-body">
                     <EditForm Model="newBuilding" OnSubmit="SaveBuilding">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger mb-3" />
                         <div class="mb-3">
                             <label class="fw-bold">Тип забудови</label>
                             <InputSelect class="form-select" @bind-Value="newBuilding.BuildingType">
@@ -317,6 +319,8 @@
                     }
 
                     <EditForm Model="newPremise" OnSubmit="SavePremise">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger mb-3" />
                         <div class="mb-3"><label>№ квартири / офісу</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
                         
                         @{
