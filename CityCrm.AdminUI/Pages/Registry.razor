@@ -253,7 +253,9 @@
                                 <div class="col-12">
                                     <label>Номер будинку / об'єкту</label>
                                     <div class="input-group mb-1">
-                                        <InputText class="form-control" @bind-Value="newBuilding.BuildingNumber" placeholder="Напр. 15-А" />
+                                        <InputNumber class="form-control" style="max-width: 120px;" @bind-Value="newBuilding.BuildingNumber" placeholder="15" />
+                                        <span class="input-group-text">-</span>
+                                        <InputText class="form-control" style="max-width: 100px;" @bind-Value="newBuilding.BuildingLetter" placeholder="А" />
                                         
                                         <button type="button" class="btn btn-outline-primary fw-bold" @onclick="FetchOsmContour" disabled="@isFetchingOsm">
                                             @if(isFetchingOsm) { <span class="spinner-border spinner-border-sm"></span> }
@@ -522,9 +524,9 @@
 
     private async Task FetchOsmContour()
     {
-        if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || string.IsNullOrWhiteSpace(newBuilding.BuildingNumber))
+        if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || newBuilding.BuildingNumber <= 0)
         {
-            osmMessage = "Спочатку оберіть вулицю та вкажіть номер будинку!";
+            osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
             return;
         }
 
@@ -534,7 +536,9 @@
 
         try
         {
-            var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={newBuilding.BuildingNumber}");
+            string fullNumber = $"{newBuilding.BuildingNumber}{newBuilding.BuildingLetter?.Trim()}";
+            
+            var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -587,7 +591,8 @@
             Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, 
             Lat = b.Lat, Lng = b.Lng, 
             StreetType = b.StreetType, StreetName = b.StreetName, 
-            BuildingNumber = b.BuildingNumber, 
+            BuildingNumber = b.BuildingNumber,
+            BuildingLetter = b.BuildingLetter,
             CoopNumber = b.CoopNumber,
             GeoJson = b.GeoJson
         }; 
@@ -612,16 +617,27 @@
     
     private async Task SaveBuilding()
 {
+    if (!string.IsNullOrWhiteSpace(newBuilding.BuildingLetter))
+    {
+        string letter = newBuilding.BuildingLetter.Trim().ToUpper();
+        letter = letter.TrimStart('-', ' ');
+        letter = letter.Replace("A", "А").Replace("B", "В").Replace("C", "С")
+                       .Replace("E", "Е").Replace("H", "Н").Replace("I", "І")
+                       .Replace("M", "М").Replace("O", "О").Replace("P", "Р")
+                       .Replace("T", "Т").Replace("X", "Х");
+        newBuilding.BuildingLetter = letter;
+    }
+
     if (newBuilding.Lat == 0 && string.IsNullOrEmpty(newBuilding.GeoJson))
     {
         osmMessage = "❌ Помилка: Оберіть розташування на карті (клікніть або знайдіть контур)!";
-        return; 
+        return;
     }
 
-    var response = newBuilding.Id == 0 
-        ? await Http.PostAsJsonAsync("api/buildings", newBuilding) 
+    var response = newBuilding.Id == 0
+        ? await Http.PostAsJsonAsync("api/buildings", newBuilding)
         : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
-        
+
     if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
 }
     

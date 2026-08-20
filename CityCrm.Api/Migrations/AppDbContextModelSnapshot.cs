@@ -32,9 +32,11 @@ namespace CityCrm.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BuildingNumber")
-                        .IsRequired()
+                    b.Property<string>("BuildingLetter")
                         .HasColumnType("text");
+
+                    b.Property<int>("BuildingNumber")
+                        .HasColumnType("integer");
 
                     b.Property<string>("BuildingType")
                         .IsRequired()

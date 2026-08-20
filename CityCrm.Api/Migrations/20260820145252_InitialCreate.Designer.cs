@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CityCrm.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260817181816_AddBuildingCondition")]
-    partial class AddBuildingCondition
+    [Migration("20260820145252_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,9 +35,11 @@ namespace CityCrm.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .IsRequired()
+                    b.Property<string>("BuildingLetter")
                         .HasColumnType("text");
+
+                    b.Property<int>("BuildingNumber")
+                        .HasColumnType("integer");
 
                     b.Property<string>("BuildingType")
                         .IsRequired()
@@ -47,8 +49,19 @@ namespace CityCrm.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Point>("Location")
+                    b.Property<string>("CoopNumber")
+                        .HasColumnType("text");
+
+                    b.Property<Geometry>("Location")
                         .HasColumnType("geometry");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StreetType")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -87,10 +100,10 @@ namespace CityCrm.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("RegistrationDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("RentEndDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -105,6 +118,30 @@ namespace CityCrm.Api.Migrations
                     b.HasIndex("BuildingId");
 
                     b.ToTable("Premises");
+                });
+
+            modelBuilder.Entity("CityCrm.Api.Entities.Street", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OldNames")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StreetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Streets");
                 });
 
             modelBuilder.Entity("CityCrm.Api.Entities.Premise", b =>

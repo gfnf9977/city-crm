@@ -33,11 +33,11 @@
     {
         if (buildings.Any() && !isMapInitialized)
         {
-            var mapData = buildings.Select(b => new 
+            var mapData = buildings.Select(b => new
             {
                 lat = b.Lat,
                 lng = b.Lng,
-                address = $"{b.StreetType} {b.StreetName}, {b.BuildingNumber}", 
+                address = b.FullAddress, 
                 buildingType = b.BuildingType,
                 condition = b.Condition,
                 geoJson = b.GeoJson 

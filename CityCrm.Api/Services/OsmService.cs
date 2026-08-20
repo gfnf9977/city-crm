@@ -16,11 +16,27 @@ namespace CityCrm.Api.Services
 
         public async Task<(Geometry? Geometry, string? ErrorMessage)> GetBuildingGeometryAsync(string cityName, string streetName, string houseNumber)
         {
+            string cleanNumber = houseNumber.Trim();
+
+            var match = System.Text.RegularExpressions.Regex.Match(cleanNumber, @"^(\d+)(.*)$");
+            string osmRegex;
+
+            if (match.Success && !string.IsNullOrEmpty(match.Groups[2].Value))
+            {
+                string digits = match.Groups[1].Value;
+                string tail = System.Text.RegularExpressions.Regex.Escape(match.Groups[2].Value.TrimStart('-', ' '));
+                osmRegex = $"^{digits}[\\s-]?{tail}$";
+            }
+            else
+            {
+                osmRegex = $"^{cleanNumber}$";
+            }
+
             string query = $@"[out:json];
                 area[""name""=""{cityName}""]->.searchArea;
                 (
-                  way[""addr:street""~""{streetName}""][""addr:housenumber""=""{houseNumber}""](area.searchArea);
-                  relation[""addr:street""~""{streetName}""][""addr:housenumber""=""{houseNumber}""](area.searchArea);
+                  way[""addr:street""~""{streetName}"", i][""addr:housenumber""~""{osmRegex}"", i](area.searchArea);
+                  relation[""addr:street""~""{streetName}"", i][""addr:housenumber""~""{osmRegex}"", i](area.searchArea);
                 );
                 out geom;";
 

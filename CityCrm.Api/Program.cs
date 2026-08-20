@@ -41,7 +41,7 @@ using (var scope = app.Services.CreateScope())
         {
             StreetType = "просп.",
             StreetName = "Миру",
-            BuildingNumber = "15",
+            BuildingNumber = 15,
             
             BuildingType = "Багатоповерхівка",
             Condition = "В експлуатації", 

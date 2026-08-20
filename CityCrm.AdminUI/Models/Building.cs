@@ -14,7 +14,10 @@ namespace CityCrm.AdminUI.Models
         public string StreetName { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Номер об'єкту є обов'язковим")]
-        public string BuildingNumber { get; set; } = string.Empty;
+        [Range(1, 9999, ErrorMessage = "Некоректний номер будинку")]
+        public int BuildingNumber { get; set; }
+        
+        public string? BuildingLetter { get; set; }
         
         public string? CoopNumber { get; set; }
 
@@ -36,7 +39,7 @@ namespace CityCrm.AdminUI.Models
 
         [JsonIgnore] 
         public string FullAddress => BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber) 
-            ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}" 
-            : $"{StreetType} {StreetName}, {BuildingNumber}";
+            ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}" 
+            : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
     }
 }

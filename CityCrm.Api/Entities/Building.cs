@@ -11,7 +11,8 @@ namespace CityCrm.Api.Entities
         
         public string StreetType { get; set; } = "вул."; 
         public string StreetName { get; set; } = string.Empty;
-        public string BuildingNumber { get; set; } = string.Empty;
+        public int BuildingNumber { get; set; }
+        public string? BuildingLetter { get; set; }
         public string? CoopNumber { get; set; }
 
         public string BuildingType { get; set; } = string.Empty; 
