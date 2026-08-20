@@ -74,7 +74,7 @@
                                 @if (building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр")
                                 {
                                     var entrances = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(e => e).ToList();
-                                    
+
                                     if (!entrances.Any())
                                     {
                                         <div class="alert alert-info">Додайте першу квартиру і вкажіть її під'їзд та поверх, щоб побачити сітку.</div>
@@ -87,15 +87,15 @@
                                             @foreach (var ent in entrances)
                                             {
                                                 <li class="nav-item">
-                                                    <a class="nav-link @(activeEntrance == ent ? "active fw-bold" : "")" 
-                                                       style="cursor:pointer;" 
+                                                    <a class="nav-link @(activeEntrance == ent ? "active fw-bold" : "")"
+                                                       style="cursor:pointer;"
                                                        @onclick="() => SelectEntrance(building.Id, ent)">Під'їзд @ent</a>
                                                 </li>
                                             }
                                         </ul>
 
                                         var floors = building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor.HasValue).Select(p => p.Floor.Value).Distinct().OrderByDescending(f => f);
-                                        
+
                                         <div class="bg-light p-3 rounded border">
                                             @foreach (var floor in floors)
                                             {
@@ -104,7 +104,7 @@
                                                     <div class="d-flex flex-wrap gap-2">
                                                         @foreach(var premise in building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor == floor).OrderBy(p => p.PremiseNumber))
                                                         {
-                                                            <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)" 
+                                                            <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)"
                                                                  style="width: 80px; cursor:pointer; transition: transform 0.2s;"
                                                                  @onclick="() => ShowEditPremiseModal(premise)"
                                                                  title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
@@ -123,7 +123,7 @@
                                 else if (building.BuildingType == "Гаражний кооператив")
                                 {
                                     var lines = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(l => l).ToList();
-                                    
+
                                     if (!lines.Any())
                                     {
                                         <div class="alert alert-info">Додайте перший гараж і вкажіть його лінію/ряд.</div>
@@ -137,7 +137,7 @@
                                                 <div class="d-flex flex-wrap gap-2 mb-4">
                                                     @foreach(var premise in building.Premises.Where(p => p.Entrance == line).OrderBy(p => p.PremiseNumber))
                                                     {
-                                                        <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)" 
+                                                        <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)"
                                                              style="width: 80px; cursor:pointer; transition: transform 0.2s;"
                                                              @onclick="() => ShowEditPremiseModal(premise)"
                                                              title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
@@ -217,30 +217,31 @@
                                     <label class="fw-bold text-primary">Номер кооперативу (АК №)</label>
                                     <InputText class="form-control border-primary" @bind-Value="newBuilding.CoopNumber" placeholder="Наприклад: 27" />
                                 </div>
+
                             }
-                            
+
                             <div class="mb-3 position-relative">
                                 <label class="fw-bold">Вулиця</label>
-                                <input type="text" class="form-control" 
-                                       @bind="streetSearchQuery" 
-                                       @oninput="SearchStreet" 
-                                       placeholder="Почніть вводити назву (напр. Рокос...)" 
+                                <input type="text" class="form-control"
+                                       @bind="streetSearchQuery"
+                                       @oninput="SearchStreet"
+                                       placeholder="Почніть вводити назву (напр. Рокос...)"
                                        autocomplete="off" />
-                                
+
                                 @if (streetSuggestions.Any())
                                 {
                                     <ul class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
                                         @foreach(var s in streetSuggestions)
                                         {
-                                            <li class="list-group-item list-group-item-action text-primary" 
-                                                style="cursor: pointer;" 
+                                            <li class="list-group-item list-group-item-action text-primary"
+                                                style="cursor: pointer;"
                                                 @onclick="() => SelectStreet(s)">
                                                 <i class="bi bi-geo-alt me-2"></i> @s.DisplayName
                                             </li>
                                         }
                                     </ul>
                                 }
-                                
+
                                 @if (!string.IsNullOrEmpty(newBuilding.StreetName))
                                 {
                                     <div class="form-text text-success">
@@ -256,7 +257,7 @@
                                         <InputNumber class="form-control" style="max-width: 120px;" @bind-Value="newBuilding.BuildingNumber" placeholder="15" />
                                         <span class="input-group-text">-</span>
                                         <InputText class="form-control" style="max-width: 100px;" @bind-Value="newBuilding.BuildingLetter" placeholder="А" />
-                                        
+
                                         <button type="button" class="btn btn-outline-primary fw-bold" @onclick="FetchOsmContour" disabled="@isFetchingOsm">
                                             @if(isFetchingOsm) { <span class="spinner-border spinner-border-sm"></span> }
                                             else { <span>🪄 Знайти контур</span> }
@@ -279,11 +280,11 @@
                                 <option value="Занедбана будівля">Занедбана будівля (Покинуто)</option>
                             </InputSelect>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="fw-bold">Клікніть на карті, щоб вказати розташування:</label>
                             <div id="mapPicker" style="height: 450px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1000;"></div>
-                            
+
                             @if (newBuilding.Lat != 0)
                             {
                                 <small class="text-success"><i class="bi bi-geo-alt-fill"></i> Точку зафіксовано: @newBuilding.Lat, @newBuilding.Lng</small>
@@ -293,7 +294,7 @@
                                 <small class="text-danger"><i class="bi bi-exclamation-triangle"></i> Розташування не обрано!</small>
                             }
                         </div>
-                        
+
                         <div class="text-end">
                             <button type="button" class="btn btn-secondary" @onclick="CloseBuildingModal">Скасувати</button>
                             <button type="submit" class="btn btn-primary">Зберегти</button>
@@ -324,11 +325,11 @@
                         <DataAnnotationsValidator />
                         <ValidationSummary class="text-danger mb-3" />
                         <div class="mb-3"><label>№ квартири / офісу</label><InputText class="form-control" @bind-Value="newPremise.PremiseNumber" required /></div>
-                        
+
                         @{
                             var bType = buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId)?.BuildingType;
                         }
-                        
+
                         <div class="row">
                             @if (bType == "Гаражний кооператив")
                             {
@@ -414,7 +415,7 @@
                                 </div>
                             </div>
                         }
-                        
+
                         <div class="d-flex justify-content-between mt-4">
                             <div>
                                 @if (newPremise.Id > 0)
@@ -435,6 +436,8 @@
 }
 
 @code {
+    private class CoordinatesDto { public double Lat { get; set; } public double Lng { get; set; } }
+
     private List<Building> buildings = new();
     private HashSet<int> expandedBuildings = new();
     private Dictionary<int, int> selectedEntrances = new();
@@ -474,10 +477,10 @@
     public void SetDrawnGeoJson(string? geoJsonStr)
     {
         newBuilding.GeoJson = geoJsonStr;
-        
+
         newBuilding.Lat = 0;
         newBuilding.Lng = 0;
-        
+
         StateHasChanged();
     }
 
@@ -501,7 +504,7 @@
     private async Task SearchStreet(ChangeEventArgs e)
     {
         streetSearchQuery = e.Value?.ToString() ?? "";
-        
+
         if (streetSearchQuery.Length >= 2)
         {
             var result = await Http.GetFromJsonAsync<List<Street>>($"api/streets/search?q={streetSearchQuery}");
@@ -517,96 +520,111 @@
     {
         newBuilding.StreetType = street.StreetType;
         newBuilding.StreetName = street.Name;
-        
-        streetSearchQuery = street.DisplayName; 
-        streetSuggestions.Clear(); 
+
+        streetSearchQuery = street.DisplayName;
+        streetSuggestions.Clear();
     }
 
     private async Task FetchOsmContour()
+{
+    if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || newBuilding.BuildingNumber <= 0)
     {
-        if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || newBuilding.BuildingNumber <= 0)
-        {
-            osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
-            return;
-        }
+        osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
+        return;
+    }
 
-        isFetchingOsm = true;
-        osmMessage = "📡 Шукаємо контур будівлі в OpenStreetMap...";
+    isFetchingOsm = true;
+    osmMessage = "📡 Шукаємо контур будівлі в OSM...";
+    StateHasChanged();
+
+    bool contourFound = false;
+    
+    // ВИНЕСЕНО СЮДИ: тепер змінна доступна для обох запитів
+    string fullNumber = $"{newBuilding.BuildingNumber}{newBuilding.BuildingLetter?.Trim()}";
+
+    try
+    {
+        var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+        
+        if (response.IsSuccessStatusCode)
+        {
+            currentGeoJson = await response.Content.ReadAsStringAsync();
+            newBuilding.GeoJson = currentGeoJson;
+            newBuilding.Lat = 0; newBuilding.Lng = 0; 
+            osmMessage = "✨ Контур знайдено і побудовано!";
+            await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
+            contourFound = true;
+        }
+    }
+    catch { /* Ігноруємо помилку, бо нижче є резервний сценарій */ }
+
+    // --- РЕЗЕРВНИЙ СЦЕНАРІЙ (Авто-центрування) ---
+    if (!contourFound)
+    {
+        osmMessage = "🔍 Контур не знайдено. Шукаємо координати будинку...";
         StateHasChanged();
 
-        try
+        try 
         {
-            string fullNumber = $"{newBuilding.BuildingNumber}{newBuilding.BuildingLetter?.Trim()}";
-            
-            var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
-            
-            if (response.IsSuccessStatusCode)
+            var geoResponse = await Http.GetAsync($"api/streets/geocode?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+            if (geoResponse.IsSuccessStatusCode)
             {
-                currentGeoJson = await response.Content.ReadAsStringAsync();
-                newBuilding.GeoJson = currentGeoJson;
-                newBuilding.Lat = 0; newBuilding.Lng = 0; 
-                osmMessage = "✨ Контур знайдено і побудовано!";
-                await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
+                var coords = await geoResponse.Content.ReadFromJsonAsync<CoordinatesDto>();
+                if (coords != null)
+                {
+                    await JS.InvokeVoidAsync("centerMapPicker", coords.Lat, coords.Lng);
+                    osmMessage = "📍 Контур відсутній, але ми відцентрували карту на цій адресі. Намалюйте об'єкт вручну (кнопка ⬟).";
+                }
             }
-            else if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) 
+            else
             {
-                osmMessage = "⏳ Забагато запитів! Сервер OSM просить почекати хвилину.";
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway) 
-            {
-                osmMessage = "🌐 Сервер OSM зараз перевантажений і не відповідає. Спробуйте ще раз або намалюйте контур вручну (кнопка ⬟).";
-            }
-            else 
-            {
-                osmMessage = "❌ В базі OSM немає контуру цього будинку. Намалюйте його на карті вручну (кнопка ⬟).";
+                osmMessage = "❌ Будівлю не знайдено взагалі. Знайдіть її на карті та намалюйте контур вручну (кнопка ⬟).";
             }
         }
-        catch (Exception)
+        catch
         {
-            osmMessage = "⚠️ Помилка з'єднання з нашим бекендом.";
-        }
-        finally
-        {
-            isFetchingOsm = false;
-            StateHasChanged(); 
+            osmMessage = "❌ Будівлю не знайдено. Намалюйте контур вручну (кнопка ⬟).";
         }
     }
 
-    private async Task ShowAddBuildingModal() 
-    { 
-        newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." }; 
+    isFetchingOsm = false;
+    StateHasChanged(); 
+}
+    private async Task ShowAddBuildingModal()
+    {
+        newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." };
         streetSearchQuery = "";
         streetSuggestions.Clear();
         osmMessage = "";
         currentGeoJson = null;
-        showBuildingModal = true; 
-        
+        showBuildingModal = true;
+
         await Task.Delay(100);
         await JS.InvokeVoidAsync("initMapPicker", 0, 0, objRef);
     }
-    
-    private async Task ShowEditBuildingModal(Building b) 
-    { 
-        newBuilding = new Building { 
-            Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition, 
-            Lat = b.Lat, Lng = b.Lng, 
-            StreetType = b.StreetType, StreetName = b.StreetName, 
+
+    private async Task ShowEditBuildingModal(Building b)
+    {
+        newBuilding = new Building {
+            Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition,
+            Lat = b.Lat, Lng = b.Lng,
+            StreetType = b.StreetType, StreetName = b.StreetName,
             BuildingNumber = b.BuildingNumber,
             BuildingLetter = b.BuildingLetter,
             CoopNumber = b.CoopNumber,
             GeoJson = b.GeoJson
-        }; 
-        
+        };
+
         streetSearchQuery = $"{b.StreetType} {b.StreetName}";
         streetSuggestions.Clear();
         osmMessage = "";
         currentGeoJson = null;
-        showBuildingModal = true; 
-        
+        showBuildingModal = true;
+
         await Task.Delay(100);
-        
+
         await JS.InvokeVoidAsync("initMapPicker", b.Lat, b.Lng, objRef);
-        
+
         if (!string.IsNullOrEmpty(b.GeoJson))
         {
             await JS.InvokeVoidAsync("drawOsmPolygon", b.GeoJson);
@@ -614,62 +632,62 @@
     }
 
     private void CloseBuildingModal() => showBuildingModal = false;
-    
+
     private async Task SaveBuilding()
-{
-    if (!string.IsNullOrWhiteSpace(newBuilding.BuildingLetter))
     {
-        string letter = newBuilding.BuildingLetter.Trim().ToUpper();
-        letter = letter.TrimStart('-', ' ');
-        letter = letter.Replace("A", "А").Replace("B", "В").Replace("C", "С")
-                       .Replace("E", "Е").Replace("H", "Н").Replace("I", "І")
-                       .Replace("M", "М").Replace("O", "О").Replace("P", "Р")
-                       .Replace("T", "Т").Replace("X", "Х");
-        newBuilding.BuildingLetter = letter;
+        if (!string.IsNullOrWhiteSpace(newBuilding.BuildingLetter))
+        {
+            string letter = newBuilding.BuildingLetter.Trim().ToUpper();
+            letter = letter.TrimStart('-', ' ');
+            letter = letter.Replace("A", "А").Replace("B", "В").Replace("C", "С")
+                           .Replace("E", "Е").Replace("H", "Н").Replace("I", "І")
+                           .Replace("M", "М").Replace("O", "О").Replace("P", "Р")
+                           .Replace("T", "Т").Replace("X", "Х");
+            newBuilding.BuildingLetter = letter;
+        }
+
+        if (newBuilding.Lat == 0 && string.IsNullOrEmpty(newBuilding.GeoJson))
+        {
+            osmMessage = "❌ Помилка: Оберіть розташування на карті (клікніть або знайдіть контур)!";
+            return;
+        }
+
+        var response = newBuilding.Id == 0
+            ? await Http.PostAsJsonAsync("api/buildings", newBuilding)
+            : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
+
+        if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
     }
 
-    if (newBuilding.Lat == 0 && string.IsNullOrEmpty(newBuilding.GeoJson))
-    {
-        osmMessage = "❌ Помилка: Оберіть розташування на карті (клікніть або знайдіть контур)!";
-        return;
-    }
-
-    var response = newBuilding.Id == 0
-        ? await Http.PostAsJsonAsync("api/buildings", newBuilding)
-        : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
-
-    if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
-}
-    
     private async Task DeleteBuilding(int id) { if ((await Http.DeleteAsync($"api/buildings/{id}")).IsSuccessStatusCode) await LoadBuildings(); }
 
-    private void ShowAddPremiseModal(int buildingId) 
-    { 
+    private void ShowAddPremiseModal(int buildingId)
+    {
         errorMessage = "";
-        newPremise = new Premise { BuildingId = buildingId, Type = "Житлова", Status = "Вільне", Ownership = "Комунальна" }; 
-        showPremiseModal = true; 
+        newPremise = new Premise { BuildingId = buildingId, Type = "Житлова", Status = "Вільне", Ownership = "Комунальна" };
+        showPremiseModal = true;
     }
-    
-    private void ShowEditPremiseModal(Premise p) 
-    { 
-        errorMessage = ""; 
-        newPremise = new Premise { Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber, Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type, Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName, RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate }; 
-        showPremiseModal = true; 
+
+    private void ShowEditPremiseModal(Premise p)
+    {
+        errorMessage = "";
+        newPremise = new Premise { Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber, Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type, Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName, RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate };
+        showPremiseModal = true;
     }
-    
+
     private void ClosePremiseModal() => showPremiseModal = false;
 
     private async Task SavePremise()
     {
         errorMessage = "";
-        
+
         var currentBuilding = buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId);
         if (currentBuilding != null && !string.IsNullOrWhiteSpace(newPremise.PremiseNumber))
         {
-            bool isDuplicate = currentBuilding.Premises.Any(p => 
-                p.Id != newPremise.Id && 
+            bool isDuplicate = currentBuilding.Premises.Any(p =>
+                p.Id != newPremise.Id &&
                 p.PremiseNumber.Trim().ToLower() == newPremise.PremiseNumber.Trim().ToLower());
-                
+
             if (isDuplicate)
             {
                 errorMessage = $"Увага! Приміщення з номером {newPremise.PremiseNumber} вже існує у цій будівлі.";
@@ -692,13 +710,13 @@
                 errorMessage = "Помилка сумісності! Статус 'В експлуатації' використовується для приватних або державних об'єктів. Для комунальної власності деталізуйте статус (напр. 'Вільне', 'Службове' або 'Орендоване').";
                 return;
             }
-            
+
             if (newPremise.Type == "Житлова" && newPremise.Status == "Орендоване (Комерція)")
             {
                 errorMessage = "Помилка сумісності! Житлове комунальне приміщення не може здаватися в комерційну оренду. Якщо це програма муніципального житла, оберіть 'Орендоване (Соціальне)'. Переконайтеся у правильності даних.";
                 return;
             }
-            
+
             if (newPremise.Type == "Комерційна" && newPremise.Status == "Орендоване (Соціальне)")
             {
                 errorMessage = "Помилка сумісності! Комерційне приміщення не підпадає під програму соціального муніципального житла. Оберіть 'Орендоване (Комерція)'. Переконайтеся у правильності даних.";
@@ -706,25 +724,25 @@
             }
         }
 
-        var response = newPremise.Id == 0 
-            ? await Http.PostAsJsonAsync("api/premises", newPremise) 
+        var response = newPremise.Id == 0
+            ? await Http.PostAsJsonAsync("api/premises", newPremise)
             : await Http.PutAsJsonAsync($"api/premises/{newPremise.Id}", newPremise);
-            
-        if (response.IsSuccessStatusCode) 
-        { 
-            await LoadBuildings(); 
-            showPremiseModal = false; 
+
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadBuildings();
+            showPremiseModal = false;
         }
         else
         {
             errorMessage = "Сервер відхилив запит. Перевірте дані.";
         }
     }
-    
-    private async Task DeletePremise(int id) 
-    { 
+
+    private async Task DeletePremise(int id)
+    {
         var response = await Http.DeleteAsync($"api/premises/{id}");
-        if (response.IsSuccessStatusCode) 
+        if (response.IsSuccessStatusCode)
         {
             await LoadBuildings();
             showPremiseModal = false;

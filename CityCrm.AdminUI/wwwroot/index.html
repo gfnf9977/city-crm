@@ -112,6 +112,12 @@
             }).addTo(pickerMap);
             pickerMap.fitBounds(pickerPolygon.getBounds());
         };
+
+        window.centerMapPicker = (lat, lng) => {
+    if (pickerMap) {
+        pickerMap.setView([lat, lng], 19, { animate: true, duration: 1 });
+    }
+};
     </script>
 </body>
 

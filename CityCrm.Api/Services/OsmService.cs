@@ -126,5 +126,32 @@ namespace CityCrm.Api.Services
 
             return (factory.CreateLineString(coordinates.ToArray()), null);
         }
+
+        public async Task<(double Lat, double Lng)?> GetAddressCoordinatesAsync(string cityName, string streetName, string houseNumber)
+{
+    try
+    {
+        string query = $"{houseNumber} {streetName}, {cityName}";
+        string url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(query)}&format=json&limit=1";
+        
+        var response = await _httpClient.GetAsync(url);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var json = Newtonsoft.Json.Linq.JArray.Parse(jsonString);
+            
+            if (json.Count > 0)
+            {
+                double lat = (double)json[0]["lat"]!;
+                double lon = (double)json[0]["lon"]!;
+                return (lat, lon);
+            }
+        }
+    }
+    catch { }
+    
+    return null;
+}
     }
 }
