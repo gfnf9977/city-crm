@@ -611,13 +611,19 @@
     private void CloseBuildingModal() => showBuildingModal = false;
     
     private async Task SaveBuilding()
+{
+    if (newBuilding.Lat == 0 && string.IsNullOrEmpty(newBuilding.GeoJson))
     {
-        var response = newBuilding.Id == 0 
-            ? await Http.PostAsJsonAsync("api/buildings", newBuilding) 
-            : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
-            
-        if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
+        osmMessage = "❌ Помилка: Оберіть розташування на карті (клікніть або знайдіть контур)!";
+        return; 
     }
+
+    var response = newBuilding.Id == 0 
+        ? await Http.PostAsJsonAsync("api/buildings", newBuilding) 
+        : await Http.PutAsJsonAsync($"api/buildings/{newBuilding.Id}", newBuilding);
+        
+    if (response.IsSuccessStatusCode) { await LoadBuildings(); showBuildingModal = false; }
+}
     
     private async Task DeleteBuilding(int id) { if ((await Http.DeleteAsync($"api/buildings/{id}")).IsSuccessStatusCode) await LoadBuildings(); }
 
