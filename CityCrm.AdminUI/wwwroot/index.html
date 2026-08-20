@@ -38,12 +38,12 @@
         let pickerMarker = null;
         let pickerPolygon = null;
 
-        window.initMapPicker = (lat, lng, dotNetHelper) => {
-            if (pickerMap !== null) { 
-                pickerMap.off(); 
-                pickerMap.remove(); 
+        window.initMapPicker = (lat, lng, dotNetHelper, otherPolygons = []) => {
+            if (pickerMap !== null) {
+                pickerMap.off();
+                pickerMap.remove();
             }
-            
+
             let startLat = lat !== 0 ? lat : 51.4938;
             let startLng = lng !== 0 ? lng : 31.2953;
 
@@ -52,17 +52,17 @@
 
             pickerMap.pm.addControls({
                 position: 'topleft',
-                drawMarker: false,      
+                drawMarker: false,
                 drawCircleMarker: false,
                 drawPolyline: false,
                 drawCircle: false,
                 drawText: false,
-                drawPolygon: true,       
-                drawRectangle: false,     
-                editMode: true,         
+                drawPolygon: true,
+                drawRectangle: false,
+                editMode: true,
                 dragMode: false,
                 cutPolygon: false,
-                removalMode: true        
+                removalMode: true
             });
 
             if (lat !== 0 && lng !== 0) {
@@ -70,9 +70,9 @@
             }
 
             pickerMap.on('click', function(e) {
-                if (pickerMap.pm.globalDrawModeEnabled()) return; 
+                if (pickerMap.pm.globalDrawModeEnabled()) return;
 
-                if (pickerMarker) { pickerMarker.setLatLng(e.latlng); } 
+                if (pickerMarker) { pickerMarker.setLatLng(e.latlng); }
                 else { pickerMarker = L.marker(e.latlng).addTo(pickerMap); }
                 dotNetHelper.invokeMethodAsync('SetPickedCoordinates', e.latlng.lat, e.latlng.lng);
             });
@@ -82,8 +82,8 @@
                 if (pickerPolygon) { pickerMap.removeLayer(pickerPolygon); pickerPolygon = null; }
 
                 let layer = e.layer;
-                
-                let geoJsonData = layer.toGeoJSON().geometry; 
+
+                let geoJsonData = layer.toGeoJSON().geometry;
                 let geoJsonStr = JSON.stringify(geoJsonData);
 
                 dotNetHelper.invokeMethodAsync('SetDrawnGeoJson', geoJsonStr);
@@ -99,6 +99,16 @@
             });
 
             setTimeout(() => { pickerMap.invalidateSize(); }, 300);
+
+            otherPolygons.forEach(geoJsonStr => {
+                if (geoJsonStr) {
+                    let geoJson = JSON.parse(geoJsonStr);
+                    L.geoJSON(geoJson, {
+                        style: { color: '#000000', weight: 1.5, fillOpacity: 0.15 },
+                        interactive: false
+                    }).addTo(pickerMap);
+                }
+            });
         };
 
         window.drawOsmPolygon = (geoJsonStr) => {

@@ -73,7 +73,7 @@
 
                                 @if (building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр")
                                 {
-                                    var entrances = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(e => e).ToList();
+                                    var entrances = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.GetValueOrDefault()).Distinct().OrderBy(e => e).ToList();
 
                                     if (!entrances.Any())
                                     {
@@ -94,7 +94,7 @@
                                             }
                                         </ul>
 
-                                        var floors = building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor.HasValue).Select(p => p.Floor.Value).Distinct().OrderByDescending(f => f);
+                                        var floors = building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor.HasValue).Select(p => p.Floor.GetValueOrDefault()).Distinct().OrderByDescending(f => f);
 
                                         <div class="bg-light p-3 rounded border">
                                             @foreach (var floor in floors)
@@ -122,7 +122,7 @@
                                 }
                                 else if (building.BuildingType == "Гаражний кооператив")
                                 {
-                                    var lines = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.Value).Distinct().OrderBy(l => l).ToList();
+                                    var lines = building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.GetValueOrDefault()).Distinct().OrderBy(l => l).ToList();
 
                                     if (!lines.Any())
                                     {
@@ -526,70 +526,69 @@
     }
 
     private async Task FetchOsmContour()
-{
-    if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || newBuilding.BuildingNumber <= 0)
     {
-        osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
-        return;
-    }
-
-    isFetchingOsm = true;
-    osmMessage = "📡 Шукаємо контур будівлі в OSM...";
-    StateHasChanged();
-
-    bool contourFound = false;
-    
-    // ВИНЕСЕНО СЮДИ: тепер змінна доступна для обох запитів
-    string fullNumber = $"{newBuilding.BuildingNumber}{newBuilding.BuildingLetter?.Trim()}";
-
-    try
-    {
-        var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
-        
-        if (response.IsSuccessStatusCode)
+        if (string.IsNullOrWhiteSpace(newBuilding.StreetName) || newBuilding.BuildingNumber <= 0)
         {
-            currentGeoJson = await response.Content.ReadAsStringAsync();
-            newBuilding.GeoJson = currentGeoJson;
-            newBuilding.Lat = 0; newBuilding.Lng = 0; 
-            osmMessage = "✨ Контур знайдено і побудовано!";
-            await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
-            contourFound = true;
+            osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
+            return;
         }
-    }
-    catch { /* Ігноруємо помилку, бо нижче є резервний сценарій */ }
 
-    // --- РЕЗЕРВНИЙ СЦЕНАРІЙ (Авто-центрування) ---
-    if (!contourFound)
-    {
-        osmMessage = "🔍 Контур не знайдено. Шукаємо координати будинку...";
+        isFetchingOsm = true;
+        osmMessage = "📡 Шукаємо контур будівлі в OSM...";
         StateHasChanged();
 
-        try 
+        bool contourFound = false;
+
+        string fullNumber = $"{newBuilding.BuildingNumber}{newBuilding.BuildingLetter?.Trim()}";
+
+        try
         {
-            var geoResponse = await Http.GetAsync($"api/streets/geocode?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
-            if (geoResponse.IsSuccessStatusCode)
+            var response = await Http.GetAsync($"api/buildings/osm-contour?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+
+            if (response.IsSuccessStatusCode)
             {
-                var coords = await geoResponse.Content.ReadFromJsonAsync<CoordinatesDto>();
-                if (coords != null)
+                currentGeoJson = await response.Content.ReadAsStringAsync();
+                newBuilding.GeoJson = currentGeoJson;
+                newBuilding.Lat = 0; newBuilding.Lng = 0;
+                osmMessage = "✨ Контур знайдено і побудовано!";
+                await JS.InvokeVoidAsync("drawOsmPolygon", currentGeoJson);
+                contourFound = true;
+            }
+        }
+        catch { }
+
+        if (!contourFound)
+        {
+            osmMessage = "🔍 Контур не знайдено. Шукаємо координати будинку...";
+            StateHasChanged();
+
+            try
+            {
+                var geoResponse = await Http.GetAsync($"api/streets/geocode?street={newBuilding.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+                if (geoResponse.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("centerMapPicker", coords.Lat, coords.Lng);
-                    osmMessage = "📍 Контур відсутній, але ми відцентрували карту на цій адресі. Намалюйте об'єкт вручну (кнопка ⬟).";
+                    var coords = await geoResponse.Content.ReadFromJsonAsync<CoordinatesDto>();
+                    if (coords != null)
+                    {
+                        await JS.InvokeVoidAsync("centerMapPicker", coords.Lat, coords.Lng);
+                        osmMessage = "📍 Контур відсутній, але ми відцентрували карту на цій адресі. Намалюйте об'єкт вручну (кнопка ⬟).";
+                    }
+                }
+                else
+                {
+                    osmMessage = "❌ Будівлю не знайдено взагалі. Знайдіть її на карті та намалюйте контур вручну (кнопка ⬟).";
                 }
             }
-            else
+            catch
             {
-                osmMessage = "❌ Будівлю не знайдено взагалі. Знайдіть її на карті та намалюйте контур вручну (кнопка ⬟).";
+                osmMessage = "❌ Будівлю не знайдено. Намалюйте контур вручну (кнопка ⬟).";
             }
         }
-        catch
-        {
-            osmMessage = "❌ Будівлю не знайдено. Намалюйте контур вручну (кнопка ⬟).";
-        }
+
+        isFetchingOsm = false;
+        StateHasChanged();
     }
 
-    isFetchingOsm = false;
-    StateHasChanged(); 
-}
     private async Task ShowAddBuildingModal()
     {
         newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." };
@@ -600,7 +599,8 @@
         showBuildingModal = true;
 
         await Task.Delay(100);
-        await JS.InvokeVoidAsync("initMapPicker", 0, 0, objRef);
+        var otherPolygons = buildings.Where(b => !string.IsNullOrEmpty(b.GeoJson)).Select(b => b.GeoJson).ToList();
+        await JS.InvokeVoidAsync("initMapPicker", 0, 0, objRef, otherPolygons);
     }
 
     private async Task ShowEditBuildingModal(Building b)
@@ -623,7 +623,8 @@
 
         await Task.Delay(100);
 
-        await JS.InvokeVoidAsync("initMapPicker", b.Lat, b.Lng, objRef);
+        var otherPolygons = buildings.Where(x => x.Id != b.Id && !string.IsNullOrEmpty(x.GeoJson)).Select(x => x.GeoJson).ToList();
+        await JS.InvokeVoidAsync("initMapPicker", b.Lat, b.Lng, objRef, otherPolygons);
 
         if (!string.IsNullOrEmpty(b.GeoJson))
         {
