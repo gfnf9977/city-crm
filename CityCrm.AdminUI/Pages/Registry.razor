@@ -3,6 +3,16 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
+<style>
+    @@keyframes flash-highlight {
+        0% { background-color: #fff3cd !important; } 
+        100% { background-color: inherit; }
+    }
+    .highlighted-row {
+        animation: flash-highlight 3s ease-out forwards;
+    }
+</style>
+
 <PageTitle>Реєстр нерухомості</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -32,7 +42,7 @@
         {
             @foreach (var building in buildings)
             {
-                <tr class="table-light">
+                <tr class="table-light @(currentlyHighlightedId == building.Id ? "highlighted-row" : "")">
                     <td>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleBuilding(building.Id)">
                             <i class="bi @(expandedBuildings.Contains(building.Id) ? "bi-chevron-up" : "bi-chevron-down")"></i>
@@ -458,6 +468,11 @@
     private string osmMessage = "";
     private string? currentGeoJson = null;
 
+    [SupplyParameterFromQuery(Name = "highlight")]
+    public int? HighlightBuildingId { get; set; }
+
+    private int? currentlyHighlightedId = null;
+
     protected override void OnInitialized()
     {
         objRef = DotNetObjectReference.Create(this);
@@ -488,7 +503,24 @@
     private async Task LoadBuildings()
     {
         var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
-        if (result != null) buildings = result;
+        if (result != null) 
+        {
+            buildings = result;
+
+            if (HighlightBuildingId.HasValue)
+            {
+                expandedBuildings.Clear();
+                expandedBuildings.Add(HighlightBuildingId.Value);
+                currentlyHighlightedId = HighlightBuildingId.Value;
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(3500); 
+                    currentlyHighlightedId = null;
+                    await InvokeAsync(StateHasChanged);
+                });
+            }
+        }
     }
 
     private void ToggleBuilding(int id)

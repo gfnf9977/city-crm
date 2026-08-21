@@ -35,12 +35,19 @@
         {
             var mapData = buildings.Select(b => new
             {
+                id = b.Id,
                 lat = b.Lat,
                 lng = b.Lng,
                 address = b.FullAddress, 
                 buildingType = b.BuildingType,
                 condition = b.Condition,
-                geoJson = b.GeoJson 
+                geoJson = b.GeoJson,
+                premises = b.Premises.Select(p => new {
+                    number = p.PremiseNumber,
+                    area = p.Area,
+                    type = p.Type,
+                    status = p.Status
+                }).ToList()
             }).ToList();
 
             await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", mapData);
