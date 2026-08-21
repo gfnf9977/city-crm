@@ -525,8 +525,15 @@
 
     private void ToggleBuilding(int id)
     {
-        if (expandedBuildings.Contains(id)) expandedBuildings.Remove(id);
-        else expandedBuildings.Add(id);
+        if (expandedBuildings.Contains(id)) 
+        {
+            expandedBuildings.Remove(id); 
+        }
+        else 
+        {
+            expandedBuildings.Clear(); 
+            expandedBuildings.Add(id); 
+        }
     }
 
     private void SelectEntrance(int buildingId, int entrance)
