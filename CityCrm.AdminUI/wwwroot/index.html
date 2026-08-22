@@ -124,10 +124,18 @@
         };
 
         window.centerMapPicker = (lat, lng) => {
-    if (pickerMap) {
-        pickerMap.setView([lat, lng], 19, { animate: true, duration: 1 });
-    }
-};
+            if (pickerMap) {
+                pickerMap.setView([lat, lng], 19, { animate: true, duration: 1 });
+            }
+        };
+    </script>
+    <script>
+        window.scrollToElement = (id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
     </script>
 </body>
 

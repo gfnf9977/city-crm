@@ -21,6 +21,7 @@ namespace CityCrm.Api.Entities
         public string Status { get; set; } = string.Empty; 
         public string Ownership { get; set; } = string.Empty; 
         public string? OwnerName { get; set; } 
+        public string? Notes { get; set; }
         
         public DateTime? RegistrationDate { get; set; } 
         

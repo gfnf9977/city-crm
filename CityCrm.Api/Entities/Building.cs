@@ -14,6 +14,7 @@ namespace CityCrm.Api.Entities
         public int BuildingNumber { get; set; }
         public string? BuildingLetter { get; set; }
         public string? CoopNumber { get; set; }
+        public string? Notes { get; set; }
 
         public string BuildingType { get; set; } = string.Empty; 
         public string Condition { get; set; } = "В експлуатації";

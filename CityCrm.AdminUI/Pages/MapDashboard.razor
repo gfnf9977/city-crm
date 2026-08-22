@@ -42,11 +42,13 @@
                 buildingType = b.BuildingType,
                 condition = b.Condition,
                 geoJson = b.GeoJson,
+                notes = b.Notes,
                 premises = b.Premises.Select(p => new {
                     number = p.PremiseNumber,
                     area = p.Area,
                     type = p.Type,
-                    status = p.Status
+                    status = p.Status,
+                    notes = p.Notes
                 }).ToList()
             }).ToList();
 

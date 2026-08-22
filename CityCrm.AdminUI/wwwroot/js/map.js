@@ -7,7 +7,8 @@ window.leafletMap = {
         }).addTo(map);
 
         locations.forEach(loc => {
-            let tooltipContent = `<b>${loc.address}</b><br/>Тип забудови: ${loc.buildingType}`;
+            let hasNotesIcon = loc.notes ? ' <span title="Є примітки">📝</span>' : '';
+            let tooltipContent = `<b>${loc.address}</b>${hasNotesIcon}<br/>Тип забудови: ${loc.buildingType}`;
 
             let statusSummary = {};
             if (loc.premises) {
@@ -25,6 +26,10 @@ window.leafletMap = {
                     </div>
             `;
 
+            if (loc.notes) {
+                popupContent += `<div class="alert alert-warning p-2 mb-2" style="font-size: 0.8rem;"><strong>Примітки:</strong><br/>${loc.notes}</div>`;
+            }
+
             if (Object.keys(statusSummary).length > 0) {
                 popupContent += `<div class="mb-2" style="font-size: 0.85rem;"><strong>Приміщення:</strong><ul class="mb-0 ps-3">`;
                 for (const [status, count] of Object.entries(statusSummary)) {
@@ -35,7 +40,7 @@ window.leafletMap = {
                 popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
             }
             
-            popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100">Відкрити в реєстрі</a>`;
+            popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
             popupContent += `</div>`;
 
             if (loc.geoJson) {

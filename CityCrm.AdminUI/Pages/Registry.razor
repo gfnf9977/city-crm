@@ -5,7 +5,7 @@
 
 <style>
     @@keyframes flash-highlight {
-        0% { background-color: #fff3cd !important; } 
+        0% { background-color: #fff3cd !important; }
         100% { background-color: inherit; }
     }
     .highlighted-row {
@@ -42,14 +42,22 @@
         {
             @foreach (var building in buildings)
             {
-                <tr class="table-light @(currentlyHighlightedId == building.Id ? "highlighted-row" : "")">
+                <tr id="building-@building.Id" class="table-light @(currentlyHighlightedId == building.Id ? "highlighted-row" : "")">
                     <td>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleBuilding(building.Id)">
                             <i class="bi @(expandedBuildings.Contains(building.Id) ? "bi-chevron-up" : "bi-chevron-down")"></i>
                         </button>
                     </td>
                     <td>@building.Id</td>
-                    <td class="fw-bold">@building.FullAddress</td>
+                    <td class="fw-bold">
+                        @building.FullAddress
+                        @if (!string.IsNullOrEmpty(building.Notes))
+                        {
+                            <div class="text-muted fw-normal mt-1" style="font-size: 0.8rem;">
+                                <i class="bi bi-card-text"></i> @building.Notes
+                            </div>
+                        }
+                    </td>
                     <td>@building.BuildingType</td>
                     <td>
                         <span class="badge @GetBuildingConditionBadge(building.Condition)">
@@ -114,11 +122,15 @@
                                                     <div class="d-flex flex-wrap gap-2">
                                                         @foreach(var premise in building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor == floor).OrderBy(p => p.PremiseNumber))
                                                         {
-                                                            <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)"
+                                                            <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
                                                                  style="width: 80px; cursor:pointer; transition: transform 0.2s;"
                                                                  @onclick="() => ShowEditPremiseModal(premise)"
                                                                  title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
                                                                 <div class="card-body p-2">
+                                                                    @if (!string.IsNullOrEmpty(premise.Notes))
+                                                                    {
+                                                                        <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                                                                    }
                                                                     <div class="fw-bold fs-5">@premise.PremiseNumber</div>
                                                                     <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
                                                                 </div>
@@ -147,11 +159,15 @@
                                                 <div class="d-flex flex-wrap gap-2 mb-4">
                                                     @foreach(var premise in building.Premises.Where(p => p.Entrance == line).OrderBy(p => p.PremiseNumber))
                                                     {
-                                                        <div class="card shadow-sm text-center text-white @GetPremiseColorClass(premise.Status)"
+                                                        <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
                                                              style="width: 80px; cursor:pointer; transition: transform 0.2s;"
                                                              @onclick="() => ShowEditPremiseModal(premise)"
                                                              title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
                                                             <div class="card-body p-2">
+                                                                @if (!string.IsNullOrEmpty(premise.Notes))
+                                                                {
+                                                                    <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                                                                }
                                                                 <div class="fw-bold">№ @premise.PremiseNumber</div>
                                                                 <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
                                                             </div>
@@ -172,7 +188,13 @@
                                             @foreach (var premise in building.Premises)
                                             {
                                                 <tr>
-                                                    <td>@premise.PremiseNumber</td>
+                                                    <td>
+                                                        @premise.PremiseNumber
+                                                        @if (!string.IsNullOrEmpty(premise.Notes))
+                                                        {
+                                                            <span class="ms-1" title="@premise.Notes">📝</span>
+                                                        }
+                                                    </td>
                                                     <td>@premise.Area кв.м</td>
                                                     <td>@premise.Type</td>
                                                     <td><span class="badge bg-secondary">@premise.Status</span></td>
@@ -228,7 +250,6 @@
                                     <label class="fw-bold text-primary">Номер кооперативу (АК №)</label>
                                     <InputText class="form-control border-primary" @bind-Value="newBuilding.CoopNumber" placeholder="Наприклад: 27" />
                                 </div>
-
                             }
 
                             <div class="mb-3 position-relative">
@@ -290,6 +311,11 @@
                                 <option value="Зруйновано (бойові дії)">Зруйновано (бойові дії)</option>
                                 <option value="Занедбана будівля">Занедбана будівля (Покинуто)</option>
                             </InputSelect>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold">Примітки (опціонально)</label>
+                            <InputTextArea class="form-control" @bind-Value="newBuilding.Notes" rows="2" placeholder="Особливості об'єкта, пошкодження тощо..." />
                         </div>
 
                         <div class="mb-3">
@@ -427,6 +453,11 @@
                             </div>
                         }
 
+                        <div class="mb-3">
+                            <label>Примітки (опціонально)</label>
+                            <InputTextArea class="form-control" @bind-Value="newPremise.Notes" rows="2" placeholder="Стан ремонту, особливості оренди..." />
+                        </div>
+
                         <div class="d-flex justify-content-between mt-4">
                             <div>
                                 @if (newPremise.Id > 0)
@@ -509,9 +540,14 @@
 
             if (HighlightBuildingId.HasValue)
             {
-                expandedBuildings.Clear();
-                expandedBuildings.Add(HighlightBuildingId.Value);
-                currentlyHighlightedId = HighlightBuildingId.Value;
+                expandedBuildings.Clear(); 
+                expandedBuildings.Add(HighlightBuildingId.Value); 
+                currentlyHighlightedId = HighlightBuildingId.Value; 
+
+                StateHasChanged(); 
+
+                await Task.Delay(100); 
+                await JS.InvokeVoidAsync("scrollToElement", $"building-{currentlyHighlightedId}");
 
                 _ = Task.Run(async () =>
                 {
@@ -525,15 +561,8 @@
 
     private void ToggleBuilding(int id)
     {
-        if (expandedBuildings.Contains(id)) 
-        {
-            expandedBuildings.Remove(id); 
-        }
-        else 
-        {
-            expandedBuildings.Clear(); 
-            expandedBuildings.Add(id); 
-        }
+        if (expandedBuildings.Contains(id)) expandedBuildings.Remove(id);
+        else expandedBuildings.Add(id);
     }
 
     private void SelectEntrance(int buildingId, int entrance)
@@ -652,7 +681,8 @@
             BuildingNumber = b.BuildingNumber,
             BuildingLetter = b.BuildingLetter,
             CoopNumber = b.CoopNumber,
-            GeoJson = b.GeoJson
+            GeoJson = b.GeoJson,
+            Notes = b.Notes
         };
 
         streetSearchQuery = $"{b.StreetType} {b.StreetName}";
@@ -712,7 +742,7 @@
     private void ShowEditPremiseModal(Premise p)
     {
         errorMessage = "";
-        newPremise = new Premise { Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber, Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type, Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName, RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate };
+        newPremise = new Premise { Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber, Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type, Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName, RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate, Notes = p.Notes };
         showPremiseModal = true;
     }
 

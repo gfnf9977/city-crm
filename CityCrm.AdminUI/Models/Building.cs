@@ -18,6 +18,7 @@ namespace CityCrm.AdminUI.Models
         public int BuildingNumber { get; set; }
         
         public string? BuildingLetter { get; set; }
+        public string? Notes { get; set; }
         
         public string? CoopNumber { get; set; }
 

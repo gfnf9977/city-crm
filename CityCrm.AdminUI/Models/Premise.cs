@@ -25,5 +25,6 @@ namespace CityCrm.AdminUI.Models
         public string? OwnerName { get; set; } 
         public DateTime? RegistrationDate { get; set; } 
         public DateTime? RentEndDate { get; set; }
+        public string? Notes { get; set; }
     }
 }
