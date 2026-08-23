@@ -17,9 +17,64 @@ namespace CityCrm.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Building>>> GetBuildings()
+        public async Task<ActionResult<IEnumerable<Building>>> GetBuildings(
+            [FromQuery] string? search,
+            [FromQuery] string? bType,
+            [FromQuery] string? condition,
+            [FromQuery] string? pType,
+            [FromQuery] string? pStatus,
+            [FromQuery] string? pOwnership,
+            [FromQuery] double? minArea,
+            [FromQuery] double? maxArea)
         {
-            var buildings = await _context.Buildings.Include(b => b.Premises).ToListAsync();
+            var query = _context.Buildings.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.ToLower();
+                query = query.Where(b => 
+                    b.StreetName.ToLower().Contains(s) || 
+                    (b.Notes != null && b.Notes.ToLower().Contains(s)) ||
+                    b.BuildingNumber.ToString().Contains(s) ||
+                    (b.CoopNumber != null && b.CoopNumber.ToLower().Contains(s))
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(bType))
+                query = query.Where(b => b.BuildingType == bType);
+
+            if (!string.IsNullOrWhiteSpace(condition))
+                query = query.Where(b => b.Condition == condition);
+
+            bool hasPremiseFilter = !string.IsNullOrWhiteSpace(pType) || 
+                                    !string.IsNullOrWhiteSpace(pStatus) || 
+                                    !string.IsNullOrWhiteSpace(pOwnership) || 
+                                    minArea.HasValue || maxArea.HasValue;
+
+            if (hasPremiseFilter)
+            {
+                query = query.Include(b => b.Premises.Where(p => 
+                    (string.IsNullOrWhiteSpace(pType) || p.Type == pType) &&
+                    (string.IsNullOrWhiteSpace(pStatus) || p.Status == pStatus) &&
+                    (string.IsNullOrWhiteSpace(pOwnership) || p.Ownership == pOwnership) &&
+                    (!minArea.HasValue || p.Area >= minArea.Value) &&
+                    (!maxArea.HasValue || p.Area <= maxArea.Value)
+                ));
+
+                query = query.Where(b => b.Premises.Any(p => 
+                    (string.IsNullOrWhiteSpace(pType) || p.Type == pType) &&
+                    (string.IsNullOrWhiteSpace(pStatus) || p.Status == pStatus) &&
+                    (string.IsNullOrWhiteSpace(pOwnership) || p.Ownership == pOwnership) &&
+                    (!minArea.HasValue || p.Area >= minArea.Value) &&
+                    (!maxArea.HasValue || p.Area <= maxArea.Value)
+                ));
+            }
+            else
+            {
+                query = query.Include(b => b.Premises);
+            }
+
+            var buildings = await query.OrderByDescending(b => b.Id).ToListAsync();
             var writer = new NetTopologySuite.IO.GeoJsonWriter();
 
             foreach (var b in buildings)

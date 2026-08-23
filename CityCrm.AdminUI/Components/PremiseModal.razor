@@ -1,0 +1,224 @@
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(Model.Id == 0 ? "Додати приміщення" : "Редагувати приміщення")</h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger p-2 mb-3">@errorMessage</div>
+                    }
+
+                    <EditForm Model="Model" OnSubmit="Save">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger mb-3" />
+                        <div class="mb-3">
+                            <label>№ приміщення (квартири/кімнати/офісу)</label>
+                            <InputText class="form-control" @bind-Value="Model.PremiseNumber" required />
+                        </div>
+
+                        <div class="row">
+                            @if (BuildingType == "Гаражний кооператив")
+                            {
+                                <div class="col-md-12 mb-3">
+                                    <label>Ряд / Лінія (Тільки цифра)</label>
+                                    <InputNumber class="form-control" @bind-Value="Model.Entrance" />
+                                </div>
+                            }
+                            else if (BuildingType == "Багатоповерхівка" || BuildingType == "Офісний/Бізнес центр" || BuildingType == "Гуртожиток")
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label>Під'їзд / Блок / Секція</label>
+                                    <InputNumber class="form-control" @bind-Value="Model.Entrance" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Поверх</label>
+                                    <InputNumber class="form-control" @bind-Value="Model.Floor" />
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Площа (кв.м)</label>
+                            <InputNumber class="form-control" @bind-Value="Model.Area" required />
+                        </div>
+                        <div class="mb-3">
+                            <label>Тип</label>
+                            <InputSelect class="form-select" @bind-Value="Model.Type">
+                                <option value="Житлова">Житлова</option>
+                                <option value="Комерційна">Комерційна</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label>Статус</label>
+                            <InputSelect class="form-select" @bind-Value="Model.Status">
+                                <option value="Вільне">Вільне (очікує аукціону/розподілу)</option>
+                                <option value="Орендоване (Комерція)">Орендоване (Комерція)</option>
+                                <option value="Орендоване (Соціальне)">Орендоване (Муніципальне житло)</option>
+                                <option value="Службове">Службове (ЦНАП, ЖЕК, Інше)</option>
+                                <option value="В експлуатації">В експлуатації (Приватне / Державне)</option>
+                                <option value="Аварійне">Аварійне</option>
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label>Власність</label>
+                            <InputSelect class="form-select" @bind-Value="Model.Ownership">
+                                <option value="Комунальна">Комунальна (Місто)</option>
+                                <option value="Приватна">Приватна</option>
+                                <option value="Державна">Державна</option>
+                            </InputSelect>
+                        </div>
+
+                        @if (Model.Ownership == "Приватна" || Model.Ownership == "Державна")
+                        {
+                            <div class="card card-body bg-light border-secondary mb-3 shadow-sm p-3">
+                                <h6 class="text-secondary border-bottom pb-2">Дані з реєстру прав:</h6>
+                                <div class="mb-2">
+                                    <label>Власник (ПІБ або Назва установи)</label>
+                                    <InputText class="form-control" @bind-Value="Model.OwnerName" />
+                                </div>
+                                <div>
+                                    <label>Дата реєстрації права власності</label>
+                                    <InputDate class="form-control" @bind-Value="Model.RegistrationDate" />
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Ownership == "Комунальна" && (Model.Status == "Орендоване (Комерція)" || Model.Status == "Орендоване (Соціальне)"))
+                        {
+                            <div class="card card-body bg-light border-primary mb-3 shadow-sm p-3">
+                                <h6 class="text-primary border-bottom pb-2">
+                                    Дані оренди (@(Model.Status == "Орендоване (Комерція)" ? "Комерційної" : "Соціальної")):
+                                </h6>
+                                <div class="mb-2">
+                                    <label>Орендар (@(Model.Status == "Орендоване (Комерція)" ? "Назва компанії / ФОП" : "ПІБ особи / родини"))</label>
+                                    <InputText class="form-control" @bind-Value="Model.OwnerName" />
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label>Початок договору</label>
+                                        <InputDate class="form-control" @bind-Value="Model.RegistrationDate" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label>Кінець договору</label>
+                                        <InputDate class="form-control" @bind-Value="Model.RentEndDate" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label>Примітки (опціонально)</label>
+                            <InputTextArea class="form-control" @bind-Value="Model.Notes" rows="2" placeholder="Стан ремонту, особливості оренди..." />
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <div>
+                                @if (Model.Id > 0)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" @onclick="Delete">Видалити</button>
+                                }
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-secondary me-2" @onclick="Close">Скасувати</button>
+                                <button type="submit" class="btn btn-primary">Зберегти</button>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public Premise Model { get; set; } = new();
+    [Parameter] public string BuildingType { get; set; } = "";
+    [Parameter] public List<Premise> ExistingPremises { get; set; } = new();
+    [Parameter] public EventCallback OnSaved { get; set; }
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private string errorMessage = "";
+
+    private async Task Save()
+    {
+        errorMessage = "";
+
+        if (!string.IsNullOrWhiteSpace(Model.PremiseNumber))
+        {
+            bool isDuplicate = ExistingPremises.Any(p =>
+                p.Id != Model.Id &&
+                p.PremiseNumber.Trim().ToLower() == Model.PremiseNumber.Trim().ToLower());
+
+            if (isDuplicate)
+            {
+                errorMessage = $"Увага! Приміщення з номером {Model.PremiseNumber} вже існує у цій будівлі.";
+                return;
+            }
+        }
+
+        if (Model.Ownership == "Приватна" || Model.Ownership == "Державна")
+        {
+            if (Model.Status != "В експлуатації" && Model.Status != "Аварійне")
+            {
+                errorMessage = $"Помилка сумісності! Система не веде облік оренди чи службового використання для форми власності '{Model.Ownership}'. Оберіть статус 'В експлуатації' або 'Аварійне'. Будь ласка, переконайтеся у правильності даних.";
+                return;
+            }
+        }
+        else if (Model.Ownership == "Комунальна")
+        {
+            if (Model.Status == "В експлуатації")
+            {
+                errorMessage = "Помилка сумісності! Статус 'В експлуатації' використовується для приватних або державних об'єктів. Для комунальної власності деталізуйте статус (напр. 'Вільне', 'Службове' або 'Орендоване').";
+                return;
+            }
+
+            if (Model.Type == "Житлова" && Model.Status == "Орендоване (Комерція)")
+            {
+                errorMessage = "Помилка сумісності! Житлове комунальне приміщення не може здаватися в комерційну оренду. Якщо це програма муніципального житла, оберіть 'Орендоване (Соціальне)'. Переконайтеся у правильності даних.";
+                return;
+            }
+
+            if (Model.Type == "Комерційна" && Model.Status == "Орендоване (Соціальне)")
+            {
+                errorMessage = "Помилка сумісності! Комерційне приміщення не підпадає під програму соціального муніципального житла. Оберіть 'Орендоване (Комерція)'. Переконайтеся у правильності даних.";
+                return;
+            }
+        }
+
+        var response = Model.Id == 0
+            ? await Http.PostAsJsonAsync("api/premises", Model)
+            : await Http.PutAsJsonAsync($"api/premises/{Model.Id}", Model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await OnSaved.InvokeAsync();
+        }
+        else
+        {
+            errorMessage = "Сервер відхилив запит. Перевірте дані.";
+        }
+    }
+
+    private async Task Delete()
+    {
+        var response = await Http.DeleteAsync($"api/premises/{Model.Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            await OnSaved.InvokeAsync();
+        }
+    }
+
+    private async Task Close()
+    {
+        errorMessage = "";
+        await OnClosed.InvokeAsync();
+    }
+}
