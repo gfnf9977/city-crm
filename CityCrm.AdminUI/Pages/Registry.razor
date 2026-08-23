@@ -4,11 +4,19 @@
 @inject IJSRuntime JS
 
 <style>
-    @@keyframes flash-highlight {
-        0% { background-color: #fff3cd !important; }
-        100% { background-color: inherit; }
+    .expanded-row > td {
+        background-color: #f8f9fa !important; 
     }
-    .highlighted-row {
+    
+    .expanded-row > td:first-child {
+        box-shadow: inset 4px 0 0 0 #0d6efd; 
+    }
+
+    @@keyframes flash-highlight {
+        0% { background-color: #fff3cd !important; } 
+        100% { background-color: #f8f9fa !important; } 
+    }
+    .highlighted-row > td {
         animation: flash-highlight 3s ease-out forwards;
     }
 </style>
@@ -42,14 +50,16 @@
         {
             @foreach (var building in buildings)
             {
-                <tr id="building-@building.Id" class="table-light @(currentlyHighlightedId == building.Id ? "highlighted-row" : "")">
+                <tr id="building-@building.Id" class="@(expandedBuildings.Contains(building.Id) ? "expanded-row" : "table-light") @(currentlyHighlightedId == building.Id ? "highlighted-row" : "")">
                     <td>
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleBuilding(building.Id)">
+                        <button class="btn btn-sm @(expandedBuildings.Contains(building.Id) ? "btn-primary" : "btn-outline-secondary")" 
+                                @onclick="() => ToggleBuilding(building.Id)"
+                                style="transition: all 0.2s ease;">
                             <i class="bi @(expandedBuildings.Contains(building.Id) ? "bi-chevron-up" : "bi-chevron-down")"></i>
                         </button>
                     </td>
                     <td>@building.Id</td>
-                    <td class="fw-bold">
+                    <td class="@(expandedBuildings.Contains(building.Id) ? "fw-bolder fs-6 text-primary" : "fw-bold")" style="transition: all 0.2s;">
                         @building.FullAddress
                         @if (!string.IsNullOrEmpty(building.Notes))
                         {
@@ -284,17 +294,19 @@
 
                             <div class="row">
                                 <div class="col-12">
-                                    <label>Номер будинку / об'єкту</label>
-                                    <div class="input-group mb-1">
-                                        <InputNumber class="form-control" style="max-width: 120px;" @bind-Value="newBuilding.BuildingNumber" placeholder="15" />
-                                        <span class="input-group-text">-</span>
-                                        <InputText class="form-control" style="max-width: 100px;" @bind-Value="newBuilding.BuildingLetter" placeholder="А" />
+                                    <label>Номер / Літера / Корпус</label>
+<div class="input-group mb-1">
+    <InputNumber class="form-control" style="max-width: 90px;" @bind-Value="newBuilding.BuildingNumber" placeholder="15" />
+    <span class="input-group-text">-</span>
+    <InputText class="form-control" style="max-width: 70px;" @bind-Value="newBuilding.BuildingLetter" placeholder="А" title="Літера" />
+    <span class="input-group-text">корп.</span>
+    <InputText class="form-control" style="max-width: 80px;" @bind-Value="newBuilding.BuildingBlock" placeholder="3" title="Корпус" />
 
-                                        <button type="button" class="btn btn-outline-primary fw-bold" @onclick="FetchOsmContour" disabled="@isFetchingOsm">
-                                            @if(isFetchingOsm) { <span class="spinner-border spinner-border-sm"></span> }
-                                            else { <span>🪄 Знайти контур</span> }
-                                        </button>
-                                    </div>
+    <button type="button" class="btn btn-outline-primary fw-bold" @onclick="FetchOsmContour" disabled="@isFetchingOsm">
+        @if(isFetchingOsm) { <span class="spinner-border spinner-border-sm"></span> }
+        else { <span>🪄 Контур</span> }
+    </button>
+</div>
                                     @if (!string.IsNullOrEmpty(osmMessage))
                                     {
                                         <small class="text-info fw-bold">@osmMessage</small>
@@ -561,8 +573,15 @@
 
     private void ToggleBuilding(int id)
     {
-        if (expandedBuildings.Contains(id)) expandedBuildings.Remove(id);
-        else expandedBuildings.Add(id);
+        if (expandedBuildings.Contains(id)) 
+        {
+            expandedBuildings.Remove(id); 
+        }
+        else 
+        {
+            expandedBuildings.Clear(); 
+            expandedBuildings.Add(id); 
+        }
     }
 
     private void SelectEntrance(int buildingId, int entrance)
@@ -680,6 +699,7 @@
             StreetType = b.StreetType, StreetName = b.StreetName,
             BuildingNumber = b.BuildingNumber,
             BuildingLetter = b.BuildingLetter,
+            BuildingBlock = b.BuildingBlock,
             CoopNumber = b.CoopNumber,
             GeoJson = b.GeoJson,
             Notes = b.Notes

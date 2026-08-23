@@ -18,6 +18,7 @@ namespace CityCrm.AdminUI.Models
         public int BuildingNumber { get; set; }
         
         public string? BuildingLetter { get; set; }
+        public string? BuildingBlock { get; set; }
         public string? Notes { get; set; }
         
         public string? CoopNumber { get; set; }
@@ -39,8 +40,21 @@ namespace CityCrm.AdminUI.Models
         public List<Premise> Premises { get; set; } = new();
 
         [JsonIgnore] 
-        public string FullAddress => BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber) 
-            ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}" 
-            : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
+        public string FullAddress
+        {
+            get
+            {
+                var addr = BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber)
+                    ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}"
+                    : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
+
+                if (!string.IsNullOrWhiteSpace(BuildingBlock))
+                {
+                    addr += $", корп. {BuildingBlock}";
+                }
+
+                return addr;
+            }
+        }
     }
 }

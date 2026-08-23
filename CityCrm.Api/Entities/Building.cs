@@ -13,6 +13,7 @@ namespace CityCrm.Api.Entities
         public string StreetName { get; set; } = string.Empty;
         public int BuildingNumber { get; set; }
         public string? BuildingLetter { get; set; }
+        public string? BuildingBlock { get; set; }
         public string? CoopNumber { get; set; }
         public string? Notes { get; set; }
 
@@ -32,5 +33,23 @@ namespace CityCrm.Api.Entities
         public string? GeoJson { get; set; }
 
         public List<Premise> Premises { get; set; } = new();
+
+        [NotMapped]
+        public string FullAddress
+        {
+            get
+            {
+                var addr = BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber)
+                    ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}"
+                    : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
+
+                if (!string.IsNullOrWhiteSpace(BuildingBlock))
+                {
+                    addr += $", корп. {BuildingBlock}";
+                }
+
+                return addr;
+            }
+        }
     }
 }
