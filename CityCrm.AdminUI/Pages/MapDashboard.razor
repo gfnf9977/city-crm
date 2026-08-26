@@ -5,55 +5,118 @@
 
 <PageTitle>Карта об'єктів</PageTitle>
 
-<h1>Просторова мапа нерухомості</h1>
+<div class="d-flex justify-content-between align-items-end mb-3">
+    <h1>Просторова мапа нерухомості</h1>
+    
+    <div class="d-flex gap-2">
+        <button class="btn @(activeFilter == "" ? "btn-secondary" : "btn-outline-secondary")" 
+                @onclick="@(() => ApplyFilter(""))">
+            <i class="bi bi-globe"></i> Всі об'єкти
+        </button>
+        <button class="btn @(activeFilter == "free_communal" ? "btn-success" : "btn-outline-success")" 
+                @onclick="@(() => ApplyFilter("free_communal"))">
+            Вільна комуналка
+        </button>
+        <button class="btn @(activeFilter == "commerce" ? "btn-primary" : "btn-outline-primary")" 
+                @onclick="@(() => ApplyFilter("commerce"))">
+            Комерційні площі
+        </button>
+        <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" 
+                @onclick="@(() => ApplyFilter("problems"))">
+            Зруйновані / Аварійні
+        </button>
+    </div>
+</div>
 
-<div id="map" style="height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc;"></div>
+@if (isLoading)
+{
+    <div class="alert alert-info">Завантаження даних просторової бази...</div>
+}
+
+<div id="map" style="height: 700px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
 
 @code {
-    private List<Building> buildings = new();
     private bool isMapInitialized = false;
+    private bool isLoading = true;
+    private string activeFilter = "";
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("leafletMap.init", "map");
+            isMapInitialized = true;
+            
+            await LoadAndRenderData("");
+        }
+    }
+
+    private async Task ApplyFilter(string filterType)
+    {
+        activeFilter = filterType;
+        await LoadAndRenderData(activeFilter);
+    }
+
+    private async Task LoadAndRenderData(string filterType)
+    {
+        isLoading = true;
+        StateHasChanged();
+
         try
         {
-            var result = await Http.GetFromJsonAsync<List<Building>>("api/buildings");
-            if (result != null)
+            var queryParams = new List<string>();
+            
+            if (filterType == "free_communal")
             {
-                buildings = result;
+                queryParams.Add("pOwnership=" + Uri.EscapeDataString("Комунальна"));
+                queryParams.Add("pStatus=" + Uri.EscapeDataString("Вільне"));
+            }
+            else if (filterType == "commerce")
+            {
+                queryParams.Add("pType=" + Uri.EscapeDataString("Комерційна"));
+            }
+            else if (filterType == "problems")
+            {
+                queryParams.Add("pStatus=" + Uri.EscapeDataString("Аварійне"));
+            }
+
+            var url = "api/buildings";
+            if (queryParams.Any()) url += "?" + string.Join("&", queryParams);
+
+            var buildings = await Http.GetFromJsonAsync<List<Building>>(url);
+
+            if (buildings != null && isMapInitialized)
+            {
+                var mapData = buildings.Select(b => new
+                {
+                    id = b.Id,
+                    lat = b.Lat,
+                    lng = b.Lng,
+                    address = b.FullAddress, 
+                    buildingType = b.BuildingType,
+                    condition = b.Condition,
+                    geoJson = b.GeoJson,
+                    notes = b.Notes,
+                    premises = b.Premises.Select(p => new {
+                        number = p.PremiseNumber,
+                        area = p.Area,
+                        type = p.Type,
+                        status = p.Status,
+                        notes = p.Notes
+                    }).ToList()
+                }).ToList();
+
+                await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Помилка завантаження даних для карти: {ex.Message}");
+            Console.WriteLine($"Помилка завантаження карти: {ex.Message}");
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (buildings.Any() && !isMapInitialized)
+        finally
         {
-            var mapData = buildings.Select(b => new
-            {
-                id = b.Id,
-                lat = b.Lat,
-                lng = b.Lng,
-                address = b.FullAddress, 
-                buildingType = b.BuildingType,
-                condition = b.Condition,
-                geoJson = b.GeoJson,
-                notes = b.Notes,
-                premises = b.Premises.Select(p => new {
-                    number = p.PremiseNumber,
-                    area = p.Area,
-                    type = p.Type,
-                    status = p.Status,
-                    notes = p.Notes
-                }).ToList()
-            }).ToList();
-
-            await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", mapData);
-            isMapInitialized = true;
+            isLoading = false;
+            StateHasChanged();
         }
     }
 }
