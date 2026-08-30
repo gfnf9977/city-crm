@@ -145,9 +145,32 @@
                                             <InputText class="form-control" @bind-Value="Model.BusinessName" placeholder="напр. Сільпо" />
                                         </div>
                                     </div>
-                                    <div class="mb-2">
-                                        <label>Години роботи</label>
-                                        <InputText class="form-control" @bind-Value="Model.WorkingHours" placeholder="напр. Пн-Нд 08:00 - 22:00" />
+                                    <div class="mb-3">
+                                        <label class="fw-bold mb-2">Графік роботи</label>
+                                        <div class="bg-white border rounded p-2">
+                                            @foreach (var day in daysOfWeek)
+                                            {
+                                                if (weeklySchedule.TryGetValue(day, out var schedule))
+                                                {
+                                                    <div class="d-flex align-items-center mb-1 pb-1 border-bottom-dashed">
+                                                        <div style="width: 40px;" class="fw-bold @(schedule.IsWorking ? "text-dark" : "text-muted")">@day</div>
+                                                        <div class="form-check form-switch me-3 mb-0">
+                                                            <input type="checkbox" class="form-check-input" @bind="schedule.IsWorking" style="cursor: pointer;" />
+                                                        </div>
+                                                        @if (schedule.IsWorking)
+                                                        {
+                                                            <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Open" />
+                                                            <span class="mx-2 text-muted">-</span>
+                                                            <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Close" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted fst-italic ms-2" style="font-size: 0.85rem;">Вихідний</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
                                     </div>
                                     <div class="mb-2">
                                         <label>Короткий опис послуг</label>
@@ -191,8 +214,56 @@
 
     private string errorMessage = "";
 
+    public class DaySchedule
+    {
+        public bool IsWorking { get; set; } = true;
+        public TimeOnly? Open { get; set; } = new TimeOnly(9, 0);
+        public TimeOnly? Close { get; set; } = new TimeOnly(18, 0);
+    }
+
+    private Dictionary<string, DaySchedule> weeklySchedule = new();
+    private readonly string[] daysOfWeek = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд" };
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible)
+        {
+            if (string.IsNullOrEmpty(Model.WorkingHours))
+            {
+                weeklySchedule = daysOfWeek.ToDictionary(d => d, d => new DaySchedule
+                {
+                    IsWorking = d != "Сб" && d != "Нд"
+                });
+            }
+            else
+            {
+                try
+                {
+                    weeklySchedule = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, DaySchedule>>(Model.WorkingHours)
+                                     ?? InitializeEmptySchedule();
+                }
+                catch
+                {
+                    weeklySchedule = InitializeEmptySchedule();
+                }
+            }
+        }
+    }
+
+    private Dictionary<string, DaySchedule> InitializeEmptySchedule() =>
+        daysOfWeek.ToDictionary(d => d, d => new DaySchedule { IsWorking = d != "Сб" && d != "Нд" });
+
     private async Task Save()
     {
+        if (Model.Type == "Комерційна" && Model.IsPublicVisible)
+        {
+            Model.WorkingHours = System.Text.Json.JsonSerializer.Serialize(weeklySchedule);
+        }
+        else
+        {
+            Model.WorkingHours = null;
+        }
+
         errorMessage = "";
 
         if (!string.IsNullOrWhiteSpace(Model.PremiseNumber))
