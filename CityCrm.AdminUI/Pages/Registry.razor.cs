@@ -24,7 +24,6 @@ namespace CityCrm.AdminUI.Pages
         public int? HighlightBuildingId { get; set; }
         private int? currentlyHighlightedId = null;
 
-        // Змінні фільтрів
         private bool showAdvancedFilters = false;
         private string filterSearch = "";
         private string filterBType = "";
@@ -126,10 +125,6 @@ namespace CityCrm.AdminUI.Pages
             selectedEntrances[buildingId] = entrance;
         }
 
-        // ==========================================
-        // ЛОГІКА МОДАЛОК
-        // ==========================================
-
         private void ShowAddBuildingModal()
         {
             newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." };
@@ -168,7 +163,10 @@ namespace CityCrm.AdminUI.Pages
                 Id = p.Id, BuildingId = p.BuildingId, PremiseNumber = p.PremiseNumber,
                 Entrance = p.Entrance, Floor = p.Floor, Area = p.Area, Type = p.Type,
                 Status = p.Status, Ownership = p.Ownership, OwnerName = p.OwnerName,
-                RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate, Notes = p.Notes
+                RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate, Notes = p.Notes,
+                BusinessCategory = p.BusinessCategory, BusinessName = p.BusinessName,
+                WorkingHours = p.WorkingHours, BusinessDescription = p.BusinessDescription,
+                IsPublicVisible = p.IsPublicVisible
             };
             showPremiseModal = true;
         }
@@ -182,7 +180,6 @@ namespace CityCrm.AdminUI.Pages
             }
         }
 
-        // Ці методи викликаються дочірніми компонентами, коли збереження успішне
         private async Task HandleBuildingSaved()
         {
             showBuildingModal = false;
@@ -197,10 +194,6 @@ namespace CityCrm.AdminUI.Pages
 
         private void CloseBuildingModal() => showBuildingModal = false;
         private void ClosePremiseModal() => showPremiseModal = false;
-
-        // ==========================================
-        // UI ХЕЛПЕРИ
-        // ==========================================
 
         private string GetPremiseColorClass(string status) => status switch
         {

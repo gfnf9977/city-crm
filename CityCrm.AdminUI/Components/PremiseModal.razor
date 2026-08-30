@@ -113,6 +113,50 @@
                             </div>
                         }
 
+                        @if (Model.Type == "Комерційна")
+                        {
+                            <div class="card card-body bg-light border-warning mb-3 shadow-sm p-3">
+                                <h6 class="border-bottom pb-2" style="color: #d39e00;">
+                                    <i class="bi bi-shop"></i> Публічні дані бізнесу (для громадян)
+                                </h6>
+                                <div class="form-check form-switch mb-3">
+                                    <InputCheckbox class="form-check-input" id="isPublic" @bind-Value="Model.IsPublicVisible" />
+                                    <label class="form-check-label fw-bold" for="isPublic">Відображати на публічній карті міста</label>
+                                </div>
+
+                                @if (Model.IsPublicVisible)
+                                {
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Сфера / Категорія</label>
+                                            <InputSelect class="form-select" @bind-Value="Model.BusinessCategory">
+                                                <option value="">-- Оберіть категорію --</option>
+                                                <option value="Продукти / Супермаркет">Продукти / Супермаркет</option>
+                                                <option value="Кафе / Ресторан">Кафе / Ресторан</option>
+                                                <option value="СТО / Автомийка">СТО / Автомийка</option>
+                                                <option value="Аптека / Медицина">Аптека / Медицина</option>
+                                                <option value="Послуги / Краса">Послуги / Краса</option>
+                                                <option value="Офіс / Відділення">Офіс / Відділення</option>
+                                                <option value="Інше">Інше</option>
+                                            </InputSelect>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label>Назва закладу (вивіска)</label>
+                                            <InputText class="form-control" @bind-Value="Model.BusinessName" placeholder="напр. Сільпо" />
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Години роботи</label>
+                                        <InputText class="form-control" @bind-Value="Model.WorkingHours" placeholder="напр. Пн-Нд 08:00 - 22:00" />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Короткий опис послуг</label>
+                                        <InputTextArea class="form-control" @bind-Value="Model.BusinessDescription" rows="2" placeholder="Що саме пропонує заклад..." />
+                                    </div>
+                                }
+                            </div>
+                        }
+
                         <div class="mb-3">
                             <label>Примітки (опціонально)</label>
                             <InputTextArea class="form-control" @bind-Value="Model.Notes" rows="2" placeholder="Стан ремонту, особливості оренди..." />

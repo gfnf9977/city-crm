@@ -22,6 +22,11 @@ namespace CityCrm.Api.Entities
         public string Ownership { get; set; } = string.Empty; 
         public string? OwnerName { get; set; } 
         public string? Notes { get; set; }
+        public string? BusinessCategory { get; set; } 
+        public string? BusinessName { get; set; }     
+        public string? WorkingHours { get; set; }     
+        public string? BusinessDescription { get; set; } 
+        public bool IsPublicVisible { get; set; } = false;
         
         public DateTime? RegistrationDate { get; set; } 
         
