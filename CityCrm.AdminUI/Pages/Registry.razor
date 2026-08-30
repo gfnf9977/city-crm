@@ -236,6 +236,30 @@
                                             }
                                         </div>
                                     }
+
+                                    var noEntrancePremises = building.Premises.Where(p => !p.Entrance.HasValue).OrderBy(p => p.PremiseNumber).ToList();
+                                    if (noEntrancePremises.Any())
+                                    {
+                                        <h6 class="mt-4 mb-3 text-secondary">Приміщення без прив'язки до під'їзду (Окремий вхід / Комерція):</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach (var premise in noEntrancePremises)
+                                            {
+                                                <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
+                                                     style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                                                     @onclick="() => ShowEditPremiseModal(premise)"
+                                                     title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                                                    <div class="card-body p-2">
+                                                        @if (!string.IsNullOrEmpty(premise.Notes))
+                                                        {
+                                                            <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                                                        }
+                                                        <div class="fw-bold fs-6">@premise.PremiseNumber</div>
+                                                        <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
                                 }
                                 else if (building.BuildingType == "Гаражний кооператив")
                                 {

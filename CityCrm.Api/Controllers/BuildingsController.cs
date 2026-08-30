@@ -118,6 +118,7 @@ namespace CityCrm.Api.Controllers
             {
                 var reader = new NetTopologySuite.IO.GeoJsonReader();
                 building.Location = reader.Read<NetTopologySuite.Geometries.Geometry>(building.GeoJson);
+                building.Location.SRID = 4326;
             }
             else if (building.Lat != 0 && building.Lng != 0)
             {
@@ -145,6 +146,7 @@ namespace CityCrm.Api.Controllers
             {
                 var reader = new NetTopologySuite.IO.GeoJsonReader();
                 building.Location = reader.Read<NetTopologySuite.Geometries.Geometry>(building.GeoJson);
+                building.Location.SRID = 4326;
             }
             else if (building.Lat != 0 && building.Lng != 0)
             {
