@@ -58,8 +58,11 @@ else
                             <td class="fw-bold">@street.Name</td>
                             <td class="text-muted">@street.OldNames</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Редагувати">
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Виправити помилку">
                                     <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ShowRenameModal(street)" title="Офіційне перейменування">
+                                    <i class="bi bi-signpost-split"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteStreet(street.Id)" title="Видалити">
                                     <i class="bi bi-trash"></i>
@@ -71,7 +74,7 @@ else
             </tbody>
         </table>
     </div>
-    
+
     <div class="text-muted mt-2 small text-end">
         Всього записів: @streets.Count
     </div>
@@ -82,12 +85,18 @@ else
              OnSaved="HandleSaved"
              OnClosed="CloseModal" />
 
+<StreetRenameModal IsVisible="showRenameModal"
+                   Model="currentStreet"
+                   OnSaved="HandleSaved"
+                   OnClosed="CloseModal" />
+
 @code {
     private List<Street> streets = new();
     private bool isLoading = true;
     private string searchQuery = "";
-    
+
     private bool showModal = false;
+    private bool showRenameModal = false;
     private Street currentStreet = new();
 
     protected override async Task OnInitializedAsync()
@@ -150,6 +159,18 @@ else
         showModal = true;
     }
 
+    private void ShowRenameModal(Street s)
+    {
+        currentStreet = new Street
+        {
+            Id = s.Id,
+            StreetType = s.StreetType,
+            Name = s.Name,
+            OldNames = s.OldNames
+        };
+        showRenameModal = true;
+    }
+
     private async Task DeleteStreet(int id)
     {
         var response = await Http.DeleteAsync($"api/streets/{id}");
@@ -162,11 +183,13 @@ else
     private async Task HandleSaved()
     {
         showModal = false;
+        showRenameModal = false;
         await LoadStreets();
     }
 
     private void CloseModal()
     {
         showModal = false;
+        showRenameModal = false;
     }
 }
