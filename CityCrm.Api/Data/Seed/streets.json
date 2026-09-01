@@ -1,0 +1,2647 @@
+[
+    {
+        "StreetType": "вул.",
+        "Name": "Авіаторів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Авіації",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Автозаводська",
+        "OldNames": "вул. Миколи Неборака"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Академіка Рево",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ігоря Алєксєєва",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Андріївська",
+        "OldNames": "вул. Тельмана"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Артилеристів",
+        "OldNames": "вул. Гастелло"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Батюка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Багряного",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олексія Бакуринського",
+        "OldNames": "вул. Папанінців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Аверкія Гончаренка",
+        "OldNames": "вул. Балицького"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Степана Бандери",
+        "OldNames": "вул. Попова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лазаря Барановича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ганни Барвінок",
+        "OldNames": "вул. Мінська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Батуринська",
+        "OldNames": "вул. Лермонтова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Берегова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Березова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Максима Березовського",
+        "OldNames": "вул. Федорова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Романа Бжеського",
+        "OldNames": "вул. Віліса Лаціса"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Білогірська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Максима Білоконя",
+        "OldNames": "вул. Брестська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Катерини Білокур",
+        "OldNames": "вул. Мозирська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Капітана Білоусова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Блажкуна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Блакитного",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Бобровицька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Богуна",
+        "OldNames": "вул. Богунського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Богушевича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Любомира Боднарука",
+        "OldNames": "вул. Дзержинського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Борисоглібська",
+        "OldNames": "вул. Серьожнікова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дмитра Бортнянського",
+        "OldNames": "вул. Дундича"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Борщова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Будівельна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Бузкова",
+        "OldNames": "вул. Сиренєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ханенків",
+        "OldNames": "вул. Василя Бульби"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Варзара",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Миколи Василенка",
+        "OldNames": "пров. Будьонного"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Васильченка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Вербицьких",
+        "OldNames": "вул. Зої Космодем'янської"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Верені",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Остапа Вересая",
+        "OldNames": "вул. Краснодонців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Аркадія Верзілова",
+        "OldNames": "пров. 2-й Орджонікідзе"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Григорія Верьовки",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Весняна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ветеринарна",
+        "OldNames": "вул. Маресьєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Виговського",
+        "OldNames": "вул. Малиновського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Висока",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Вишнева",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Остапа Вишні",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Відпочинку",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Воздвиженська",
+        "OldNames": "вул. Родимцева"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Волковича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимирська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Волонтерів",
+        "OldNames": "пров. 2-й Ворошилова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Волошкова",
+        "OldNames": "вул. Василькова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Вороного",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Воскресенська",
+        "OldNames": "вул. Муринсона"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Востришева",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Всіхсвятська",
+        "OldNames": "вул. 50 років СРСР"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гайова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ганжівська",
+        "OldNames": "вул. Артема"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Всеволода Ганцова",
+        "OldNames": "вул. Жовтнева"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гарамів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Геологічна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Героїв Маріуполя",
+        "OldNames": "вул. Московська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Героїв Крут",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Героїв Чорнобиля",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Глинського",
+        "OldNames": "пров. 1-й Пархоменка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Глібова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Глухівська",
+        "OldNames": "вул. Радищева"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гмирі Бориса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Зеленого Клину",
+        "OldNames": "вул. Гнєдаша"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гоголя",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гонча",
+        "OldNames": "вул. Горького"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гориста",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Городнянська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Господарська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гребінки",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Григоренка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Грінченка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Громадська",
+        "OldNames": "вул. Борисенка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Грушевського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гулака-Артемовського",
+        "OldNames": "вул. Глинки"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Євгена Гуцала",
+        "OldNames": "пров. 2-й Гайдара"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ґельсінської спілки",
+        "OldNames": "вул. Ломоносова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дачна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Деснянська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Джерельна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дніпровська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Добровольців",
+        "OldNames": "пров. 3-й Ворошилова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Добрянська",
+        "OldNames": "вул. Ударна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Довга",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Київський",
+        "OldNames": "вул. Довженка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дмитра Дорошенка",
+        "OldNames": "вул. Соколовської"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Дрозда",
+        "OldNames": "вул. Любченка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дружби",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Дуніна-Борковського",
+        "OldNames": "вул. Калініна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Експертна",
+        "OldNames": "вул. Разіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Елеваторна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Енергетиків",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Єлецька",
+        "OldNames": "вул. Бєлінського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Ємця",
+        "OldNames": "вул. Земнухова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Курсанта Єськова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Жабинського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Житомирська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Забарівська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Заводська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Загородня",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Максима Загривного",
+        "OldNames": "вул. Пархоменка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Задорожна",
+        "OldNames": "вул. Тургенєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Залізнична",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Залізничників",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Марії Заньковецької",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Захисників України",
+        "OldNames": "вул. Одинцова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Зелена",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Земська",
+        "OldNames": "вул. Орджонікідзе"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Золотаренка",
+        "OldNames": "вул. Шевцової"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Івасюка",
+        "OldNames": "вул. Менделєєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дем'яна Ігнатовича",
+        "OldNames": "пров. Ушакова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Іллінська",
+        "OldNames": "вул. Гліба Успенського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Індустріальна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Інженерна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Інструментальна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Леоніда Каденюка",
+        "OldNames": "вул. Волкова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Калинова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кастуся Калиновського",
+        "OldNames": "вул. Смирнова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Євгена Калити",
+        "OldNames": "вул. Некрасова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Устима Кармелюка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Андрія Карнабіди",
+        "OldNames": "вул. Короленка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Карпенка-Карого",
+        "OldNames": "вул. Станіславського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Карпинського",
+        "OldNames": "вул. Тульська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Каштанова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ігоря Качуровського",
+        "OldNames": "вул. Андрусенка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Квітнева",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Керченська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кибальчича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Київська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Княжа",
+        "OldNames": "вул. Кирпоноса"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кістяківських",
+        "OldNames": "вул. Панфіловців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кільцева",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кленова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Коваленка",
+        "OldNames": "вул. Генерала Пухова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ковальська",
+        "OldNames": "вул. Кузнечна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Козацька",
+        "OldNames": "вул. 50 років ВЛКСМ"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Колоскових",
+        "OldNames": "вул. Будьонного"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Комка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Михайла Комочкова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Комунальна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Кониського",
+        "OldNames": "вул. Короткова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "1-ша Кордівка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "2-га Кордівка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Терентія Кореня",
+        "OldNames": "вул. Челюскінців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Корнієвського",
+        "OldNames": "вул. Цимбаліста"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Любові Забашти",
+        "OldNames": "вул. Коробка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Корольова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Корюківська",
+        "OldNames": "вул. Комарова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Дмитра Романченка",
+        "OldNames": "вул. Космонавтів"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Віктора Костарчука",
+        "OldNames": "вул. Правди"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Костомарівська",
+        "OldNames": "вул. Чапаєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Коти",
+        "OldNames": "вул. Громової"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Котляревського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Михайла Коцюбинського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кочура Григорія",
+        "OldNames": "пров. Гайдара"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кочерги",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Крайня",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Симона Петлюри",
+        "OldNames": "вул. Красносільського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кривоноса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кривулівська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кримська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кринична",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кропивницького",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кругова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Галини Кузьменко",
+        "OldNames": "вул. Маяковського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Курганна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Куренівка",
+        "OldNames": "вул. Фікселя"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Лазаревського",
+        "OldNames": "вул. Інтернаціональна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Миколи Леонтовича",
+        "OldNames": "вул. Чайковського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лизогубів",
+        "OldNames": "вул. Дмитра Лизогуба"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Липинського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лисенка",
+        "OldNames": "вул. Олени Білевич"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Лисенка",
+        "OldNames": "пров. Олени Білевич"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Литовська",
+        "OldNames": "вул. Кірова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лісковицька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лісова",
+        "OldNames": "вул. Лісна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Євгена Лоскота",
+        "OldNames": "вул. Костромська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Семена Лощенка",
+        "OldNames": "вул. Поліни Осипенко"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Лугова",
+        "OldNames": "вул. Єрьоменка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Бориса Луговського",
+        "OldNames": "вул. Рози Люксембург"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Львівська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Льговська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Льотна",
+        "OldNames": "вул. Червоногвардійська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Любецька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Магістратська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Мазепи Івана",
+        "OldNames": "вул. Щорса"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Іоанна Максимовича",
+        "OldNames": "вул. Островського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Марка Вовчка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Марковича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Масанівська",
+        "OldNames": "вул. Галана"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Степана Подобайла",
+        "OldNames": "вул. Матросова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Мачеретівська",
+        "OldNames": "вул. Піонерська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Мацієвського",
+        "OldNames": "вул. Попудренка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Медиків",
+        "OldNames": "вул. Галанова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Джеймса Мейса",
+        "OldNames": "вул. Банченкова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Межова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Юрія Мезенцева",
+        "OldNames": "вул. Долорес Ібаррурі"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Менська",
+        "OldNames": "вул. Шмідта"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Механізаторів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Воїнів УПА",
+        "OldNames": "вул. Милорадовичів, вул. Петровського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Миру",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Михайлофедорівська",
+        "OldNames": "вул. Клари Цеткін"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Михалевича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Миколи Міхновського",
+        "OldNames": "вул. Таращанська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олега Міхнюка",
+        "OldNames": "вул. Воїнів-інтернаціоналістів"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Андрія Мовчана",
+        "OldNames": "вул. Крупської"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Михайла Могилянського",
+        "OldNames": "вул. Селюка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Леоніда Могучова",
+        "OldNames": "вул. Невського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Вадима Модзалевського",
+        "OldNames": "вул. Сєрікова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Молодіжна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Молявки",
+        "OldNames": "вул. Фурманова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пилипа Морачевського",
+        "OldNames": "вул. Сабурова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Мстиславська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Музейна",
+        "OldNames": "вул Горького"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Музична",
+        "OldNames": "вул. Музикальна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Юрія Мушкетика",
+        "OldNames": "вул. Мечникова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "1-ша Набережна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "2-га Набережна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Надії",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Георгія Нарбута",
+        "OldNames": "вул. Курська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Народного руху",
+        "OldNames": "вул. Ціолковського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Нафтовиків",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Національної гвардії",
+        "OldNames": "вул. 1-ї Гвардійської армії"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Мартина Небаби",
+        "OldNames": "вул. Боженка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Небесної Сотні",
+        "OldNames": "вул. Орловська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Володимира Неговського",
+        "OldNames": "вул. Сімашка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Незалежності",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Нечуя-Левицького",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Низова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ніжинська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Нова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Новоселів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Новооукраїнська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Носа Степана",
+        "OldNames": "вул. Гайдара"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Оборонців Чернігова",
+        "OldNames": "вул. Олександра Молодчого"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Одеська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Озерна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олегове поле",
+        "OldNames": "вул. Лунінців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександрівська",
+        "OldNames": "вул. Ворошилова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ольговичів",
+        "OldNames": "пров. Нахімова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Євгена Онацького",
+        "OldNames": "пров. 2-й Пархоменка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пилипа Орлика",
+        "OldNames": "вул. Черняховського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Освіти",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "П'ятницька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пам'ятна",
+        "OldNames": "вул. 50 років Перемоги"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Панаса Мирного",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пантелеймонівська",
+        "OldNames": "вул. Малясова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Паркова",
+        "OldNames": "вул. Савчука"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ганни Арсенич-Баран",
+        "OldNames": "вул. Партизанська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Патріарха Мстислава",
+        "OldNames": "вул. Стратилата"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Леоніда Пашина",
+        "OldNames": "вул. Олександра Беспалова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Перемоги",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Антонія Печерського",
+        "OldNames": "вул. Ушакова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пирогова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Північна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Півці",
+        "OldNames": "вул. Ривкіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Підвальна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Підгірна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Підлісна",
+        "OldNames": "вул. Чайкіної"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Піщана",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пласту",
+        "OldNames": "вул. Макаренка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Анатолія Погрібного",
+        "OldNames": "вул. Авдєєнка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Подусівська",
+        "OldNames": "вул. Арсенальців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Поліська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Політехнічна",
+        "OldNames": "вул. Федоровського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Полторацьких",
+        "OldNames": "вул. Колгоспну"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Гетьмана Полуботка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Польова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Преображенська",
+        "OldNames": "вул. Карла Маркса"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Привітна",
+        "OldNames": "вул. Яцівська, вул. Менжинського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Привокзальна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Пригородна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Придеснянська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Прикордонників",
+        "OldNames": "вул. Підводника Китицина"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Прилуцька",
+        "OldNames": "вул. Таранущенка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Прокоповича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Промислова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Прорізна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Профспілок",
+        "OldNames": "вул. Профрад"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Прохорського",
+        "OldNames": "вул. Ленінградська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олени Пчілки ",
+        "OldNames": "вул. Полєтаєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Радіо",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Радіозаводська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "1-ша Радіозаводська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "2-га Радіозаводська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "3-тя Радіозаводська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "В'ячеслава Радченка",
+        "OldNames": "вул. Комінтерна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Йосипа Рапопорта",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Натана Рахліна",
+        "OldNames": "вул. 8-го Березня"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Рашевського",
+        "OldNames": "вул. Павлика Морозова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ревуцького",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Ремболовича",
+        "OldNames": "пров. Некрасова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ремзаводська",
+        "OldNames": "вул. Гончарова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Реміснича",
+        "OldNames": "вул. Комсомольська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Робітнича",
+        "OldNames": "вул. Робоча"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Кирила Розумовського",
+        "OldNames": "вул. Рахматуліна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Рєпіна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Рильського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ринкова",
+        "OldNames": "вул. Примакова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ріпкинська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Річкова",
+        "OldNames": "вул. Річна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Бориса Пилипенка",
+        "OldNames": "вул. Руднєва"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Григорія Ващенка",
+        "OldNames": "вул. Рудого"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Русової",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Рятувальників",
+        "OldNames": "вул. Олега Кошового"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Садова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Саксаганського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Самійленка",
+        "OldNames": "вул. Котовського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Самойловича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Олександра Довгача",
+        "OldNames": "пров. Дмитра Самоквасова, пров. Стахановців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Довгача",
+        "OldNames": "вул. Дмитра Самоквасова, вул. Стахановців"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ігоря Самострова ",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Валерія Сарани",
+        "OldNames": "пров. Лермонтова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Світанкова",
+        "OldNames": "вул. Розсвітна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Святомиколаївська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Святомихайлівська",
+        "OldNames": "вул. Декабристів"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Святославська",
+        "OldNames": "вул. Нахімова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Севастопольська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Седнівська",
+        "OldNames": "вул. Сагайдак"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олексія Сенюка",
+        "OldNames": "вул. Грибоєдова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Петра Смолічева",
+        "OldNames": "пров. Жовтневий"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Симиренків",
+        "OldNames": "вул. Мічуріна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Симоненка",
+        "OldNames": "вул. Десняка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сіверська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сіверянська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сірка Івана",
+        "OldNames": "вул. Кутузова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Січових Стрільців",
+        "OldNames": "вул. Гомельська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сковороди",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Скоропадського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Славутицька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Слобідська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Слов'янська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Соборності",
+        "OldNames": "вул. Доценка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Солов'їна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сонячна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сосницька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Соснова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Спаська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Спортивна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Старий вокзал",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Старобілоуська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Стародубського полку",
+        "OldNames": "вул. Білоруська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Старопосадська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Старостриженська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Стрілецька",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Стуса ",
+        "OldNames": "вул. Чернишевського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сумська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Сунична",
+        "OldNames": "вул. Землянична"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Григорія Сурабка",
+        "OldNames": "вул. Василевської"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Братства Тарасівців",
+        "OldNames": "вул. Добролюбова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Тарновського",
+        "OldNames": "вул. Пушкіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Текстильників",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тероборони",
+        "OldNames": "вул. Гагаріна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тиха",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тичини",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Тищинського",
+        "OldNames": "вул. Кропив'янського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тополина",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тракторна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Транспортна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Троїцька",
+        "OldNames": "вул. Суворова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Тролейбусна",
+        "OldNames": "вул. Академіка Павлова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Трудова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Феодосія Углицького",
+        "OldNames": "пров. Гліба Успенського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Українська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Украïнський хутір",
+        "OldNames": "вул. Ватутіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Урожайна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Федора Уманця",
+        "OldNames": "вул. Макаєвської"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Урочище Святе",
+        "OldNames": "вул. Пролетарський Гай"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Успенська",
+        "OldNames": "вул. Антонова-Овсієнка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ушинського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Фабрична",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олексія Фльорова",
+        "OldNames": "вул. Подвойського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Франка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Харківська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Хлібопекарська",
+        "OldNames": "вул. Воровського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Хижнякова",
+        "OldNames": "пров. 1-й Орджонікідзе"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Хмельницького",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Холодний Яр",
+        "OldNames": "вул. Черняка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Цегельна",
+        "OldNames": "вул. 18-го партз'їзду"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Квітки Цісик",
+        "OldNames": "вул. Тюленіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Красний Хутір",
+        "OldNames": "вул. Червона"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Черкаська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Чернігівська",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "В'ячеслава Чорновола",
+        "OldNames": "вул. Войкова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Князя Чорного",
+        "OldNames": "вул. Пролетарська"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Опанаса Шафонського",
+        "OldNames": "вул. Паризької Комуни"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Швейцарівка",
+        "OldNames": "вул. Пугачова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Шевченка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Шевчука",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Широка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Шкільна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Шкурка",
+        "OldNames": "вул. Академіка Рибакова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Романа Шухевича",
+        "OldNames": "вул. Герцена"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Шрага",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Яблунева",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ялівщина",
+        "OldNames": "вул. Жуковського"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ярославни",
+        "OldNames": "вул. Григорія Щербини"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "1-ї танкової бригади",
+        "OldNames": "вул. Генерала Бєлова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "102-й кілометр",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "2-й кілометр",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Андрія Мельника",
+        "OldNames": "вул. 21-го Вересня"
+    },
+    {
+        "StreetType": "просп.",
+        "Name": "Миру",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "просп.",
+        "Name": "Перемоги",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "просп.",
+        "Name": "Левка Лук'яненка",
+        "OldNames": "вул. 77-ї Гвардійської дивізії, вул. Рокоссовського"
+    },
+    {
+        "StreetType": "просп.",
+        "Name": "Михайла Грушевського",
+        "OldNames": "вул. 1-го Травня"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Олексія Бакуринського",
+        "OldNames": "пров. Папанінців"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Степана Бандери",
+        "OldNames": "пров. Попова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Ганни Барвінок",
+        "OldNames": "пров. Мінський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Береговий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Березовий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Романа Бжеського",
+        "OldNames": "пров. Віліса Лаціса"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Катерини Білокур",
+        "OldNames": "пров. Мозирський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Бобровицький",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Любомира Боднарука",
+        "OldNames": "пров. Дзержинського"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Болдинський",
+        "OldNames": "пров. 2-й Толстого"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Дмитра Бортнянського",
+        "OldNames": "пров. Дундича"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Борщовий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Миколи Василенка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Відпочинку",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Відпочинку",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Вокзальний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Воскресенський",
+        "OldNames": "пров. 1-й Муринсона"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Воскресенський",
+        "OldNames": "пров. 2-й Муринсона"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Гайовий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Глухівський",
+        "OldNames": "пров. 1-й Радищева"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Глухівський",
+        "OldNames": "пров. 2-й Радищева"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Григоренка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Громової",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Дніпровський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Василя Дуніна-Борковського",
+        "OldNames": "пров. Калініна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Забарівський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Залізничний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Марії Заньковецької",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Устима Кармелюка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Андрія Карнабіди",
+        "OldNames": "пров. 1-й Короленка"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Кастуся Калиновського",
+        "OldNames": "пров. Смирнова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Квартальний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Кибальчича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Кільцевий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Комунальний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Корольова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Корольова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Корольова",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Коти",
+        "OldNames": "пров. Громової"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Михайла Коцюбинського",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Кривоноса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Кривоноса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Кривоноса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "3-й Кривоноса",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Курганний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Куренівський",
+        "OldNames": "пров. Фікселя"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Лісовий",
+        "OldNames": "пров. 2-й Короленка"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Семена Лощенка",
+        "OldNames": "пров. Бойовий"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Льотний",
+        "OldNames": "пров. Червоногвардійський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Іоанна Максимовича",
+        "OldNames": "пров. Попудренка"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Марковича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Масанівський",
+        "OldNames": "пров. Галана"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Межовий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Юрія Мезенцева",
+        "OldNames": "пров. Долорес Ібаррурі"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Механізаторів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Механізаторів",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Олега Міхнюка",
+        "OldNames": "пров. 1-го Травня"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Андрія Мовчана",
+        "OldNames": "пров. Крупської"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Леоніда Могучова",
+        "OldNames": "пров. Невського"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Вадима Модзалевського",
+        "OldNames": "пров. Сєрікова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Івана Молявки",
+        "OldNames": "пров. Фурманова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Музичний",
+        "OldNames": "пров. Музикальний"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Надії",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Надії",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Георгія Нарбута",
+        "OldNames": "пров. Курський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Нафтовиків",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Ніжинський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Степана Носа",
+        "OldNames": "пров. Полєтаєва"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Віктора Орленка",
+        "OldNames": "пров. Костромський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Ганни Арсенич-Баран",
+        "OldNames": "пров. Партизанський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Північний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Подусівський",
+        "OldNames": "пров. Арсенальців"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Поліський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Левка Лук'яненка",
+        "OldNames": "пров. Проектний"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Прокоповича",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Кирила Розумовського",
+        "OldNames": "пров. 1-й Рахматуліна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Кирила Розумовського",
+        "OldNames": "пров. 2-й Рахматуліна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Дмитра Самоквасова",
+        "OldNames": "пров. Стахановців"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Седнівський",
+        "OldNames": "пров. Сагайдак"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Січових Стрільців",
+        "OldNames": "пров. Гомельський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Січових Стрільців",
+        "OldNames": "пров. 1-й Гомельський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Січових Стрільців",
+        "OldNames": "пров. 2-й Гомельський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Слобідський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Сосницький",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Сосновий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Старобілоуський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Стародубського полку",
+        "OldNames": "пров. Білоруський"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Стриженський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Тихий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Тичини",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "1-й Тракторний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "2-й Тракторний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Транспортний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Троїцький",
+        "OldNames": "вул. Віхніна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Тролейбусний",
+        "OldNames": "пров. Академіка Павлова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Тюленіна",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Хмельницького",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Квітки Цісик",
+        "OldNames": "пров. Тюленіна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Чернігівський",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Опанаса Шафонського",
+        "OldNames": "пров. Паризької Комуни"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Шевченка",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Широкий",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Шкільний",
+        "OldNames": ""
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Ярова",
+        "OldNames": "вул. Овражна"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Яровий",
+        "OldNames": "пров. Овражний"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Горобинова",
+        "OldNames": "вул. Рябінова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Василя Будника",
+        "OldNames": "пров. 1-й Ворошилова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Європейська",
+        "OldNames": "вул. Визволителів"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Князя Давида Святославича",
+        "OldNames": "вул. Бланка"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Олександра Довженка",
+        "OldNames": "вул. Толстого"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Христини Алчевської",
+        "OldNames": "вул. Чудінова"
+    },
+    {
+        "StreetType": "пров.",
+        "Name": "Петра Калнишевського",
+        "OldNames": "пров. Дьошина"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Петра Калнишевського",
+        "OldNames": "вул. Дьошина"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Івана Драча",
+        "OldNames": "вул. Мурахтова"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Савченків-Біліських",
+        "OldNames": "вул. Юдашкіна"
+    },
+    {
+        "StreetType": "вул.",
+        "Name": "Танкістів",
+        "OldNames": ""
+    }
+]

@@ -17,4 +17,10 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="9.0.*" />
   </ItemGroup>
 
+  <ItemGroup>
+  <Content Update="Data\Seed\streets.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+
 </Project>
