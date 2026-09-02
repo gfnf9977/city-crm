@@ -82,11 +82,20 @@
         }
 
         var oldFullName = $"{Model.StreetType} {Model.Name}".Trim();
-        
-        Model.OldNames = string.IsNullOrWhiteSpace(Model.OldNames) 
-            ? oldFullName 
-            : $"{oldFullName}, {Model.OldNames}";
-            
+        var newFullName = $"{newType} {trimmedName}".Trim();
+
+        var oldNamesList = string.IsNullOrWhiteSpace(Model.OldNames) 
+            ? new List<string>() 
+            : Model.OldNames.Split(',').Select(n => n.Trim()).ToList();
+
+        if (!oldNamesList.Contains(oldFullName))
+        {
+            oldNamesList.Insert(0, oldFullName);
+        }
+
+        oldNamesList.RemoveAll(n => n.Equals(newFullName, StringComparison.OrdinalIgnoreCase));
+
+        Model.OldNames = oldNamesList.Any() ? string.Join(", ", oldNamesList) : null;
         Model.StreetType = newType;
         Model.Name = trimmedName;
 
