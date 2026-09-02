@@ -33,16 +33,34 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
-    if (!context.Buildings.Any())
+    context.Database.EnsureCreated();
+    
+    if (!context.Streets.Any())
     {
+        var seedFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "streets.json");
+        if (File.Exists(seedFilePath))
+        {
+            var jsonData = File.ReadAllText(seedFilePath);
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var streets = System.Text.Json.JsonSerializer.Deserialize<List<CityCrm.Api.Entities.Street>>(jsonData, options);
+
+            if (streets != null && streets.Any())
+            {
+                context.Streets.AddRange(streets);
+                context.SaveChanges();
+            }
+        }
+    }
+    
+    if (!context.Buildings.Any() && context.Streets.Any())
+    {
+        var firstStreet = context.Streets.First(s => s.Name == "Миру");
         var geometryFactory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         
         var testBuilding = new CityCrm.Api.Entities.Building
         {
-            StreetType = "просп.",
-            StreetName = "Миру",
+            StreetId = firstStreet.Id,
             BuildingNumber = 15,
-            
             BuildingType = "Багатоповерхівка",
             Condition = "В експлуатації", 
             Location = geometryFactory.CreatePoint(new NetTopologySuite.Geometries.Coordinate(31.2953, 51.4938)),
@@ -51,45 +69,14 @@ using (var scope = app.Services.CreateScope())
             {
                 new CityCrm.Api.Entities.Premise 
                 { 
-                    PremiseNumber = "Офіс 1", 
-                    Area = 120.5, 
-                    Type = "Комерційна", 
-                    Status = "Вільне", 
-                    Ownership = "Комунальна" 
+                    PremiseNumber = "Офіс 1", Area = 120.5, Type = "Комерційна", 
+                    Status = "Вільне", Ownership = "Комунальна" 
                 }
             }
         };
         
         context.Buildings.Add(testBuilding);
         context.SaveChanges();
-    }
-    
-    if (!context.Streets.Any())
-    {
-        var seedFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "streets.json");
-
-        if (File.Exists(seedFilePath))
-        {
-            var jsonData = File.ReadAllText(seedFilePath);
-            
-            var options = new System.Text.Json.JsonSerializerOptions 
-            { 
-                PropertyNameCaseInsensitive = true 
-            };
-
-            var streets = System.Text.Json.JsonSerializer.Deserialize<List<CityCrm.Api.Entities.Street>>(jsonData, options);
-
-            if (streets != null && streets.Any())
-            {
-                context.Streets.AddRange(streets);
-                context.SaveChanges();
-                Console.WriteLine($"Успішно завантажено {streets.Count} вулиць з JSON.");
-            }
-        }
-        else
-        {
-            Console.WriteLine($"Увага: Файл {seedFilePath} не знайдено! База вулиць порожня.");
-        }
     }
 }
 

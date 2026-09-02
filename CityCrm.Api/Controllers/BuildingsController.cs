@@ -27,13 +27,13 @@ namespace CityCrm.Api.Controllers
             [FromQuery] double? minArea,
             [FromQuery] double? maxArea)
         {
-            var query = _context.Buildings.AsQueryable();
+            var query = _context.Buildings.Include(b => b.Street).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.ToLower();
                 query = query.Where(b => 
-                    b.StreetName.ToLower().Contains(s) || 
+                    (b.Street != null && b.Street.Name.ToLower().Contains(s)) || 
                     (b.Notes != null && b.Notes.ToLower().Contains(s)) ||
                     b.BuildingNumber.ToString().Contains(s) ||
                     (b.CoopNumber != null && b.CoopNumber.ToLower().Contains(s))
@@ -129,6 +129,8 @@ namespace CityCrm.Api.Controllers
                 return BadRequest("Не вказано розташування будівлі.");
             }
 
+            building.Street = null;
+
             _context.Buildings.Add(building);
             await _context.SaveChangesAsync();
 
@@ -156,6 +158,8 @@ namespace CityCrm.Api.Controllers
             {
                 return BadRequest("Не вказано розташування будівлі.");
             }
+
+            building.Street = null;
 
             _context.Entry(building).State = EntityState.Modified;
 

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
@@ -9,8 +8,9 @@ namespace CityCrm.Api.Entities
     {
         public int Id { get; set; }
         
-        public string StreetType { get; set; } = "вул."; 
-        public string StreetName { get; set; } = string.Empty;
+        public int StreetId { get; set; }
+        public Street? Street { get; set; }
+
         public int BuildingNumber { get; set; }
         public string? BuildingLetter { get; set; }
         public string? BuildingBlock { get; set; }
@@ -39,16 +39,19 @@ namespace CityCrm.Api.Entities
         {
             get
             {
+                var stType = Street?.StreetType ?? "";
+                var stName = Street?.Name ?? "Невідома вулиця";
+
                 var addr = BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber)
-                    ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}"
-                    : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
+                    ? $"АК №{CoopNumber}, {stType} {stName}, {BuildingNumber}{BuildingLetter}"
+                    : $"{stType} {stName}, {BuildingNumber}{BuildingLetter}";
 
                 if (!string.IsNullOrWhiteSpace(BuildingBlock))
                 {
                     addr += $", корп. {BuildingBlock}";
                 }
 
-                return addr;
+                return addr.Trim(',', ' ');
             }
         }
     }

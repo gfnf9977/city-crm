@@ -127,7 +127,11 @@ namespace CityCrm.AdminUI.Pages
 
         private void ShowAddBuildingModal()
         {
-            newBuilding = new Building { BuildingType = "Багатоповерхівка", Condition = "В експлуатації", StreetType = "вул." };
+            newBuilding = new Building 
+            { 
+                BuildingType = "Багатоповерхівка", 
+                Condition = "В експлуатації" 
+            };
             showBuildingModal = true;
         }
 
@@ -135,11 +139,19 @@ namespace CityCrm.AdminUI.Pages
         {
             newBuilding = new Building
             {
-                Id = b.Id, BuildingType = b.BuildingType, Condition = b.Condition,
-                Lat = b.Lat, Lng = b.Lng, StreetType = b.StreetType, StreetName = b.StreetName,
-                BuildingNumber = b.BuildingNumber, BuildingLetter = b.BuildingLetter,
-                BuildingBlock = b.BuildingBlock, CoopNumber = b.CoopNumber,
-                GeoJson = b.GeoJson, Notes = b.Notes
+                Id = b.Id, 
+                BuildingType = b.BuildingType, 
+                Condition = b.Condition,
+                Lat = b.Lat, 
+                Lng = b.Lng, 
+                StreetId = b.StreetId,
+                Street = b.Street,
+                BuildingNumber = b.BuildingNumber, 
+                BuildingLetter = b.BuildingLetter,
+                BuildingBlock = b.BuildingBlock, 
+                CoopNumber = b.CoopNumber,
+                GeoJson = b.GeoJson, 
+                Notes = b.Notes
             };
             showBuildingModal = true;
         }

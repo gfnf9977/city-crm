@@ -7,12 +7,12 @@ namespace CityCrm.AdminUI.Models
     {
         public int Id { get; set; }
         
-        [Required(ErrorMessage = "Тип вулиці є обов'язковим")]
-        public string StreetType { get; set; } = "вул."; 
+        [Required(ErrorMessage = "Оберіть вулицю з довідника")]
+        [Range(1, int.MaxValue, ErrorMessage = "Оберіть вулицю з довідника")]
+        public int StreetId { get; set; }
         
-        [Required(ErrorMessage = "Назва вулиці є обов'язковою")]
-        public string StreetName { get; set; } = string.Empty;
-        
+        public Street? Street { get; set; }
+
         [Required(ErrorMessage = "Номер об'єкту є обов'язковим")]
         [Range(1, 9999, ErrorMessage = "Некоректний номер будинку")]
         public int BuildingNumber { get; set; }
@@ -20,7 +20,6 @@ namespace CityCrm.AdminUI.Models
         public string? BuildingLetter { get; set; }
         public string? BuildingBlock { get; set; }
         public string? Notes { get; set; }
-        
         public string? CoopNumber { get; set; }
 
         [Required]
@@ -44,16 +43,19 @@ namespace CityCrm.AdminUI.Models
         {
             get
             {
+                var stType = Street?.StreetType ?? "";
+                var stName = Street?.Name ?? "";
+
                 var addr = BuildingType == "Гаражний кооператив" && !string.IsNullOrWhiteSpace(CoopNumber)
-                    ? $"АК №{CoopNumber}, {StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}"
-                    : $"{StreetType} {StreetName}, {BuildingNumber}{BuildingLetter}";
+                    ? $"АК №{CoopNumber}, {stType} {stName}, {BuildingNumber}{BuildingLetter}"
+                    : $"{stType} {stName}, {BuildingNumber}{BuildingLetter}";
 
                 if (!string.IsNullOrWhiteSpace(BuildingBlock))
                 {
                     addr += $", корп. {BuildingBlock}";
                 }
 
-                return addr;
+                return addr.Trim(',', ' ');
             }
         }
     }

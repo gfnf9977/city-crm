@@ -40,7 +40,7 @@
 
                             <div class="mb-3 position-relative">
                                 <label class="fw-bold">Вулиця</label>
-                                <input type="text" class="form-control"
+                                <input type="text" class="form-control @(Model.StreetId == 0 ? "is-invalid" : "is-valid")"
                                        @bind="streetSearchQuery"
                                        @oninput="SearchStreet"
                                        placeholder="Почніть вводити назву (напр. Рокос...)"
@@ -60,10 +60,16 @@
                                     </ul>
                                 }
 
-                                @if (!string.IsNullOrEmpty(Model.StreetName))
+                                @if (Model.StreetId > 0)
                                 {
                                     <div class="form-text text-success">
-                                        <i class="bi bi-check-circle"></i> Обрано: @Model.StreetType @Model.StreetName
+                                        <i class="bi bi-check-circle"></i> Вулицю обрано: @selectedStreetDisplayName
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="invalid-feedback d-block">
+                                        Оберіть вулицю зі списку
                                     </div>
                                 }
                             </div>
@@ -122,7 +128,7 @@
 
                         <div class="text-end">
                             <button type="button" class="btn btn-secondary" @onclick="Close">Скасувати</button>
-                            <button type="submit" class="btn btn-primary">Зберегти</button>
+                            <button type="submit" class="btn btn-primary" disabled="@(Model.StreetId == 0)">Зберегти</button>
                         </div>
                     </EditForm>
                 </div>
@@ -145,6 +151,8 @@
     [Parameter] public EventCallback OnClosed { get; set; }
 
     private string streetSearchQuery = "";
+    private string selectedStreetName = "";
+    private string selectedStreetDisplayName = "";
     private List<Street> streetSuggestions = new();
     private DotNetObjectReference<BuildingModal>? objRef;
     private bool isFetchingOsm = false;
@@ -160,9 +168,9 @@
     {
         if (IsVisible && !mapInitialized)
         {
-            streetSearchQuery = string.IsNullOrEmpty(Model.StreetName)
-                ? ""
-                : $"{Model.StreetType} {Model.StreetName}";
+            streetSearchQuery = Model.Street != null ? Model.Street.DisplayName : "";
+            selectedStreetDisplayName = streetSearchQuery;
+            selectedStreetName = Model.Street?.Name ?? "";
             streetSuggestions.Clear();
             osmMessage = "";
             mapInitialized = true;
@@ -208,6 +216,9 @@
     private async Task SearchStreet(ChangeEventArgs e)
     {
         streetSearchQuery = e.Value?.ToString() ?? "";
+        Model.StreetId = 0;
+        selectedStreetName = "";
+        selectedStreetDisplayName = "";
 
         if (streetSearchQuery.Length >= 2)
         {
@@ -222,15 +233,17 @@
 
     private void SelectStreet(Street street)
     {
-        Model.StreetType = street.StreetType;
-        Model.StreetName = street.Name;
+        Model.StreetId = street.Id;
+        Model.Street = street;
+        selectedStreetName = street.Name;
+        selectedStreetDisplayName = street.DisplayName;
         streetSearchQuery = street.DisplayName;
         streetSuggestions.Clear();
     }
 
     private async Task FetchOsmContour()
     {
-        if (string.IsNullOrWhiteSpace(Model.StreetName) || Model.BuildingNumber <= 0)
+        if (Model.StreetId == 0 || Model.BuildingNumber <= 0)
         {
             osmMessage = "Спочатку оберіть вулицю та вкажіть коректний номер будинку!";
             return;
@@ -245,7 +258,7 @@
 
         try
         {
-            var response = await Http.GetAsync($"api/buildings/osm-contour?street={Model.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+            var response = await Http.GetAsync($"api/buildings/osm-contour?street={Uri.EscapeDataString(selectedStreetName)}&number={Uri.EscapeDataString(fullNumber)}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -267,7 +280,7 @@
 
             try
             {
-                var geoResponse = await Http.GetAsync($"api/streets/geocode?street={Model.StreetName}&number={Uri.EscapeDataString(fullNumber)}");
+                var geoResponse = await Http.GetAsync($"api/streets/geocode?street={Uri.EscapeDataString(selectedStreetName)}&number={Uri.EscapeDataString(fullNumber)}");
                 if (geoResponse.IsSuccessStatusCode)
                 {
                     var coords = await geoResponse.Content.ReadFromJsonAsync<CoordinatesDto>();
@@ -294,6 +307,8 @@
 
     private async Task Save()
     {
+        if (Model.StreetId == 0) return;
+
         if (!string.IsNullOrWhiteSpace(Model.BuildingLetter))
         {
             string letter = Model.BuildingLetter.Trim().ToUpper();
