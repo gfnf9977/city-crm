@@ -1,5 +1,6 @@
 using CityCrm.Api.Data;
 using CityCrm.Api.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,6 +73,7 @@ namespace CityCrm.Api.Controllers
             return street;
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPost]
         public async Task<ActionResult<Street>> CreateStreet(Street street)
         {
@@ -80,6 +82,7 @@ namespace CityCrm.Api.Controllers
             return CreatedAtAction(nameof(GetStreet), new { id = street.Id }, street);
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStreet(int id, Street street)
         {
@@ -100,6 +103,7 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStreet(int id)
         {

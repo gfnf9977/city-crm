@@ -1,5 +1,6 @@
 using CityCrm.Api.Data;
 using CityCrm.Api.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ namespace CityCrm.Api.Controllers
             _context = context;
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPost]
         public async Task<ActionResult<Premise>> CreatePremise(Premise premise)
         {
@@ -34,6 +36,7 @@ namespace CityCrm.Api.Controllers
             return Ok(premise);
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePremise(int id, Premise premise)
         {
@@ -53,6 +56,7 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePremise(int id)
         {

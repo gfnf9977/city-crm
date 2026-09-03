@@ -1,5 +1,6 @@
 using CityCrm.Api.Data;
 using CityCrm.Api.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -109,6 +110,7 @@ namespace CityCrm.Api.Controllers
             return Ok(writer.Write(geometry));
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPost]
         public async Task<ActionResult<Building>> CreateBuilding(Building building)
         {
@@ -137,6 +139,7 @@ namespace CityCrm.Api.Controllers
             return CreatedAtAction(nameof(GetBuildings), new { id = building.Id }, building);
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBuilding(int id, Building building)
         {
@@ -176,6 +179,7 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBuilding(int id)
         {

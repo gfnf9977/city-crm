@@ -1,5 +1,8 @@
 using CityCrm.Api.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString, o => o.UseNetTopologySuite()));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 builder.Services.AddControllers();
 
@@ -26,6 +44,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+app.UseAuthentication(); 
 app.UseAuthorization();
 app.MapControllers();
 
@@ -34,6 +54,17 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
     context.Database.EnsureCreated();
+    
+    if (!context.Users.Any())
+    {
+        context.Users.Add(new CityCrm.Api.Entities.User 
+        { 
+            Username = "admin", 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), // <--- ТЕПЕР ПАРОЛЬ ХЕШУЄТЬСЯ
+            Role = "GrandAdmin" 
+        });
+        context.SaveChanges();
+    }
     
     if (!context.Streets.Any())
     {

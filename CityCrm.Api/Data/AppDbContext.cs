@@ -10,6 +10,7 @@ namespace CityCrm.Api.Data
         public DbSet<Building> Buildings => Set<Building>();
         public DbSet<Premise> Premises => Set<Premise>(); 
         public DbSet<Street> Streets { get; set; }
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
