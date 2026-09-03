@@ -4,28 +4,37 @@
 @inject IJSRuntime JSRuntime
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Карта об'єктів</PageTitle>
+<PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : "Публічна карта міста")</PageTitle>
 
 <div class="d-flex justify-content-between align-items-end mb-3">
-    <h1>Просторова мапа нерухомості</h1>
+    <h1>@(isAdmin ? "Просторова мапа нерухомості" : "Публічна карта Чернігова")</h1>
     
     <div class="d-flex gap-2">
-        <button class="btn @(activeFilter == "" ? "btn-secondary" : "btn-outline-secondary")" 
-                @onclick="@(() => ApplyFilter(""))">
-            <i class="bi bi-globe"></i> Всі об'єкти
-        </button>
-        <button class="btn @(activeFilter == "free_communal" ? "btn-success" : "btn-outline-success")" 
-                @onclick="@(() => ApplyFilter("free_communal"))">
-            Вільна комуналка
-        </button>
-        <button class="btn @(activeFilter == "commerce" ? "btn-primary" : "btn-outline-primary")" 
-                @onclick="@(() => ApplyFilter("commerce"))">
-            Комерційні площі
-        </button>
-        <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" 
-                @onclick="@(() => ApplyFilter("problems"))">
-            Зруйновані / Аварійні
-        </button>
+        @if (isAdmin)
+        {
+            <button class="btn @(activeFilter == "" ? "btn-secondary" : "btn-outline-secondary")" 
+                    @onclick="@(() => ApplyFilter(""))">
+                <i class="bi bi-globe"></i> Всі об'єкти
+            </button>
+            <button class="btn @(activeFilter == "free_communal" ? "btn-success" : "btn-outline-success")" 
+                    @onclick="@(() => ApplyFilter("free_communal"))">
+                Вільна комуналка
+            </button>
+            <button class="btn @(activeFilter == "commerce" ? "btn-primary" : "btn-outline-primary")" 
+                    @onclick="@(() => ApplyFilter("commerce"))">
+                Комерційні площі
+            </button>
+            <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" 
+                    @onclick="@(() => ApplyFilter("problems"))">
+                Зруйновані / Аварійні
+            </button>
+        }
+        else
+        {
+            <span class="btn btn-outline-primary disabled" style="opacity: 1;">
+                <i class="bi bi-shop"></i> Відкриті заклади та послуги
+            </span>
+        }
     </div>
 </div>
 
@@ -40,6 +49,15 @@
     private bool isMapInitialized = false;
     private bool isLoading = true;
     private string activeFilter = "";
+    private bool isAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.Identity?.IsAuthenticated == true && 
+                  (user.IsInRole("GrandAdmin") || user.IsInRole("Admin"));
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -62,11 +80,6 @@
     {
         isLoading = true;
         StateHasChanged();
-
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        bool isAdmin = user.Identity?.IsAuthenticated == true && 
-                       (user.IsInRole("GrandAdmin") || user.IsInRole("Admin"));
 
         try
         {
@@ -93,6 +106,20 @@
 
             if (buildings != null && isMapInitialized)
             {
+                if (!isAdmin)
+                {
+                    buildings = buildings
+                        .Where(b => b.Premises.Any(p => p.IsPublicVisible))
+                        .ToList();
+
+                    foreach (var b in buildings)
+                    {
+                        b.Premises = b.Premises.Where(p => p.IsPublicVisible).ToList();
+                        b.Notes = null; 
+                        b.Condition = "В експлуатації"; 
+                    }
+                }
+
                 var mapData = buildings.Select(b => new
                 {
                     id = b.Id,
@@ -108,7 +135,9 @@
                         area = p.Area,
                         type = p.Type,
                         status = p.Status,
-                        notes = p.Notes
+                        notes = p.Notes,
+                        businessName = p.BusinessName,
+                        businessCategory = p.BusinessCategory
                     }).ToList()
                 }).ToList();
 
