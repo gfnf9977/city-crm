@@ -2,18 +2,18 @@
 @using CityCrm.AdminUI.Models
 @using CityCrm.AdminUI.Components
 @inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Довідник вулиць</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Довідник вулиць міста</h1>
-    <AuthorizeView Roles="GrandAdmin, Admin">
-        <Authorized>
-            <button class="btn btn-success" @onclick="ShowAddModal">
-                <i class="bi bi-plus-circle"></i> Додати вулицю
-            </button>
-        </Authorized>
-    </AuthorizeView>
+    @if (isAdmin)
+    {
+        <button class="btn btn-success" @onclick="ShowAddModal">
+            <i class="bi bi-plus-circle"></i> Додати вулицю
+        </button>
+    }
 </div>
 
 <div class="card mb-3 shadow-sm border-0 bg-light">
@@ -40,42 +40,41 @@ else
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th style="width: 80px;">ID</th>
+                    @if (isAdmin) { <th style="width: 80px;">ID</th> }
                     <th style="width: 100px;">Тип</th>
                     <th>Назва</th>
                     <th>Колишні назви</th>
-                    <th style="width: 120px;" class="text-center">Дії</th>
+                    @if (isAdmin) { <th style="width: 120px;" class="text-center">Дії</th> }
                 </tr>
             </thead>
             <tbody>
                 @if (!streets.Any())
                 {
-                    <tr><td colspan="5" class="text-center text-muted py-3">Немає записів...</td></tr>
+                    <tr><td colspan="@(isAdmin ? 5 : 3)" class="text-center text-muted py-3">Немає записів...</td></tr>
                 }
                 else
                 {
                     @foreach (var street in streets)
                     {
                         <tr>
-                            <td class="text-muted">@street.Id</td>
+                            @if (isAdmin) { <td class="text-muted">@street.Id</td> }
                             <td><span class="badge bg-secondary">@street.StreetType</span></td>
                             <td class="fw-bold">@street.Name</td>
                             <td class="text-muted">@street.OldNames</td>
-                            <td class="text-center">
-                                <AuthorizeView Roles="GrandAdmin, Admin">
-                                    <Authorized>
-                                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Виправити помилку">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ShowRenameModal(street)" title="Офіційне перейменування">
-                                            <i class="bi bi-signpost-split"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteStreet(street.Id)" title="Видалити">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </Authorized>
-                                </AuthorizeView>
-                            </td>
+                            @if (isAdmin)
+                            {
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Виправити помилку">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ShowRenameModal(street)" title="Офіційне перейменування">
+                                        <i class="bi bi-signpost-split"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteStreet(street.Id)" title="Видалити">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            }
                         </tr>
                     }
                 }
@@ -106,9 +105,16 @@ else
     private bool showModal = false;
     private bool showRenameModal = false;
     private Street currentStreet = new();
+    
+    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.Identity?.IsAuthenticated == true && 
+                 (user.IsInRole("GrandAdmin") || user.IsInRole("Admin"));
+
         await LoadStreets();
     }
 
