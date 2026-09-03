@@ -2,6 +2,7 @@
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Карта об'єктів</PageTitle>
 
@@ -62,6 +63,11 @@
         isLoading = true;
         StateHasChanged();
 
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        bool isAdmin = user.Identity?.IsAuthenticated == true && 
+                       (user.IsInRole("GrandAdmin") || user.IsInRole("Admin"));
+
         try
         {
             var queryParams = new List<string>();
@@ -106,7 +112,7 @@
                     }).ToList()
                 }).ToList();
 
-                await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData);
+                await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin);
             }
         }
         catch (Exception ex)

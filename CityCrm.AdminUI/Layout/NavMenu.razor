@@ -14,21 +14,26 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="registry">
-                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Реєстр об'єктів
-            </NavLink>
-        </div>
+        
+        <AuthorizeView Roles="GrandAdmin, Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="registry">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Реєстр об'єктів
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="streets">
-                 <span class="bi bi-journal-text" aria-hidden="true"></span> Довідник вулиць
+                <span class="bi bi-journal-text" aria-hidden="true"></span> Довідник вулиць
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="map">
-                 <span class="bi bi-geo-alt-fill" aria-hidden="true"></span> Карта об'єктів
+                <span class="bi bi-geo-alt-fill" aria-hidden="true"></span> Карта об'єктів
             </NavLink>
         </div>
     </nav>

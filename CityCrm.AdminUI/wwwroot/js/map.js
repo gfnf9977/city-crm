@@ -16,7 +16,7 @@ window.leafletMap = {
         }).addTo(this.mapInstance);
     },
 
-    loadData: function (locations) {
+    loadData: function (locations, isAdmin) {
         if (!this.mapInstance) return;
 
         if (this.markersLayer) {
@@ -59,7 +59,10 @@ window.leafletMap = {
                 popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
             }
 
-            popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
+            if (isAdmin) {
+                popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
+            }
+            
             popupContent += `</div>`;
 
             let iconEmoji = "📍";

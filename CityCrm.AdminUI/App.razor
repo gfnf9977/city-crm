@@ -1,13 +1,22 @@
 ﻿<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <div class="alert alert-danger m-4 shadow-sm">
+                        <h4 class="alert-heading"><i class="bi bi-shield-lock"></i> Доступ заборонено</h4>
+                        <p>Цей розділ призначений лише для працівників муніципалітету.</p>
+                        <hr>
+                        <p class="mb-0">Будь ласка, <a href="login" class="alert-link">увійдіть в систему</a>.</p>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>
-            <PageTitle>Not found</PageTitle>
+            <PageTitle>Не знайдено</PageTitle>
             <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
+                <div class="alert alert-warning m-4">Сторінку не знайдено.</div>
             </LayoutView>
         </NotFound>
     </Router>
