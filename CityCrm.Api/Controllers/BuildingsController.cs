@@ -78,6 +78,14 @@ namespace CityCrm.Api.Controllers
             var buildings = await query.OrderByDescending(b => b.Id).ToListAsync();
             var writer = new NetTopologySuite.IO.GeoJsonWriter();
 
+            bool isAdmin = User.Identity != null && User.Identity.IsAuthenticated && 
+                           (User.IsInRole("GrandAdmin") || User.IsInRole("Admin"));
+
+            if (!isAdmin)
+            {
+                buildings = buildings.Where(b => b.Premises.Any(p => p.IsPublicVisible)).ToList();
+            }
+
             foreach (var b in buildings)
             {
                 b.Lat = b.Location != null ? b.Location.Centroid.Y : 0;
@@ -86,6 +94,22 @@ namespace CityCrm.Api.Controllers
                 if (b.Location != null && b.Location.GeometryType != "Point")
                 {
                     b.GeoJson = writer.Write(b.Location);
+                }
+
+                if (!isAdmin)
+                {
+                    b.Notes = null;
+                    b.Condition = "В експлуатації";
+
+                    b.Premises = b.Premises.Where(p => p.IsPublicVisible).ToList();
+
+                    foreach (var p in b.Premises)
+                    {
+                        p.OwnerName = null;
+                        p.Notes = null;
+                        p.RegistrationDate = null;
+                        p.RentEndDate = null;
+                    }
                 }
             }
 
