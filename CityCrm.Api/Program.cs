@@ -55,14 +55,20 @@ using (var scope = app.Services.CreateScope())
     
     context.Database.EnsureCreated();
     
-    if (!context.Users.Any())
+    var adminUser = context.Users.FirstOrDefault(u => u.Username == "admin");
+    if (adminUser == null)
     {
         context.Users.Add(new CityCrm.Api.Entities.User 
         { 
             Username = "admin", 
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), // <--- ТЕПЕР ПАРОЛЬ ХЕШУЄТЬСЯ
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
             Role = "GrandAdmin" 
         });
+        context.SaveChanges();
+    }
+    else if (!adminUser.PasswordHash.StartsWith("$2")) 
+    {
+        adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
         context.SaveChanges();
     }
     

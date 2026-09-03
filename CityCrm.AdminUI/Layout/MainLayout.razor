@@ -5,8 +5,18 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 auth d-flex justify-content-end align-items-center">
+            <AuthorizeView>
+                <Authorized>
+                    <span class="me-3 fw-bold text-primary">
+                        <i class="bi bi-person-circle"></i> @context.User.Identity?.Name
+                    </span>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="Logout">Вийти</button>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="login" class="btn btn-sm btn-primary">Увійти в систему</a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -14,3 +24,17 @@
         </article>
     </main>
 </div>
+
+@code {
+    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = default!;
+    [Inject] private Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+    [Inject] private Microsoft.AspNetCore.Components.NavigationManager NavManager { get; set; } = default!;
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("authToken");
+        var customAuthStateProvider = (CityCrm.AdminUI.Auth.CustomAuthStateProvider)AuthStateProvider;
+        customAuthStateProvider.MarkUserAsLoggedOut();
+        NavManager.NavigateTo("/");
+    }
+}

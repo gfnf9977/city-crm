@@ -7,9 +7,13 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Довідник вулиць міста</h1>
-    <button class="btn btn-success" @onclick="ShowAddModal">
-        <i class="bi bi-plus-circle"></i> Додати вулицю
-    </button>
+    <AuthorizeView Roles="GrandAdmin, Admin">
+        <Authorized>
+            <button class="btn btn-success" @onclick="ShowAddModal">
+                <i class="bi bi-plus-circle"></i> Додати вулицю
+            </button>
+        </Authorized>
+    </AuthorizeView>
 </div>
 
 <div class="card mb-3 shadow-sm border-0 bg-light">
@@ -58,15 +62,19 @@ else
                             <td class="fw-bold">@street.Name</td>
                             <td class="text-muted">@street.OldNames</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Виправити помилку">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ShowRenameModal(street)" title="Офіційне перейменування">
-                                    <i class="bi bi-signpost-split"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteStreet(street.Id)" title="Видалити">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                <AuthorizeView Roles="GrandAdmin, Admin">
+                                    <Authorized>
+                                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditModal(street)" title="Виправити помилку">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ShowRenameModal(street)" title="Офіційне перейменування">
+                                            <i class="bi bi-signpost-split"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteStreet(street.Id)" title="Видалити">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </Authorized>
+                                </AuthorizeView>
                             </td>
                         </tr>
                     }

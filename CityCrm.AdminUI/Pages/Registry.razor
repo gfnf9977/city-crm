@@ -25,9 +25,13 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Реєстр муніципальної нерухомості</h1>
-    <button class="btn btn-success" @onclick="ShowAddBuildingModal">
-        <i class="bi bi-plus-circle"></i> Додати будівлю
-    </button>
+    <AuthorizeView Roles="GrandAdmin, Admin">
+        <Authorized>
+            <button class="btn btn-success" @onclick="ShowAddBuildingModal">
+                <i class="bi bi-plus-circle"></i> Додати будівлю
+            </button>
+        </Authorized>
+    </AuthorizeView>
 </div>
 
 <div class="card mb-3 shadow-sm border-0 bg-light">
@@ -160,12 +164,16 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditBuildingModal(building)">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteBuilding(building.Id)">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <AuthorizeView Roles="GrandAdmin, Admin">
+                            <Authorized>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditBuildingModal(building)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteBuilding(building.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </Authorized>
+                        </AuthorizeView>
                     </td>
                 </tr>
 
@@ -179,9 +187,13 @@
                                     <h6 class="mb-0 text-primary">
                                         @(building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр" ? "Візуалізація під'їздів та поверхів:" : building.BuildingType == "Гаражний кооператив" ? "Схема гаражних рядів:" : "Приміщення у цій будівлі:")
                                     </h6>
-                                    <button class="btn btn-sm btn-primary" @onclick="() => ShowAddPremiseModal(building.Id)">
-                                        <i class="bi bi-plus"></i> Додати приміщення
-                                    </button>
+                                    <AuthorizeView Roles="GrandAdmin, Admin">
+                                        <Authorized>
+                                            <button class="btn btn-sm btn-primary" @onclick="() => ShowAddPremiseModal(building.Id)">
+                                                <i class="bi bi-plus"></i> Додати приміщення
+                                            </button>
+                                        </Authorized>
+                                    </AuthorizeView>
                                 </div>
 
                                 @if (building.BuildingType == "Багатоповерхівка" || building.BuildingType == "Офісний/Бізнес центр")
@@ -318,8 +330,12 @@
                                                     <td>@premise.Type</td>
                                                     <td><span class="badge bg-secondary">@premise.Status</span></td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditPremiseModal(premise)"><i class="bi bi-pencil"></i></button>
-                                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePremise(premise.Id)"><i class="bi bi-trash"></i></button>
+                                                        <AuthorizeView Roles="GrandAdmin, Admin">
+                                                            <Authorized>
+                                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowEditPremiseModal(premise)"><i class="bi bi-pencil"></i></button>
+                                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePremise(premise.Id)"><i class="bi bi-trash"></i></button>
+                                                            </Authorized>
+                                                        </AuthorizeView>
                                                     </td>
                                                 </tr>
                                             }
