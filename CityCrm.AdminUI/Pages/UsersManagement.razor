@@ -1,0 +1,159 @@
+@page "/users"
+@using CityCrm.AdminUI.Models
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "GrandAdmin")]
+@inject HttpClient Http
+
+<PageTitle>Управління працівниками</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-people-fill"></i> Управління доступом (Адміни)</h1>
+    <button class="btn btn-success" @onclick="() => showModal = true">
+        <i class="bi bi-person-plus"></i> Створити акаунт
+    </button>
+</div>
+
+@if (isLoading)
+{
+    <div class="alert alert-info">Завантаження...</div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Логін</th>
+                    <th>Роль</th>
+                    <th>Статус</th>
+                    <th class="text-center">Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr class="@(user.IsActive ? "" : "table-secondary text-muted")">
+                        <td>@user.Id</td>
+                        <td class="fw-bold">@user.Username</td>
+                        <td><span class="badge bg-primary">@user.Role</span></td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge bg-success">Активний</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Заблокований</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (user.Role != "GrandAdmin")
+                            {
+                                <button class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")" 
+                                        @onclick="() => ToggleUserStatus(user.Id)" title="Змінити статус">
+                                    <i class="bi @(user.IsActive ? "bi-lock-fill" : "bi-unlock-fill")"></i> 
+                                    @(user.IsActive ? "Заблокувати" : "Розблокувати")
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новий адміністратор</h5>
+                    <button type="button" class="btn-close" @onclick="() => showModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger p-2">@errorMessage</div>
+                    }
+
+                    <EditForm Model="newUser" OnValidSubmit="CreateUser">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Логін працівника</label>
+                            <InputText class="form-control" @bind-Value="newUser.Username" />
+                            <ValidationMessage For="@(() => newUser.Username)" class="text-danger small" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <InputText class="form-control" type="password" @bind-Value="newUser.Password" />
+                            <ValidationMessage For="@(() => newUser.Password)" class="text-danger small" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Роль</label>
+                            <InputSelect class="form-select" @bind-Value="newUser.Role">
+                                <option value="Admin">Звичайний Адмін (Може редагувати Реєстр)</option>
+                                <option value="GrandAdmin">GrandAdmin (Може створювати інших)</option>
+                            </InputSelect>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-secondary me-2" @onclick="() => showModal = false">Скасувати</button>
+                            <button type="submit" class="btn btn-primary">Створити</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<User> users = new();
+    private bool isLoading = true;
+    private bool showModal = false;
+    private User newUser = new();
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync() => await LoadUsers();
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        try
+        {
+            var result = await Http.GetFromJsonAsync<List<User>>("api/users");
+            if (result != null) users = result;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateUser()
+    {
+        errorMessage = "";
+        var response = await Http.PostAsJsonAsync("api/users", newUser);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            showModal = false;
+            newUser = new User(); // Очищаємо форму
+            await LoadUsers();
+        }
+        else
+        {
+            errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async Task ToggleUserStatus(int id)
+    {
+        var response = await Http.PutAsync($"api/users/{id}/toggle-status", null);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadUsers();
+        }
+    }
+}

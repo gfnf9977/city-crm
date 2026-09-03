@@ -25,6 +25,16 @@
             </Authorized>
         </AuthorizeView>
 
+        <AuthorizeView Roles="GrandAdmin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="users">
+                        <span class="bi bi-people-fill" aria-hidden="true" style="margin-right: 0.75rem; font-size: 1.25rem; display: inline-block;"></span> Користувачі
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="streets">
                 <span class="bi bi-journal-text" aria-hidden="true"></span> Довідник вулиць

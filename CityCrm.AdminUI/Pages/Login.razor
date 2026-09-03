@@ -31,8 +31,13 @@
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Пароль</label>
-                            <InputText type="password" class="form-control" @bind-Value="loginModel.Password" placeholder="Введіть пароль..." />
-                            <ValidationMessage For="@(() => loginModel.Password)" />
+                            <div class="input-group">
+                                <InputText type="@passwordInputType" class="form-control" @bind-Value="loginModel.Password" placeholder="Введіть пароль..." />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="TogglePasswordVisibility" tabindex="-1">
+                                    <i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
@@ -50,6 +55,13 @@
     private LoginRequest loginModel = new();
     private string errorMessage = "";
     private bool isLoading = false;
+    private bool showPassword = false;
+    private string passwordInputType => showPassword ? "text" : "password";
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
 
     private async Task HandleLogin()
     {
