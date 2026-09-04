@@ -118,7 +118,10 @@ window.leafletMap = {
                                     let now = new Date();
                                     let currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
 
-                                    if (currentTime >= openTime && currentTime < closeTime) {
+                                    if (openTime === "00:00" && closeTime === "23:59") {
+                                        statusText = `🟢 Цілодобово 24/7`;
+                                        statusColor = "text-success";
+                                    } else if (currentTime >= openTime && currentTime < closeTime) {
                                         statusText = `🟢 Відчинено до ${closeTime}`;
                                         statusColor = "text-success";
                                     } else if (currentTime < openTime) {
@@ -137,7 +140,12 @@ window.leafletMap = {
                                     if (s && (s.IsWorking || s.isWorking)) {
                                         let op = (s.Open || s.open).substring(0, 5);
                                         let cl = (s.Close || s.close).substring(0, 5);
-                                        rowHtml += `<span class="${isToday ? 'fw-bold text-dark' : 'text-secondary'}">${op} - ${cl}</span>`;
+                                        
+                                        if (op === "00:00" && cl === "23:59") {
+                                            rowHtml += `<span class="${isToday ? 'fw-bold text-success' : 'text-success'}">Цілодобово</span>`;
+                                        } else {
+                                            rowHtml += `<span class="${isToday ? 'fw-bold text-dark' : 'text-secondary'}">${op} - ${cl}</span>`;
+                                        }
                                     } else {
                                         rowHtml += `<span class="text-danger ${isToday ? 'fw-bold' : ''}" style="font-size: 0.7rem;">Вихідний</span>`;
                                     }

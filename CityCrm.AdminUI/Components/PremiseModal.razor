@@ -146,31 +146,48 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="fw-bold mb-2">Графік роботи</label>
-                                        <div class="bg-white border rounded p-2">
-                                            @foreach (var day in daysOfWeek)
-                                            {
-                                                if (weeklySchedule.TryGetValue(day, out var schedule))
-                                                {
-                                                    <div class="d-flex align-items-center mb-1 pb-1 border-bottom-dashed">
-                                                        <div style="width: 40px;" class="fw-bold @(schedule.IsWorking ? "text-dark" : "text-muted")">@day</div>
-                                                        <div class="form-check form-switch me-3 mb-0">
-                                                            <input type="checkbox" class="form-check-input" @bind="schedule.IsWorking" style="cursor: pointer;" />
-                                                        </div>
-                                                        @if (schedule.IsWorking)
-                                                        {
-                                                            <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Open" />
-                                                            <span class="mx-2 text-muted">-</span>
-                                                            <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Close" />
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted fst-italic ms-2" style="font-size: 0.85rem;">Вихідний</span>
-                                                        }
-                                                    </div>
-                                                }
-                                            }
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="fw-bold mb-0">Графік роботи</label>
+                                            <div class="form-check form-switch mb-0">
+                                                <input type="checkbox" class="form-check-input" id="is247" @bind="is24_7" />
+                                                <label class="form-check-label text-success fw-bold" style="font-size: 0.85rem;" for="is247">Цілодобово (24/7)</label>
+                                            </div>
                                         </div>
+
+                                        @if (!is24_7)
+                                        {
+                                            <div class="bg-white border rounded p-2">
+                                                @foreach (var day in daysOfWeek)
+                                                {
+                                                    if (weeklySchedule.TryGetValue(day, out var schedule))
+                                                    {
+                                                        <div class="d-flex align-items-center mb-1 pb-1 border-bottom-dashed">
+                                                            <div style="width: 40px;" class="fw-bold @(schedule.IsWorking ? "text-dark" : "text-muted")">@day</div>
+                                                            <div class="form-check form-switch me-3 mb-0">
+                                                                <input type="checkbox" class="form-check-input" @bind="schedule.IsWorking" style="cursor: pointer;" />
+                                                            </div>
+                                                            @if (schedule.IsWorking)
+                                                            {
+                                                                <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Open" />
+                                                                <span class="mx-2 text-muted">-</span>
+                                                                <input type="time" class="form-control form-control-sm text-center" style="width: 100px;" @bind="schedule.Close" />
+                                                                
+                                                                @if (day == "Пн")
+                                                                {
+                                                                    <button type="button" class="btn btn-sm btn-link text-decoration-none ms-2 p-0" @onclick="CopyMondayToWeekdays" title="Копіювати час на Вт-Пт">
+                                                                        <i class="bi bi-files"></i>
+                                                                    </button>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted fst-italic ms-2" style="font-size: 0.85rem;">Вихідний</span>
+                                                            }
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                     <div class="mb-2">
                                         <label>Короткий опис послуг</label>
@@ -213,6 +230,7 @@
     [Parameter] public EventCallback OnClosed { get; set; }
 
     private string errorMessage = "";
+    private bool is24_7 = false;
 
     public class DaySchedule
     {
@@ -228,12 +246,10 @@
     {
         if (IsVisible)
         {
+            is24_7 = false;
             if (string.IsNullOrEmpty(Model.WorkingHours))
             {
-                weeklySchedule = daysOfWeek.ToDictionary(d => d, d => new DaySchedule
-                {
-                    IsWorking = d != "Сб" && d != "Нд"
-                });
+                weeklySchedule = InitializeEmptySchedule();
             }
             else
             {
@@ -241,6 +257,12 @@
                 {
                     weeklySchedule = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, DaySchedule>>(Model.WorkingHours)
                                      ?? InitializeEmptySchedule();
+
+                    is24_7 = daysOfWeek.All(d => 
+                        weeklySchedule.ContainsKey(d) && 
+                        weeklySchedule[d].IsWorking && 
+                        weeklySchedule[d].Open == new TimeOnly(0, 0) && 
+                        weeklySchedule[d].Close == new TimeOnly(23, 59));
                 }
                 catch
                 {
@@ -253,10 +275,36 @@
     private Dictionary<string, DaySchedule> InitializeEmptySchedule() =>
         daysOfWeek.ToDictionary(d => d, d => new DaySchedule { IsWorking = d != "Сб" && d != "Нд" });
 
+    private void CopyMondayToWeekdays()
+    {
+        if (weeklySchedule.TryGetValue("Пн", out var mon) && mon.IsWorking)
+        {
+            string[] weekdays = { "Вт", "Ср", "Чт", "Пт" };
+            foreach (var day in weekdays)
+            {
+                if (weeklySchedule.TryGetValue(day, out var target))
+                {
+                    target.IsWorking = true;
+                    target.Open = mon.Open;
+                    target.Close = mon.Close;
+                }
+            }
+        }
+    }
+
     private async Task Save()
     {
         if (Model.Type == "Комерційна" && Model.IsPublicVisible)
         {
+            if (is24_7)
+            {
+                foreach (var day in daysOfWeek)
+                {
+                    weeklySchedule[day].IsWorking = true;
+                    weeklySchedule[day].Open = new TimeOnly(0, 0);
+                    weeklySchedule[day].Close = new TimeOnly(23, 59);
+                }
+            }
             Model.WorkingHours = System.Text.Json.JsonSerializer.Serialize(weeklySchedule);
         }
         else
