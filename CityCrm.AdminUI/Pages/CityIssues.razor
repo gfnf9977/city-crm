@@ -1,0 +1,77 @@
+@page "/city-issues"
+
+<PageTitle>Благоустрій | CityCrm</PageTitle>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-exclamation-triangle text-primary"></i> Фіксація інцидентів</h2>
+            <p class="text-muted mb-0">Допоможіть зробити Чернігів кращим. Повідомляйте про проблеми інфраструктури.</p>
+        </div>
+        <button class="btn btn-primary shadow-sm" @onclick="() => showMockModal = true">
+            <i class="bi bi-plus-lg"></i> Повідомити про проблему
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-warning text-dark">В роботі</span>
+                        <small class="text-muted">Сьогодні, 09:15</small>
+                    </div>
+                    <h6 class="fw-bold">Відкритий каналізаційний люк</h6>
+                    <p class="small text-secondary mb-2"><i class="bi bi-geo-alt"></i> вул. П'ятницька, 12</p>
+                    <div class="progress" style="height: 5px;"><div class="progress-bar bg-warning" style="width: 50%"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-success">Вирішено</span>
+                        <small class="text-muted">Вчора</small>
+                    </div>
+                    <h6 class="fw-bold">Повалене дерево після бурі</h6>
+                    <p class="small text-secondary mb-2"><i class="bi bi-geo-alt"></i> просп. Миру, 45</p>
+                    <div class="text-success small fw-bold"><i class="bi bi-check2-all"></i> Оцінка мешканців: 5/5</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 opacity-75">
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                    <i class="bi bi-cone-striped fs-1 text-muted mb-2"></i>
+                    <h6 class="text-muted">Тут будуть ваші заявки</h6>
+                    <small>Авторизуйтесь через Дія.Підпис / Telegram</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showMockModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-tools"></i> Новий інцидент</h5>
+                    <button type="button" class="btn-close" @onclick="() => showMockModal = false"></button>
+                </div>
+                <div class="modal-body text-center p-5">
+                    <i class="bi bi-phone-vibrate text-primary display-1 mb-3"></i>
+                    <h4>Функціонал у розробці</h4>
+                    <p class="text-muted">У наступній фазі (Фаза 7) тут буде реалізована інтеграція з картою та верифікація громадян.</p>
+                    <button class="btn btn-secondary mt-2" @onclick="() => showMockModal = false">Зрозуміло</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool showMockModal = false;
+}

@@ -1,0 +1,68 @@
+@page "/business-request"
+
+<PageTitle>Відповідальний бізнес | CityCrm</PageTitle>
+
+<div class="container py-4" style="max-width: 800px;">
+    <h2 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-warning"></i> Додати бізнес на карту міста</h2>
+    <p class="text-muted mb-4">
+        Заповніть форму нижче, щоб додати ваш заклад до міського реєстру. Після перевірки модератором, він з'явиться на публічній карті Чернігова.
+    </p>
+
+    @if (isSubmitted)
+    {
+        <div class="alert alert-success shadow-sm p-4 text-center">
+            <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
+            <h4 class="fw-bold">Дякуємо! Заявку прийнято.</h4>
+            <p class="mb-0">Ваші дані успішно відправлені на модерацію. Очікуйте появу вашого закладу на карті міста найближчим часом.</p>
+            <button class="btn btn-outline-success mt-3" @onclick="() => isSubmitted = false">Подати ще одну заявку</button>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form @onsubmit="SubmitDummyForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Назва закладу / вивіска</label>
+                            <input type="text" class="form-control" placeholder="Напр: Кавоварка" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Сфера діяльності</label>
+                            <select class="form-select" required>
+                                <option value="">Оберіть категорію...</option>
+                                <option>Продукти / Супермаркет</option>
+                                <option>Кафе / Ресторан</option>
+                                <option>СТО / Автомийка</option>
+                                <option>Аптека / Медицина</option>
+                                <option>Послуги / Краса</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Адреса розташування</label>
+                            <input type="text" class="form-control" placeholder="Вулиця, номер будинку" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Короткий опис</label>
+                            <textarea class="form-control" rows="2" placeholder="Що ви пропонуєте містянам?"></textarea>
+                        </div>
+                        <div class="col-12 mt-4 text-end">
+                            <button type="submit" class="btn btn-warning fw-bold px-4">
+                                <i class="bi bi-send-fill"></i> Відправити на модерацію
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isSubmitted = false;
+
+    private void SubmitDummyForm()
+    {
+        isSubmitted = true;
+    }
+}
