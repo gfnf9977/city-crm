@@ -29,40 +29,74 @@ window.leafletMap = {
             let hasNotesIcon = loc.notes ? ' <span title="Є примітки">📝</span>' : '';
             let tooltipContent = `<b>${loc.address}</b>${hasNotesIcon}<br/>Тип забудови: ${loc.buildingType}`;
 
-            let statusSummary = {};
-            if (loc.premises) {
-                loc.premises.forEach(p => {
-                    statusSummary[p.status] = (statusSummary[p.status] || 0) + 1;
-                });
-            }
-
             let popupContent = `
-                <div style="min-width: 200px;">
+                <div style="min-width: 220px; max-width: 300px;">
                     <h6 class="mb-1 text-primary border-bottom pb-1">${loc.address}</h6>
+            `;
+
+            if (isAdmin) {
+                popupContent += `
                     <div class="mb-2" style="font-size: 0.85rem;">
                         <strong>Тип:</strong> ${loc.buildingType}<br/>
                         <strong>Стан:</strong> ${loc.condition}
                     </div>
-            `;
+                `;
 
-            if (loc.notes) {
-                popupContent += `<div class="alert alert-warning p-2 mb-2" style="font-size: 0.8rem;"><strong>Примітки:</strong><br/>${loc.notes}</div>`;
-            }
-
-            if (Object.keys(statusSummary).length > 0) {
-                popupContent += `<div class="mb-2" style="font-size: 0.85rem;"><strong>Приміщення:</strong><ul class="mb-0 ps-3">`;
-                for (const [status, count] of Object.entries(statusSummary)) {
-                    popupContent += `<li>${status}: <strong>${count}</strong></li>`;
+                if (loc.notes) {
+                    popupContent += `<div class="alert alert-warning p-2 mb-2" style="font-size: 0.8rem;"><strong>Примітки:</strong><br/>${loc.notes}</div>`;
                 }
-                popupContent += `</ul></div>`;
+
+                let statusSummary = {};
+                if (loc.premises) {
+                    loc.premises.forEach(p => {
+                        statusSummary[p.status] = (statusSummary[p.status] || 0) + 1;
+                    });
+                }
+
+                if (Object.keys(statusSummary).length > 0) {
+                    popupContent += `<div class="mb-2" style="font-size: 0.85rem;"><strong>Приміщення:</strong><ul class="mb-0 ps-3">`;
+                    for (const [status, count] of Object.entries(statusSummary)) {
+                        popupContent += `<li>${status}: <strong>${count}</strong></li>`;
+                    }
+                    popupContent += `</ul></div>`;
+                } else {
+                    popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
+                }
+
+                popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
             } else {
-                popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
+                if (loc.premises && loc.premises.length > 0) {
+                    popupContent += `<div class="mt-2 d-flex flex-column gap-2">`;
+                    loc.premises.forEach(p => {
+                        let catIcon = "bi-shop";
+                        if (p.businessCategory === "Продукти / Супермаркет") catIcon = "bi-basket";
+                        else if (p.businessCategory === "Кафе / Ресторан") catIcon = "bi-cup-hot";
+                        else if (p.businessCategory === "СТО / Автомийка") catIcon = "bi-tools";
+                        else if (p.businessCategory === "Аптека / Медицина") catIcon = "bi-capsule";
+
+                        let bizName = p.businessName ? p.businessName : "Заклад / Послуги";
+                        let bizDesc = p.businessDescription ? `<div class="mt-1 text-secondary" style="font-size: 0.8rem; line-height: 1.2;">${p.businessDescription}</div>` : "";
+                        let bizCat = p.businessCategory ? `<div class="text-muted" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
+
+                        popupContent += `
+                            <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
+                                <div class="card-body p-2">
+                                    <div class="fw-bold text-dark d-flex align-items-center mb-1" style="font-size: 0.9rem;">
+                                        <i class="bi ${catIcon} text-primary me-2 fs-5"></i> 
+                                        ${bizName}
+                                    </div>
+                                    ${bizCat}
+                                    ${bizDesc}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    popupContent += `</div>`;
+                } else {
+                    popupContent += `<div class="text-muted fst-italic mt-2" style="font-size: 0.8rem;">Інформація про заклади відсутня</div>`;
+                }
             }
 
-            if (isAdmin) {
-                popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
-            }
-            
             popupContent += `</div>`;
 
             let iconEmoji = "📍";
