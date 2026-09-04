@@ -1,7 +1,65 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Головна | CityCrm</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-4">
+    <div class="p-5 mb-4 rounded-3 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 1px solid #dee2e6;">
+        <div class="container-fluid py-4 position-relative" style="z-index: 2;">
+            <h1 class="display-5 fw-bold text-primary mb-3">
+                <i class="bi bi-building"></i> Муніципальний портал Чернігова
+            </h1>
+            <p class="col-md-9 fs-5 text-secondary">
+                Інтерактивна геоінформаційна система для містян та бізнесу. Знаходьте найближчі магазини, аптеки, заклади харчування та інші об'єкти міської інфраструктури на єдиній платформі з актуальними графіками роботи.
+            </p>
+            <div class="mt-4">
+                <a href="map" class="btn btn-primary btn-lg px-4 rounded-pill shadow-sm me-3">
+                    <i class="bi bi-map-fill me-2"></i> Відкрити карту міста
+                </a>
+            </div>
+        </div>
+        <i class="bi bi-geo-alt-fill text-primary position-absolute" style="font-size: 25rem; right: -5%; top: -20%; opacity: 0.05; z-index: 1;"></i>
+    </div>
 
-Welcome to your new app.
+    <div class="row align-items-md-stretch g-4 mt-2">
+        <div class="col-md-4">
+            <div class="h-100 p-4 bg-white border rounded-3 shadow-sm text-center">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 64px; height: 64px;">
+                        <i class="bi bi-search fs-2"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold">Швидкий пошук</h4>
+                <p class="text-muted">Інтелектуальний пошук за назвою, категорією або описом послуг. Знаходьте потрібне без зайвих кліків.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="h-100 p-4 bg-white border rounded-3 shadow-sm text-center">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 64px; height: 64px;">
+                        <i class="bi bi-clock-history fs-2"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold">Актуальні дані</h4>
+                <p class="text-muted">Переглядайте точні графіки роботи закладів, включно зі статусами "Відчинено/Зачинено" та цілодобовими об'єктами.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="h-100 p-4 bg-white border rounded-3 shadow-sm text-center">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 64px; height: 64px;">
+                        <i class="bi bi-layers fs-2"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold">Деталізація</h4>
+                <p class="text-muted">Точні контури будівель, адреси з урахуванням корпусів та зручний поділ комерційних площ у багатоповерхівках.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5 pt-3 border-top text-center d-flex justify-content-between align-items-center text-muted small">
+        <span>&copy; 2026 CityCrm. Дипломний проєкт. Чернігів.</span>
+        <a href="login" class="text-muted text-decoration-none opacity-50 hover-opacity-100 transition-all" title="Вхід для працівників міськради">
+            <i class="bi bi-shield-lock-fill"></i> Службовий кабінет
+        </a>
+    </div>
+</div>
