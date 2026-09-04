@@ -163,11 +163,18 @@
         await RenderMap();
     }
 
+    private string NormalizeStr(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return "";
+        var chars = input.Where(c => !char.IsPunctuation(c)).ToArray();
+        return new string(chars).ToLower();
+    }
+
     private async Task RenderMap()
     {
         if (!isMapInitialized || cachedBuildings == null) return;
 
-        var query = publicSearchQuery?.ToLower() ?? "";
+        var query = NormalizeStr(publicSearchQuery);
         var catQuery = publicSelectedCategory;
         
         bool isSearchActive = !isAdmin && (!string.IsNullOrWhiteSpace(query) || !string.IsNullOrWhiteSpace(catQuery));
@@ -184,9 +191,9 @@
                 visiblePremises = visiblePremises.Where(p => 
                     (string.IsNullOrWhiteSpace(catQuery) || p.BusinessCategory == catQuery) &&
                     (string.IsNullOrWhiteSpace(query) || 
-                     (p.BusinessName != null && p.BusinessName.ToLower().Contains(query)) ||
-                     (p.BusinessCategory != null && p.BusinessCategory.ToLower().Contains(query)) ||
-                     (p.BusinessDescription != null && p.BusinessDescription.ToLower().Contains(query)))
+                     NormalizeStr(p.BusinessName).Contains(query) ||
+                     NormalizeStr(p.BusinessCategory).Contains(query) ||
+                     NormalizeStr(p.BusinessDescription).Contains(query))
                 ).ToList();
             }
 
