@@ -31,9 +31,21 @@
         }
         else
         {
-            <span class="btn btn-outline-primary disabled" style="opacity: 1;">
-                <i class="bi bi-shop"></i> Відкриті заклади та послуги
-            </span>
+            <div class="d-flex flex-column align-items-end">
+                <div class="input-group shadow-sm" style="width: 320px;">
+                    <span class="input-group-text bg-white border-primary"><i class="bi bi-search text-primary"></i></span>
+                    <input type="text" class="form-control border-primary" placeholder="Пошук закладу..."
+                           @bind="publicSearchQuery" @bind:event="oninput" @onkeyup="FilterMapData" />
+                    @if (!string.IsNullOrEmpty(publicSearchQuery))
+                    {
+                        <button class="btn btn-outline-primary" @onclick="ClearSearch"><i class="bi bi-x-lg"></i></button>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(publicSearchQuery))
+                {
+                    <small class="text-primary fw-bold mt-1 me-1">Знайдено закладів: @searchResultsCount</small>
+                }
+            </div>
         }
     </div>
 </div>
@@ -43,13 +55,16 @@
     <div class="alert alert-info">Завантаження даних просторової бази...</div>
 }
 
-<div id="map" style="height: 700px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
+<div id="map" style="height: calc(100vh - 160px); min-height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
 
 @code {
     private bool isMapInitialized = false;
     private bool isLoading = true;
     private string activeFilter = "";
     private bool isAdmin = false;
+    private List<Building> cachedBuildings = new();
+    private string publicSearchQuery = "";
+    private int searchResultsCount = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,17 +81,17 @@
             await JSRuntime.InvokeVoidAsync("leafletMap.init", "map");
             isMapInitialized = true;
             
-            await LoadAndRenderData("");
+            await LoadDataFromServer("");
         }
     }
 
     private async Task ApplyFilter(string filterType)
     {
         activeFilter = filterType;
-        await LoadAndRenderData(activeFilter);
+        await LoadDataFromServer(activeFilter);
     }
 
-    private async Task LoadAndRenderData(string filterType)
+    private async Task LoadDataFromServer(string filterType)
     {
         isLoading = true;
         StateHasChanged();
@@ -104,46 +119,10 @@
 
             var buildings = await Http.GetFromJsonAsync<List<Building>>(url);
 
-            if (buildings != null && isMapInitialized)
+            if (buildings != null)
             {
-                if (!isAdmin)
-                {
-                    buildings = buildings
-                        .Where(b => b.Premises.Any(p => p.IsPublicVisible))
-                        .ToList();
-
-                    foreach (var b in buildings)
-                    {
-                        b.Premises = b.Premises.Where(p => p.IsPublicVisible).ToList();
-                        b.Notes = null; 
-                        b.Condition = "В експлуатації"; 
-                    }
-                }
-
-                var mapData = buildings.Select(b => new
-                {
-                    id = b.Id,
-                    lat = b.Lat,
-                    lng = b.Lng,
-                    address = b.FullAddress, 
-                    buildingType = b.BuildingType,
-                    condition = b.Condition,
-                    geoJson = b.GeoJson,
-                    notes = b.Notes,
-                    premises = b.Premises.Select(p => new {
-                        number = p.PremiseNumber,
-                        area = p.Area,
-                        type = p.Type,
-                        status = p.Status,
-                        notes = p.Notes,
-                        businessName = p.BusinessName,
-                        businessCategory = p.BusinessCategory, 
-                        businessDescription = p.BusinessDescription, 
-                        workingHours = p.WorkingHours
-                    }).ToList()
-                }).ToList();
-
-                await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin);
+                cachedBuildings = buildings;
+                await RenderMap();
             }
         }
         catch (Exception ex)
@@ -155,5 +134,72 @@
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+    private async Task FilterMapData()
+    {
+        await RenderMap();
+    }
+
+    private async Task ClearSearch()
+    {
+        publicSearchQuery = "";
+        await RenderMap();
+    }
+
+    private async Task RenderMap()
+    {
+        if (!isMapInitialized || cachedBuildings == null) return;
+
+        var query = publicSearchQuery?.ToLower() ?? "";
+        bool isSearchActive = !isAdmin && !string.IsNullOrWhiteSpace(query);
+        searchResultsCount = 0;
+
+        var mapData = cachedBuildings.Select(b => 
+        {
+            var visiblePremises = isAdmin
+                ? b.Premises
+                : b.Premises.Where(p => p.IsPublicVisible).ToList();
+
+            if (isSearchActive)
+            {
+                visiblePremises = visiblePremises.Where(p => 
+                    (p.BusinessName != null && p.BusinessName.ToLower().Contains(query)) ||
+                    (p.BusinessCategory != null && p.BusinessCategory.ToLower().Contains(query))
+                ).ToList();
+            }
+
+            return new 
+            {
+                id = b.Id,
+                lat = b.Lat,
+                lng = b.Lng,
+                address = b.FullAddress,
+                buildingType = b.BuildingType,
+                condition = isAdmin ? b.Condition : "В експлуатації",
+                geoJson = b.GeoJson,
+                notes = isAdmin ? b.Notes : null,
+                premises = visiblePremises.Select(p => new {
+                    number = p.PremiseNumber,
+                    area = p.Area,
+                    type = p.Type,
+                    status = p.Status,
+                    notes = isAdmin ? p.Notes : null,
+                    businessName = p.BusinessName,
+                    businessCategory = p.BusinessCategory,
+                    businessDescription = p.BusinessDescription,
+                    workingHours = p.WorkingHours
+                }).ToList()
+            };
+        })
+        .Where(b => isAdmin || b.premises.Any())
+        .ToList();
+
+        if (isSearchActive)
+        {
+            searchResultsCount = mapData.Sum(b => b.premises.Count);
+        }
+
+        await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive);
     }
 }
