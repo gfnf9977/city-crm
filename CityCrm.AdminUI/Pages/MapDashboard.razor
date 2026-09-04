@@ -31,17 +31,32 @@
         }
         else
         {
-            <div class="d-flex flex-column align-items-end">
-                <div class="input-group shadow-sm" style="width: 320px;">
-                    <span class="input-group-text bg-white border-primary"><i class="bi bi-search text-primary"></i></span>
-                    <input type="text" class="form-control border-primary" placeholder="Пошук закладу..."
-                           @bind="publicSearchQuery" @bind:event="oninput" @onkeyup="FilterMapData" />
-                    @if (!string.IsNullOrEmpty(publicSearchQuery))
-                    {
-                        <button class="btn btn-outline-primary" @onclick="ClearSearch"><i class="bi bi-x-lg"></i></button>
-                    }
+            <div class="d-flex flex-column align-items-end gap-2">
+                <div class="d-flex gap-2">
+                    <select class="form-select border-primary shadow-sm" style="width: 220px;" 
+                            @bind="publicSelectedCategory" @bind:after="FilterMapData">
+                        <option value="">Всі категорії</option>
+                        <option value="Продукти / Супермаркет">🛒 Продукти / Супермаркет</option>
+                        <option value="Кафе / Ресторан">☕ Кафе / Ресторан</option>
+                        <option value="СТО / Автомийка">🔧 СТО / Автомийка</option>
+                        <option value="Аптека / Медицина">💊 Аптека / Медицина</option>
+                        <option value="Послуги / Краса">✂️ Послуги / Краса</option>
+                        <option value="Офіс / Відділення">🏢 Офіс / Відділення</option>
+                        <option value="Інше">📦 Інше</option>
+                    </select>
+
+                    <div class="input-group shadow-sm" style="width: 320px;">
+                        <span class="input-group-text bg-white border-primary"><i class="bi bi-search text-primary"></i></span>
+                        <input type="text" class="form-control border-primary" placeholder="Пошук закладу..."
+                               @bind="publicSearchQuery" @bind:event="oninput" @onkeyup="FilterMapData" />
+                        @if (!string.IsNullOrEmpty(publicSearchQuery))
+                        {
+                            <button class="btn btn-outline-primary" @onclick="ClearSearch"><i class="bi bi-x-lg"></i></button>
+                        }
+                    </div>
                 </div>
-                @if (!string.IsNullOrEmpty(publicSearchQuery))
+                
+                @if (!string.IsNullOrEmpty(publicSearchQuery) || !string.IsNullOrEmpty(publicSelectedCategory))
                 {
                     <small class="text-primary fw-bold mt-1 me-1">Знайдено закладів: @searchResultsCount</small>
                 }
@@ -64,6 +79,7 @@
     private bool isAdmin = false;
     private List<Building> cachedBuildings = new();
     private string publicSearchQuery = "";
+    private string publicSelectedCategory = "";
     private int searchResultsCount = 0;
 
     protected override async Task OnInitializedAsync()
@@ -152,7 +168,9 @@
         if (!isMapInitialized || cachedBuildings == null) return;
 
         var query = publicSearchQuery?.ToLower() ?? "";
-        bool isSearchActive = !isAdmin && !string.IsNullOrWhiteSpace(query);
+        var catQuery = publicSelectedCategory;
+        
+        bool isSearchActive = !isAdmin && (!string.IsNullOrWhiteSpace(query) || !string.IsNullOrWhiteSpace(catQuery));
         searchResultsCount = 0;
 
         var mapData = cachedBuildings.Select(b => 
@@ -164,8 +182,11 @@
             if (isSearchActive)
             {
                 visiblePremises = visiblePremises.Where(p => 
-                    (p.BusinessName != null && p.BusinessName.ToLower().Contains(query)) ||
-                    (p.BusinessCategory != null && p.BusinessCategory.ToLower().Contains(query))
+                    (string.IsNullOrWhiteSpace(catQuery) || p.BusinessCategory == catQuery) &&
+                    (string.IsNullOrWhiteSpace(query) || 
+                     (p.BusinessName != null && p.BusinessName.ToLower().Contains(query)) ||
+                     (p.BusinessCategory != null && p.BusinessCategory.ToLower().Contains(query)) ||
+                     (p.BusinessDescription != null && p.BusinessDescription.ToLower().Contains(query)))
                 ).ToList();
             }
 
