@@ -55,20 +55,20 @@ using (var scope = app.Services.CreateScope())
     
     context.Database.EnsureCreated();
     
-    var adminUser = context.Users.FirstOrDefault(u => u.Username == "admin");
-    if (adminUser == null)
+    if (!context.Users.Any())
     {
+        var defUser = builder.Configuration["DefaultAdmin:Username"];
+        var defPass = builder.Configuration["DefaultAdmin:Password"];
+
+        if (defUser == "Set_In_User_Secrets" || string.IsNullOrEmpty(defUser)) defUser = "admin_fallback";
+        if (defPass == "Set_In_User_Secrets" || string.IsNullOrEmpty(defPass)) defPass = "FallbackPass123!";
+
         context.Users.Add(new CityCrm.Api.Entities.User 
         { 
-            Username = "admin", 
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            Username = defUser, 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(defPass),
             Role = "GrandAdmin" 
         });
-        context.SaveChanges();
-    }
-    else if (!adminUser.PasswordHash.StartsWith("$2")) 
-    {
-        adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
         context.SaveChanges();
     }
     
