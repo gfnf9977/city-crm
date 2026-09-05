@@ -56,7 +56,18 @@
                     </div>
                 </div>
                 
-                @if (!string.IsNullOrEmpty(publicSearchQuery) || !string.IsNullOrEmpty(publicSelectedCategory))
+                <div class="d-flex gap-3 mt-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="shelterFilter" @bind="filterHasShelter" @bind:after="FilterMapData" />
+                        <label class="form-check-label text-success fw-bold" style="font-size: 0.85rem;" for="shelterFilter"><i class="bi bi-shield-shaded"></i> Тільки з укриттям</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="inclusiveFilter" @bind="filterIsInclusive" @bind:after="FilterMapData" />
+                        <label class="form-check-label text-primary fw-bold" style="font-size: 0.85rem;" for="inclusiveFilter"><i class="bi bi-person-wheelchair"></i> Тільки безбар'єрні</label>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(publicSearchQuery) || !string.IsNullOrEmpty(publicSelectedCategory) || filterHasShelter || filterIsInclusive)
                 {
                     <small class="text-primary fw-bold mt-1 me-1">Знайдено закладів: @searchResultsCount</small>
                 }
@@ -81,6 +92,8 @@
     private string publicSearchQuery = "";
     private string publicSelectedCategory = "";
     private int searchResultsCount = 0;
+    private bool filterHasShelter = false;
+    private bool filterIsInclusive = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,10 +190,12 @@
         var query = NormalizeStr(publicSearchQuery);
         var catQuery = publicSelectedCategory;
         
-        bool isSearchActive = !isAdmin && (!string.IsNullOrWhiteSpace(query) || !string.IsNullOrWhiteSpace(catQuery));
+        bool isSearchActive = !isAdmin && (!string.IsNullOrWhiteSpace(query) || !string.IsNullOrWhiteSpace(catQuery) || filterIsInclusive);
         searchResultsCount = 0;
 
-        var mapData = cachedBuildings.Select(b => 
+        var mapData = cachedBuildings
+        .Where(b => !filterHasShelter || b.HasShelter)
+        .Select(b => 
         {
             var visiblePremises = isAdmin
                 ? b.Premises
@@ -189,6 +204,7 @@
             if (isSearchActive)
             {
                 visiblePremises = visiblePremises.Where(p => 
+                    (!filterIsInclusive || p.IsInclusive) &&
                     (string.IsNullOrWhiteSpace(catQuery) || p.BusinessCategory == catQuery) &&
                     (string.IsNullOrWhiteSpace(query) || 
                      NormalizeStr(p.BusinessName).Contains(query) ||
@@ -205,7 +221,7 @@
                 address = b.FullAddress,
                 buildingType = b.BuildingType,
                 condition = isAdmin ? b.Condition : "В експлуатації",
-                hasShelter = b.HasShelter,    
+                hasShelter = b.HasShelter,
                 geoJson = b.GeoJson,
                 notes = isAdmin ? b.Notes : null,
                 premises = visiblePremises.Select(p => new {
@@ -222,14 +238,14 @@
                 }).ToList()
             };
         })
-        .Where(b => isAdmin || b.premises.Any())
+        .Where(b => isAdmin || b.premises.Any() || (filterHasShelter && b.hasShelter))
         .ToList();
 
-        if (isSearchActive)
+        if (isSearchActive && !filterHasShelter)
         {
             searchResultsCount = mapData.Sum(b => b.premises.Count);
         }
 
-        await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive);
+        await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive || filterHasShelter);
     }
 }

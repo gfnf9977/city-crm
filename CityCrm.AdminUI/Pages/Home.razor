@@ -97,8 +97,13 @@
     
     <div class="mt-5 pt-3 border-top text-center d-flex justify-content-between align-items-center text-muted small">
         <span>&copy; 2026 CityCrm. Дипломний проєкт. Чернігів.</span>
-        <a href="login" class="text-muted text-decoration-none opacity-50 hover-opacity-100 transition-all" title="Вхід для працівників міськради">
-            <i class="bi bi-shield-lock-fill"></i> Службовий кабінет
-        </a>
+        
+        <AuthorizeView>
+            <NotAuthorized>
+                <a href="login" class="text-muted text-decoration-none opacity-50 hover-opacity-100 transition-all" title="Вхід для працівників міськради">
+                    <i class="bi bi-shield-lock-fill"></i> Службовий кабінет
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </div>
