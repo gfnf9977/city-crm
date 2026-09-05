@@ -11,6 +11,7 @@ namespace CityCrm.Api.Data
         public DbSet<Premise> Premises => Set<Premise>(); 
         public DbSet<Street> Streets { get; set; }
         public DbSet<User> Users => Set<User>();
+        public DbSet<BusinessRequest> BusinessRequests => Set<BusinessRequest>(); 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
