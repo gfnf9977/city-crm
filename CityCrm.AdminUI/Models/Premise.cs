@@ -27,6 +27,7 @@ namespace CityCrm.AdminUI.Models
         public DateTime? RentEndDate { get; set; }
         public string? Notes { get; set; }
         public string? BusinessCategory { get; set; } 
+        public bool IsInclusive { get; set; } = false;
         public string? BusinessName { get; set; }     
         public string? WorkingHours { get; set; }     
         public string? BusinessDescription { get; set; } 

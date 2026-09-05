@@ -56,6 +56,10 @@ window.leafletMap = {
                     <h6 class="mb-1 text-primary border-bottom pb-1">${loc.address}</h6>
             `;
 
+            let badges = '';
+            if (loc.hasShelter) badges += '<span class="badge bg-success me-1 mb-2 shadow-sm"><i class="bi bi-shield-shaded"></i> Укриття</span>';
+            if (badges !== '') popupContent += `<div>${badges}</div>`;
+
             if (isAdmin) {
                 popupContent += `
                     <div class="mb-2" style="font-size: 0.85rem;">
@@ -98,7 +102,8 @@ window.leafletMap = {
 
                         let bizName = p.businessName ? p.businessName : "Заклад / Послуги";
                         let bizDesc = p.businessDescription ? `<div class="mt-1 text-secondary" style="font-size: 0.8rem; line-height: 1.2;">${p.businessDescription}</div>` : "";
-                        let bizCat = p.businessCategory ? `<div class="text-muted" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
+                        let bizCat = p.businessCategory ? `<div class="text-muted d-inline-block" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
+                        let incBadge = p.isInclusive ? `<span class="badge bg-primary ms-2 shadow-sm" style="font-size: 0.65rem;"><i class="bi bi-person-wheelchair"></i> Безбар'єрно</span>` : "";
 
                         let scheduleHtml = '';
                         if (p.workingHours) {
@@ -177,7 +182,7 @@ window.leafletMap = {
                                         <i class="bi ${catIcon} text-primary me-2 fs-5"></i> 
                                         ${bizName}
                                     </div>
-                                    ${bizCat}
+                                    <div>${bizCat}${incBadge}</div>
                                     ${bizDesc}
                                     ${scheduleHtml}
                                 </div>

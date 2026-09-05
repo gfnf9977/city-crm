@@ -205,6 +205,7 @@
                 address = b.FullAddress,
                 buildingType = b.BuildingType,
                 condition = isAdmin ? b.Condition : "В експлуатації",
+                hasShelter = b.HasShelter,    
                 geoJson = b.GeoJson,
                 notes = isAdmin ? b.Notes : null,
                 premises = visiblePremises.Select(p => new {
@@ -216,7 +217,8 @@
                     businessName = p.BusinessName,
                     businessCategory = p.BusinessCategory,
                     businessDescription = p.BusinessDescription,
-                    workingHours = p.WorkingHours
+                    workingHours = p.WorkingHours,
+                    isInclusive = p.IsInclusive
                 }).ToList()
             };
         })

@@ -3,6 +3,7 @@ using System;
 using CityCrm.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CityCrm.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260905093503_AddShelterAndInclusivity")]
+    partial class AddShelterAndInclusivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,6 +56,9 @@ namespace CityCrm.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("HasShelter")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsInclusive")
                         .HasColumnType("boolean");
 
                     b.Property<Geometry>("Location")
@@ -99,9 +105,6 @@ namespace CityCrm.Api.Migrations
 
                     b.Property<int?>("Floor")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsInclusive")
-                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPublicVisible")
                         .HasColumnType("boolean");

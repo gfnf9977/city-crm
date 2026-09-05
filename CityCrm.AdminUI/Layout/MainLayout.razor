@@ -5,19 +5,16 @@
     </div>
 
     <main>
-        <div class="top-row px-4 auth d-flex justify-content-end align-items-center">
-            <AuthorizeView>
-                <Authorized>
+        <AuthorizeView>
+            <Authorized>
+                <div class="top-row px-4 auth d-flex justify-content-end align-items-center">
                     <span class="me-3 fw-bold text-primary">
                         <i class="bi bi-person-circle"></i> @context.User.Identity?.Name
                     </span>
                     <button class="btn btn-sm btn-outline-danger" @onclick="Logout">Вийти</button>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="login" class="btn btn-sm btn-primary">Увійти в систему</a>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
         <article class="content px-4">
             @Body

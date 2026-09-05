@@ -124,6 +124,11 @@
                                     <label class="form-check-label fw-bold" for="isPublic">Відображати на публічній карті міста</label>
                                 </div>
 
+                                <div class="form-check form-switch mb-3">
+                                    <InputCheckbox class="form-check-input" id="isInclusive" @bind-Value="Model.IsInclusive" />
+                                    <label class="form-check-label fw-bold text-primary" for="isInclusive"><i class="bi bi-person-wheelchair"></i> Безбар'єрний доступ (пандус / рівна підлога)</label>
+                                </div>
+
                                 @if (Model.IsPublicVisible)
                                 {
                                     <div class="row">

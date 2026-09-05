@@ -21,7 +21,7 @@ namespace CityCrm.AdminUI.Models
         public string? BuildingBlock { get; set; }
         public string? Notes { get; set; }
         public string? CoopNumber { get; set; }
-
+        public bool HasShelter { get; set; } = false;
         [Required]
         public string BuildingType { get; set; } = string.Empty; 
         

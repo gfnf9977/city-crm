@@ -16,7 +16,7 @@ namespace CityCrm.Api.Entities
         public string? BuildingBlock { get; set; }
         public string? CoopNumber { get; set; }
         public string? Notes { get; set; }
-
+        public bool HasShelter { get; set; } = false;
         public string BuildingType { get; set; } = string.Empty; 
         public string Condition { get; set; } = "В експлуатації";
 
