@@ -61,7 +61,7 @@ else
                         <td class="fw-bold">@req.LegalName <br/><small class="fw-normal">ЄДРПОУ: @req.Edrpou</small></td>
                         <td>
                             <span class="badge bg-secondary mb-1">@req.BusinessCategory</span><br/>
-                            @(req.IsNetwork ? $"{req.NetworkName} ({req.LocalName})" : req.LocalName)
+                            @(req.IsNetwork ? (string.IsNullOrWhiteSpace(req.LocalName) ? req.NetworkName : $"{req.NetworkName} ({req.LocalName})") : req.LocalName)
                         </td>
                         <td>
                             @req.Street?.DisplayName, @req.BuildingNumber@req.BuildingLetter
@@ -277,7 +277,9 @@ else
         targetExistingPremises = targetBuilding.Premises;
 
         var premiseName = selectedRequest!.IsNetwork 
-            ? $"{selectedRequest.NetworkName} ({selectedRequest.LocalName})" 
+            ? (string.IsNullOrWhiteSpace(selectedRequest.LocalName) 
+                ? selectedRequest.NetworkName 
+                : $"{selectedRequest.NetworkName} ({selectedRequest.LocalName})") 
             : selectedRequest.LocalName;
 
         newPremise = new Premise

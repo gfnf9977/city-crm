@@ -7,8 +7,7 @@ namespace CityCrm.AdminUI.Models
         public int Id { get; set; }
         public int BuildingId { get; set; }
         
-        [Required(ErrorMessage = "Номер приміщення є обов'язковим")]
-        public string PremiseNumber { get; set; } = string.Empty; 
+        public string? PremiseNumber { get; set; } 
         
         [Range(1, 50, ErrorMessage = "Під'їзд має бути від 1 до 50")]
         public int? Entrance { get; set; } 

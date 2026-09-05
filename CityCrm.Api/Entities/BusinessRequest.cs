@@ -13,7 +13,7 @@ namespace CityCrm.Api.Entities
         public string BusinessCategory { get; set; } = string.Empty;
         public bool IsNetwork { get; set; } = false;
         public string? NetworkName { get; set; } 
-        public string LocalName { get; set; } = string.Empty; 
+        public string? LocalName { get; set; } 
         public string? Description { get; set; }
 
         public int StreetId { get; set; }

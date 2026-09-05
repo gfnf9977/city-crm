@@ -24,8 +24,7 @@ namespace CityCrm.AdminUI.Models
         public bool IsNetwork { get; set; }
         public string? NetworkName { get; set; }
 
-        [Required(ErrorMessage = "Введіть назву закладу")]
-        public string LocalName { get; set; } = string.Empty;
+        public string? LocalName { get; set; }
 
         public string? Description { get; set; }
 

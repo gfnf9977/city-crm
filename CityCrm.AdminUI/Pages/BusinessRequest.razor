@@ -110,7 +110,14 @@
                     
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Назва закладу (вивіска)</label>
-                        <InputText class="form-control" @bind-Value="requestModel.LocalName" placeholder="Напр: Кав'ярня 'У Ані'" />
+                        @if (requestModel.IsNetwork)
+                        {
+                            <InputText class="form-control" @bind-Value="requestModel.LocalName" placeholder="Опціонально: Номер відділення / ТЦ" />
+                        }
+                        else
+                        {
+                            <InputText class="form-control" @bind-Value="requestModel.LocalName" placeholder="Напр: Кав'ярня 'У Ані'" required />
+                        }
                         <ValidationMessage For="@(() => requestModel.LocalName)" class="text-danger small" />
                     </div>
 

@@ -20,8 +20,8 @@
                         <DataAnnotationsValidator />
                         <ValidationSummary class="text-danger mb-3" />
                         <div class="mb-3">
-                            <label>№ приміщення (квартири/кімнати/офісу)</label>
-                            <InputText class="form-control" @bind-Value="Model.PremiseNumber" required />
+                            <label>№ приміщення (квартири/кімнати/офісу) <span class="text-muted small">— залиште пустим для окремої будівлі</span></label>
+                            <InputText class="form-control" @bind-Value="Model.PremiseNumber" />
                         </div>
 
                         <div class="row">
@@ -323,6 +323,7 @@
         {
             bool isDuplicate = ExistingPremises.Any(p =>
                 p.Id != Model.Id &&
+                !string.IsNullOrWhiteSpace(p.PremiseNumber) &&
                 p.PremiseNumber.Trim().ToLower() == Model.PremiseNumber.Trim().ToLower());
 
             if (isDuplicate)
@@ -330,6 +331,11 @@
                 errorMessage = $"Увага! Приміщення з номером {Model.PremiseNumber} вже існує у цій будівлі.";
                 return;
             }
+        }
+        
+        if (string.IsNullOrWhiteSpace(Model.PremiseNumber)) 
+        {
+            Model.PremiseNumber = "";
         }
 
         if (Model.Ownership == "Приватна" || Model.Ownership == "Державна")
