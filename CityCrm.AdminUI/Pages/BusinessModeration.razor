@@ -25,6 +25,22 @@ else if (!requests.Any())
 }
 else
 {
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "Pending" ? "active fw-bold" : "")" 
+               style="cursor:pointer;" @onclick="@(() => activeTab = "Pending")">
+                Очікують розгляду 
+                <span class="badge bg-danger ms-1">@requests.Count(r => r.Status == "Pending")</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "History" ? "active fw-bold" : "")" 
+               style="cursor:pointer;" @onclick="@(() => activeTab = "History")">
+                Історія (Оброблені)
+            </a>
+        </li>
+    </ul>
+
     <div class="table-responsive bg-white rounded shadow-sm border">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
@@ -33,15 +49,16 @@ else
                     <th>ФОП / Компанія</th>
                     <th>Сфера / Назва</th>
                     <th>Заявлена адреса</th>
+                    <th>Статус</th>
                     <th class="text-center">Дії</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var req in requests)
+                @foreach (var req in requests.Where(r => activeTab == "Pending" ? r.Status == "Pending" : r.Status != "Pending"))
                 {
-                    <tr>
-                        <td class="text-muted small">@req.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                        <td class="fw-bold">@req.LegalName <br/><small class="text-muted fw-normal">ЄДРПОУ: @req.Edrpou</small></td>
+                    <tr class="@(req.Status != "Pending" ? "table-light text-muted" : "")">
+                        <td class="small">@req.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="fw-bold">@req.LegalName <br/><small class="fw-normal">ЄДРПОУ: @req.Edrpou</small></td>
                         <td>
                             <span class="badge bg-secondary mb-1">@req.BusinessCategory</span><br/>
                             @(req.IsNetwork ? $"{req.NetworkName} ({req.LocalName})" : req.LocalName)
@@ -50,9 +67,37 @@ else
                             @req.Street?.DisplayName, @req.BuildingNumber@req.BuildingLetter
                             @if (!string.IsNullOrEmpty(req.PremiseNumber)) { <span>, кв/оф @req.PremiseNumber</span> }
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary" @onclick="() => OpenRequestModal(req)">Розглянути</button>
+                        <td>
+                            @if (req.Status == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Нова</span>
+                            }
+                            else if (req.Status == "Approved")
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-lg"></i> Опубліковано</span>
+                            }
+                            else if (req.Status == "Rejected")
+                            {
+                                <span class="badge bg-danger"><i class="bi bi-x-lg"></i> Відхилено</span>
+                            }
                         </td>
+                        <td class="text-center">
+                            @if (req.Status == "Pending")
+                            {
+                                <button class="btn btn-sm btn-primary" @onclick="() => OpenRequestModal(req)">Розглянути</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Оброблено</button>
+                            }
+                        </td>
+                    </tr>
+                }
+                
+                @if (!requests.Any(r => activeTab == "Pending" ? r.Status == "Pending" : r.Status != "Pending"))
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Немає записів у цій категорії.</td>
                     </tr>
                 }
             </tbody>
@@ -149,6 +194,7 @@ else
 @code {
     private List<BusinessRequestModel> requests = new();
     private bool isLoading = true;
+    private string activeTab = "Pending";
     
     private BusinessRequestModel? selectedRequest;
     private bool showRequestModal = false;

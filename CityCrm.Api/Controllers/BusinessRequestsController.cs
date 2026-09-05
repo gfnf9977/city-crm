@@ -30,12 +30,11 @@ namespace CityCrm.Api.Controllers
 
         [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BusinessRequest>>> GetPendingRequests()
+        public async Task<ActionResult<IEnumerable<BusinessRequest>>> GetAllRequests()
         {
             return await _context.BusinessRequests
                 .Include(r => r.Street)
-                .Where(r => r.Status == "Pending")
-                .OrderBy(r => r.CreatedAt)
+                .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
 
