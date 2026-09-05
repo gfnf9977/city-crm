@@ -52,41 +52,16 @@ namespace CityCrm.Api.Controllers
         }
 
         [Authorize(Roles = "GrandAdmin, Admin")]
-        [HttpPost("{id}/approve")]
-        public async Task<IActionResult> ApproveRequest(int id, [FromBody] ApproveDto dto)
+        [HttpPut("{id}/approve")]
+        public async Task<IActionResult> ApproveRequest(int id)
         {
             var req = await _context.BusinessRequests.FindAsync(id);
             if (req == null) return NotFound();
 
-            var premiseName = req.IsNetwork ? $"{req.NetworkName} ({req.LocalName})" : req.LocalName;
-
-            var premise = new Premise
-            {
-                BuildingId = dto.BuildingId,
-                PremiseNumber = req.PremiseNumber ?? "",
-                Type = "Комерційна",
-                Status = "В експлуатації",
-                Ownership = "Приватна",
-                OwnerName = req.LegalName,
-                BusinessCategory = req.BusinessCategory,
-                BusinessName = premiseName,
-                BusinessDescription = req.Description,
-                WorkingHours = req.WorkingHours,
-                IsInclusive = req.IsInclusive,
-                IsPublicVisible = true,
-                Notes = $"Заявка з порталу. ЄДРПОУ: {req.Edrpou}. Контакт: {req.ContactInfo}. Посилання: {req.ReferenceLink}"
-            };
-
-            _context.Premises.Add(premise);
             req.Status = "Approved";
             await _context.SaveChangesAsync();
 
-            return Ok();
+            return NoContent();
         }
-    }
-
-    public class ApproveDto
-    {
-        public int BuildingId { get; set; }
     }
 }
