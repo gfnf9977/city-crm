@@ -25,7 +25,22 @@ namespace CityCrm.Api.Controllers
             
             _context.BusinessRequests.Add(request);
             await _context.SaveChangesAsync();
-            return Ok();
+            
+            return Ok(new { id = request.Id });
+        }
+
+        [HttpGet("{id}/status")]
+        public async Task<ActionResult> GetRequestStatus(int id)
+        {
+            var req = await _context.BusinessRequests.FindAsync(id);
+            if (req == null) return NotFound(new { message = "Заявку не знайдено" });
+
+            return Ok(new 
+            { 
+                id = req.Id,
+                status = req.Status,
+                name = req.IsNetwork ? $"{req.NetworkName} ({req.LocalName})" : req.LocalName
+            });
         }
 
         [Authorize(Roles = "GrandAdmin, Admin")]
