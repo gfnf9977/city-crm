@@ -271,5 +271,22 @@ window.leafletMap = {
             let marker = L.marker([issue.lat, issue.lng], { icon: issueIcon }).addTo(this.issueMarkersLayer);
             marker.bindPopup(popupContent);
         });
+    },
+
+    locateUser: function () {
+        if (!this.mapInstance) return;
+        
+        this.mapInstance.locate({ setView: true, maxZoom: 17, enableHighAccuracy: true });
+        
+        this.mapInstance.once('locationfound', (e) => {
+            let radius = e.accuracy / 2;
+            L.circle(e.latlng, { radius: radius, color: '#007bff', fillOpacity: 0.2 }).addTo(this.mapInstance);
+            L.circleMarker(e.latlng, { radius: 6, color: 'white', weight: 2, fillColor: '#007bff', fillOpacity: 1 }).addTo(this.mapInstance)
+                .bindTooltip("Ви знаходитесь приблизно тут", { permanent: false, direction: "top" });
+        });
+        
+        this.mapInstance.once('locationerror', (e) => {
+            alert("Не вдалося визначити вашу локацію. Перевірте дозволи в браузері (GPS).");
+        });
     }
 };

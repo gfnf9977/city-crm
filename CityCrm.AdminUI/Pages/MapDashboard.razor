@@ -13,6 +13,10 @@
         @if (!isAdmin)
         {
             <div class="d-flex align-items-center gap-3 mt-1">
+                <button class="btn btn-outline-primary shadow-sm rounded-circle" style="width: 40px; height: 40px; padding: 0;" @onclick="LocateMe" title="Знайти мене">
+                    <i class="bi bi-crosshair"></i>
+                </button>
+
                 <button class="btn @(isPickingIssueLocation ? "btn-danger" : "btn-outline-danger") shadow-sm rounded-pill px-3" @onclick="ToggleIssuePickingMode">
                     @if (isPickingIssueLocation)
                     {
@@ -230,6 +234,11 @@
                 }
             } 
         }
+    }
+
+    private async Task LocateMe()
+    {
+        await JSRuntime.InvokeVoidAsync("leafletMap.locateUser");
     }
 
     private async Task ToggleIssuePickingMode()
