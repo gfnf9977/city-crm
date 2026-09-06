@@ -172,6 +172,9 @@
 }
 
 @code {
+    [SupplyParameterFromQuery(Name = "report")]
+    public bool ReportIssueParam { get; set; }
+
     private bool isMapInitialized = false;
     private bool isLoading = true;
     private string activeFilter = "";
@@ -217,7 +220,15 @@
             isMapInitialized = true;
             
             await LoadDataFromServer("");
-            if (!isAdmin) { await LoadIssuesFromServer(); }
+            if (!isAdmin) 
+            { 
+                await LoadIssuesFromServer(); 
+                
+                if (ReportIssueParam)
+                {
+                    await ToggleIssuePickingMode();
+                }
+            } 
         }
     }
 

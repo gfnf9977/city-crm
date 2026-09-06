@@ -16,28 +16,35 @@
 }
 else
 {
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "New" ? "active fw-bold" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "New")">
-                Нові <span class="badge bg-danger ms-1">@issues.Count(i => i.Status == "New")</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "InProgress" ? "active fw-bold text-warning" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "InProgress")">
-                В роботі <span class="badge bg-warning text-dark ms-1">@issues.Count(i => i.Status == "InProgress")</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "Resolved" ? "active fw-bold text-success" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Resolved")">
-                Вирішені
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "Rejected" ? "active fw-bold text-secondary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Rejected")">
-                Відхилені
-            </a>
-        </li>
-    </ul>
+    <div class="d-flex justify-content-between align-items-end mb-3 border-bottom">
+        <ul class="nav nav-tabs border-bottom-0 mb-0">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "New" ? "active fw-bold" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "New")">
+                    Нові <span class="badge bg-danger ms-1">@issues.Count(i => i.Status == "New")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "InProgress" ? "active fw-bold text-warning" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "InProgress")">
+                    В роботі <span class="badge bg-warning text-dark ms-1">@issues.Count(i => i.Status == "InProgress")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "Resolved" ? "active fw-bold text-success" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Resolved")">
+                    Вирішені
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "Rejected" ? "active fw-bold text-secondary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Rejected")">
+                    Відхилені
+                </a>
+            </li>
+        </ul>
+        
+        <div class="pb-2">
+            <input type="text" class="form-control form-control-sm border-secondary shadow-sm" placeholder="🔍 Пошук: номер, опис..." 
+                   @bind="searchQuery" @bind:event="oninput" style="width: 250px;" />
+        </div>
+    </div>
 
     <div class="table-responsive bg-white rounded shadow-sm border">
         <table class="table table-hover align-middle mb-0">
@@ -133,24 +140,36 @@ else
                         <textarea class="form-control mb-3" rows="3" @bind="adminResponseText" placeholder="Наприклад: 'Люк відремонтовано силами водоканалу' або 'Яму передано до плану ремонту на наступний місяць'"></textarea>
 
                         <div class="d-flex justify-content-between gap-2">
-                            <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
-                                <i class="bi bi-trash"></i> Відхилити (Спам)
-                            </button>
-                            
-                            <div>
-                                @if (selectedIssue.Status == "New")
-                                {
-                                    <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("InProgress"))" disabled="@isProcessing">
-                                        <i class="bi bi-tools"></i> Взяти в роботу
-                                    </button>
-                                }
-                                else if (selectedIssue.Status == "InProgress")
-                                {
-                                    <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Resolved"))" disabled="@isProcessing">
-                                        <i class="bi bi-check-lg"></i> Відмітити як ВИРІШЕНО
-                                    </button>
-                                }
-                            </div>
+                            @if (selectedIssue.Status == "New")
+                            {
+                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
+                                    <i class="bi bi-trash"></i> Відхилити (Спам)
+                                </button>
+                                <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("InProgress"))" disabled="@isProcessing">
+                                    <i class="bi bi-tools"></i> Взяти в роботу
+                                </button>
+                            }
+                            else if (selectedIssue.Status == "InProgress")
+                            {
+                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
+                                    <i class="bi bi-x-circle"></i> Скасувати (Хибний виклик)
+                                </button>
+                                <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Resolved"))" disabled="@isProcessing">
+                                    <i class="bi bi-check-lg"></i> Відмітити як ВИРІШЕНО
+                                </button>
+                            }
+                            else if (selectedIssue.Status == "Resolved")
+                            {
+                                <button class="btn btn-success w-100 opacity-75" disabled>
+                                    <i class="bi bi-check-all"></i> Інцидент успішно вирішено
+                                </button>
+                            }
+                            else if (selectedIssue.Status == "Rejected")
+                            {
+                                <button class="btn btn-secondary w-100 opacity-75" disabled>
+                                    <i class="bi bi-slash-circle"></i> Заявку відхилено
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>
@@ -163,6 +182,7 @@ else
     private List<CityIssueModel> issues = new();
     private bool isLoading = true;
     private string activeTab = "New";
+    private string searchQuery = "";
     
     private CityIssueModel? selectedIssue;
     private bool showModal = false;
@@ -190,7 +210,19 @@ else
 
     private IEnumerable<CityIssueModel> GetFilteredIssues()
     {
-        return issues.Where(i => i.Status == activeTab);
+        var filtered = issues.Where(i => i.Status == activeTab);
+        
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.ToLower();
+            filtered = filtered.Where(i => 
+                (i.TrackingNumber != null && i.TrackingNumber.ToLower().Contains(q)) || 
+                (i.Description != null && i.Description.ToLower().Contains(q)) ||
+                (i.Category != null && i.Category.ToLower().Contains(q))
+            );
+        }
+        
+        return filtered;
     }
 
     private void OpenIssueModal(CityIssueModel issue)
