@@ -1,19 +1,41 @@
 window.leafletMap = {
     mapInstance: null,
     markersLayer: null,
+    issueMarkersLayer: null,
+    dotNetRef: null,
+    pickingMode: false,
 
-    init: function (elementId) {
+    init: function (elementId, dotNetObj) {
         if (this.mapInstance !== null) {
             this.mapInstance.off();
             this.mapInstance.remove();
             this.mapInstance = null;
             this.markersLayer = null;
+            this.issueMarkersLayer = null;
         }
 
+        this.dotNetRef = dotNetObj;
         this.mapInstance = L.map(elementId).setView([51.4938, 31.2953], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19, attribution: '© OpenStreetMap'
         }).addTo(this.mapInstance);
+
+        this.mapInstance.on('click', (e) => {
+            if (this.pickingMode && this.dotNetRef) {
+                this.disableIssuePicker();
+                this.dotNetRef.invokeMethodAsync('OnMapClicked', e.latlng.lat, e.latlng.lng);
+            }
+        });
+    },
+
+    enableIssuePicker: function () {
+        this.pickingMode = true;
+        document.getElementById('map').style.cursor = 'crosshair';
+    },
+
+    disableIssuePicker: function () {
+        this.pickingMode = false;
+        document.getElementById('map').style.cursor = 'grab';
     },
 
     loadData: function (locations, isAdmin, isSearchActive = false) {
@@ -22,7 +44,6 @@ window.leafletMap = {
         if (this.markersLayer) {
             this.mapInstance.removeLayer(this.markersLayer);
         }
-
         this.markersLayer = L.featureGroup().addTo(this.mapInstance);
 
         locations.forEach(loc => {
@@ -67,10 +88,7 @@ window.leafletMap = {
                         <strong>Стан:</strong> ${loc.condition}
                     </div>
                 `;
-
-                if (loc.notes) {
-                    popupContent += `<div class="alert alert-warning p-2 mb-2" style="font-size: 0.8rem;"><strong>Примітки:</strong><br/>${loc.notes}</div>`;
-                }
+                if (loc.notes) popupContent += `<div class="alert alert-warning p-2 mb-2" style="font-size: 0.8rem;"><strong>Примітки:</strong><br/>${loc.notes}</div>`;
 
                 let statusSummary = {};
                 if (loc.premises) {
@@ -78,7 +96,6 @@ window.leafletMap = {
                         statusSummary[p.status] = (statusSummary[p.status] || 0) + 1;
                     });
                 }
-
                 if (Object.keys(statusSummary).length > 0) {
                     popupContent += `<div class="mb-2" style="font-size: 0.85rem;"><strong>Приміщення:</strong><ul class="mb-0 ps-3">`;
                     for (const [status, count] of Object.entries(statusSummary)) {
@@ -88,7 +105,6 @@ window.leafletMap = {
                 } else {
                     popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
                 }
-
                 popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
             } else {
                 if (loc.premises && loc.premises.length > 0) {
@@ -145,15 +161,9 @@ window.leafletMap = {
                                     if (s && (s.IsWorking || s.isWorking)) {
                                         let op = (s.Open || s.open).substring(0, 5);
                                         let cl = (s.Close || s.close).substring(0, 5);
-                                        
-                                        if (op === "00:00" && cl === "23:59") {
-                                            rowHtml += `<span class="${isToday ? 'fw-bold text-success' : 'text-success'}">Цілодобово</span>`;
-                                        } else {
-                                            rowHtml += `<span class="${isToday ? 'fw-bold text-dark' : 'text-secondary'}">${op} - ${cl}</span>`;
-                                        }
-                                    } else {
-                                        rowHtml += `<span class="text-danger ${isToday ? 'fw-bold' : ''}" style="font-size: 0.7rem;">Вихідний</span>`;
-                                    }
+                                        if (op === "00:00" && cl === "23:59") rowHtml += `<span class="${isToday ? 'fw-bold text-success' : 'text-success'}">Цілодобово</span>`;
+                                        else rowHtml += `<span class="${isToday ? 'fw-bold text-dark' : 'text-secondary'}">${op} - ${cl}</span>`;
+                                    } else rowHtml += `<span class="text-danger ${isToday ? 'fw-bold' : ''}" style="font-size: 0.7rem;">Вихідний</span>`;
                                     rowHtml += `</div>`;
                                     fullScheduleHtml += rowHtml;
                                 });
@@ -170,17 +180,14 @@ window.leafletMap = {
                                         ${fullScheduleHtml}
                                     </div>
                                 `;
-                            } catch (e) {
-                                console.error("Parse error schedule:", e);
-                            }
+                            } catch (e) { console.error("Parse error schedule:", e); }
                         }
 
                         popupContent += `
                             <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
                                 <div class="card-body p-2">
                                     <div class="fw-bold text-dark d-flex align-items-center mb-1" style="font-size: 0.9rem;">
-                                        <i class="bi ${catIcon} text-primary me-2 fs-5"></i> 
-                                        ${bizName}
+                                        <i class="bi ${catIcon} text-primary me-2 fs-5"></i> ${bizName}
                                     </div>
                                     <div>${bizCat}${incBadge}</div>
                                     ${bizDesc}
@@ -194,7 +201,6 @@ window.leafletMap = {
                     popupContent += `<div class="text-muted fst-italic mt-2" style="font-size: 0.8rem;">Інформація про заклади відсутня</div>`;
                 }
             }
-
             popupContent += `</div>`;
 
             let iconEmoji = "📍";
@@ -207,9 +213,7 @@ window.leafletMap = {
             let customIcon = L.divIcon({
                 className: 'custom-map-icon',
                 html: `<div style="font-size: 18px; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${iconEmoji}</div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16],
-                popupAnchor: [0, -16]
+                iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16]
             });
 
             if (loc.geoJson) {
@@ -233,5 +237,39 @@ window.leafletMap = {
         if (locations.length > 0) {
             this.mapInstance.fitBounds(this.markersLayer.getBounds(), { padding: [50, 50], maxZoom: 17 });
         }
+    },
+
+    loadIssues: function (issues) {
+        if (!this.mapInstance) return;
+        if (this.issueMarkersLayer) {
+            this.mapInstance.removeLayer(this.issueMarkersLayer);
+        }
+        this.issueMarkersLayer = L.featureGroup().addTo(this.mapInstance);
+
+        issues.forEach(issue => {
+            let emoji = "⚠️";
+            let color = "#dc3545";
+            if (issue.status === "InProgress") { emoji = "🛠️"; color = "#ffc107"; }
+            else if (issue.status === "Resolved") { emoji = "✅"; color = "#28a745"; }
+            
+            let issueIcon = L.divIcon({
+                className: 'issue-map-icon',
+                html: `<div style="font-size: 16px; background: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 2px solid ${color}; box-shadow: 0 2px 5px rgba(0,0,0,0.4);">${emoji}</div>`,
+                iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14]
+            });
+
+            let statusText = issue.status === "New" ? "Нова заявка" : issue.status === "InProgress" ? "В роботі" : "Вирішено";
+            let popupContent = `
+                <div style="min-width: 200px;">
+                    <h6 class="mb-1 text-dark border-bottom pb-1"><i class="bi bi-exclamation-triangle-fill" style="color: ${color}"></i> ${issue.category}</h6>
+                    <p class="small text-muted mb-2 fst-italic">"${issue.description}"</p>
+                    <div class="badge" style="background-color: ${color}">${statusText}</div>
+                    <div class="text-end mt-1 text-muted" style="font-size: 0.65rem;">${new Date(issue.createdAt).toLocaleDateString()}</div>
+                </div>
+            `;
+
+            let marker = L.marker([issue.lat, issue.lng], { icon: issueIcon }).addTo(this.issueMarkersLayer);
+            marker.bindPopup(popupContent);
+        });
     }
 };
