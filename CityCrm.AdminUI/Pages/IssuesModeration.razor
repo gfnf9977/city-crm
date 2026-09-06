@@ -1,0 +1,230 @@
+@page "/issues-moderation"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "GrandAdmin, Admin")]
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+
+<PageTitle>Модерація інцидентів</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-exclamation-triangle text-danger"></i> Модерація інцидентів</h1>
+    <button class="btn btn-outline-secondary" @onclick="LoadIssues"><i class="bi bi-arrow-clockwise"></i> Оновити</button>
+</div>
+
+@if (isLoading)
+{
+    <div class="alert alert-info">Завантаження інцидентів...</div>
+}
+else
+{
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "New" ? "active fw-bold" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "New")">
+                Нові <span class="badge bg-danger ms-1">@issues.Count(i => i.Status == "New")</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "InProgress" ? "active fw-bold text-warning" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "InProgress")">
+                В роботі <span class="badge bg-warning text-dark ms-1">@issues.Count(i => i.Status == "InProgress")</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "Resolved" ? "active fw-bold text-success" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Resolved")">
+                Вирішені
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "Rejected" ? "active fw-bold text-secondary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Rejected")">
+                Відхилені
+            </a>
+        </li>
+    </ul>
+
+    <div class="table-responsive bg-white rounded shadow-sm border">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Трекінг / Дата</th>
+                    <th>Категорія</th>
+                    <th>Опис та Адреса</th>
+                    <th>Статус</th>
+                    <th class="text-center">Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var issue in GetFilteredIssues())
+                {
+                    <tr class="@(issue.Status == "Resolved" ? "table-success text-muted" : issue.Status == "Rejected" ? "table-light text-muted" : "")">
+                        <td>
+                            <div class="fw-bold">@issue.TrackingNumber</div>
+                            <small class="text-muted">@issue.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">@issue.Category</span>
+                            @if (issue.UserRating.HasValue)
+                            {
+                                <div class="text-warning small mt-1">
+                                    @for (int i = 0; i < issue.UserRating.Value; i++) { <i class="bi bi-star-fill"></i> }
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <div class="fw-bold text-truncate" style="max-width: 300px;" title="@issue.Description">@issue.Description</div>
+                            <div class="small text-muted"><i class="bi bi-geo-alt"></i> @(string.IsNullOrEmpty(issue.AddressStr) ? $"{issue.Lat}, {issue.Lng}" : issue.AddressStr)</div>
+                        </td>
+                        <td>
+                            @if (issue.Status == "New") { <span class="badge bg-danger"><i class="bi bi-exclamation-circle"></i> Новий</span> }
+                            else if (issue.Status == "InProgress") { <span class="badge bg-warning text-dark"><i class="bi bi-tools"></i> В роботі</span> }
+                            else if (issue.Status == "Resolved") { <span class="badge bg-success"><i class="bi bi-check-all"></i> Вирішено</span> }
+                            else if (issue.Status == "Rejected") { <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Відхилено</span> }
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary" @onclick="() => OpenIssueModal(issue)">Опрацювати</button>
+                        </td>
+                    </tr>
+                }
+                
+                @if (!GetFilteredIssues().Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">Немає інцидентів у цій категорії.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (showModal && selectedIssue != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Інцидент #@selectedIssue.TrackingNumber</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Категорія</h6>
+                            <p class="fw-bold">@selectedIssue.Category</p>
+                            
+                            <h6 class="text-muted mb-1">Опис громадянина</h6>
+                            <p class="fst-italic border p-2 bg-light rounded">@selectedIssue.Description</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Локація</h6>
+                            <p><i class="bi bi-geo-alt-fill text-danger"></i> @(string.IsNullOrEmpty(selectedIssue.AddressStr) ? "Координати з карти" : selectedIssue.AddressStr)</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=@(selectedIssue.Lat.ToString(System.Globalization.CultureInfo.InvariantCulture)),@(selectedIssue.Lng.ToString(System.Globalization.CultureInfo.InvariantCulture))" target="_blank" class="btn btn-sm btn-outline-info mb-2">
+                                <i class="bi bi-map"></i> Відкрити в Google Maps
+                            </a>
+                            
+                            @if (!string.IsNullOrEmpty(selectedIssue.PhotoUrl))
+                            {
+                                <div class="mt-2">
+                                    <a href="@selectedIssue.PhotoUrl" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-image"></i> Переглянути фото</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary mb-0">
+                        <label class="fw-bold mb-2">Відповідь міськради (публічна):</label>
+                        <textarea class="form-control mb-3" rows="3" @bind="adminResponseText" placeholder="Наприклад: 'Люк відремонтовано силами водоканалу' або 'Яму передано до плану ремонту на наступний місяць'"></textarea>
+
+                        <div class="d-flex justify-content-between gap-2">
+                            <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
+                                <i class="bi bi-trash"></i> Відхилити (Спам)
+                            </button>
+                            
+                            <div>
+                                @if (selectedIssue.Status == "New")
+                                {
+                                    <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("InProgress"))" disabled="@isProcessing">
+                                        <i class="bi bi-tools"></i> Взяти в роботу
+                                    </button>
+                                }
+                                else if (selectedIssue.Status == "InProgress")
+                                {
+                                    <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Resolved"))" disabled="@isProcessing">
+                                        <i class="bi bi-check-lg"></i> Відмітити як ВИРІШЕНО
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<CityIssueModel> issues = new();
+    private bool isLoading = true;
+    private string activeTab = "New";
+    
+    private CityIssueModel? selectedIssue;
+    private bool showModal = false;
+    private string adminResponseText = "";
+    private bool isProcessing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadIssues();
+    }
+
+    private async Task LoadIssues()
+    {
+        isLoading = true;
+        try
+        {
+            var result = await Http.GetFromJsonAsync<List<CityIssueModel>>("api/cityissues");
+            if (result != null) issues = result;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private IEnumerable<CityIssueModel> GetFilteredIssues()
+    {
+        return issues.Where(i => i.Status == activeTab);
+    }
+
+    private void OpenIssueModal(CityIssueModel issue)
+    {
+        selectedIssue = issue;
+        adminResponseText = issue.AdminResponse ?? "";
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedIssue = null;
+    }
+
+    private async Task UpdateStatus(string newStatus)
+    {
+        if (selectedIssue == null) return;
+
+        isProcessing = true;
+        try
+        {
+            var payload = new { Status = newStatus, AdminResponse = adminResponseText };
+            var response = await Http.PutAsJsonAsync($"api/cityissues/{selectedIssue.Id}/status", payload);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadIssues();
+                CloseModal();
+            }
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+}
