@@ -6,41 +6,49 @@
 
 <PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : "Публічна карта міста")</PageTitle>
 
-<div class="d-flex justify-content-between align-items-end mb-3">
-    <div>
-        <h1>@(isAdmin ? "Просторова мапа нерухомості" : "Публічна карта Чернігова")</h1>
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start mb-3 gap-3">
+    <div class="d-flex flex-column gap-2">
+        <h3 class="fw-bold mb-1 text-dark">@(isAdmin ? "Просторова мапа нерухомості" : "Публічна карта Чернігова")</h3>
+        
         @if (!isAdmin)
         {
-            <div class="text-muted mb-2">Знаходьте заклади або <span class="fw-bold text-danger">повідомляйте про проблеми благоустрою</span> на карті.</div>
+            <div class="d-flex align-items-center gap-3 mt-1">
+                <button class="btn @(isPickingIssueLocation ? "btn-danger" : "btn-outline-danger") shadow-sm rounded-pill px-3" @onclick="ToggleIssuePickingMode">
+                    @if (isPickingIssueLocation)
+                    {
+                        <span><i class="bi bi-x-circle"></i> Скасувати вибір</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-exclamation-triangle-fill"></i> Повідомити про проблему</span>
+                    }
+                </button>
+
+                <div class="form-check form-switch mb-0 bg-white px-3 py-1 rounded shadow-sm border">
+                    <input class="form-check-input ms-0 me-2" type="checkbox" id="showIssues" @bind="showIssuesOnMap" @bind:after="ToggleIssuesVisibility" />
+                    <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem; cursor: pointer;" for="showIssues">
+                        Показати інциденти
+                    </label>
+                </div>
+            </div>
         }
     </div>
     
     <div class="d-flex gap-2">
         @if (isAdmin)
         {
-            <button class="btn @(activeFilter == "" ? "btn-secondary" : "btn-outline-secondary")" @onclick="@(() => ApplyFilter(""))"><i class="bi bi-globe"></i> Всі об'єкти</button>
-            <button class="btn @(activeFilter == "free_communal" ? "btn-success" : "btn-outline-success")" @onclick="@(() => ApplyFilter("free_communal"))">Вільна комуналка</button>
-            <button class="btn @(activeFilter == "commerce" ? "btn-primary" : "btn-outline-primary")" @onclick="@(() => ApplyFilter("commerce"))">Комерційні площі</button>
-            <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" @onclick="@(() => ApplyFilter("problems"))">Зруйновані / Аварійні</button>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn @(activeFilter == "" ? "btn-secondary" : "btn-outline-secondary")" @onclick="@(() => ApplyFilter(""))"><i class="bi bi-globe"></i> Всі об'єкти</button>
+                <button class="btn @(activeFilter == "free_communal" ? "btn-success" : "btn-outline-success")" @onclick="@(() => ApplyFilter("free_communal"))">Вільна комуналка</button>
+                <button class="btn @(activeFilter == "commerce" ? "btn-primary" : "btn-outline-primary")" @onclick="@(() => ApplyFilter("commerce"))">Комерційні площі</button>
+                <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" @onclick="@(() => ApplyFilter("problems"))">Зруйновані / Аварійні</button>
+            </div>
         }
         else
         {
             <div class="d-flex flex-column align-items-end gap-2">
                 <div class="d-flex gap-2 align-items-center">
-                    <button class="btn @(isPickingIssueLocation ? "btn-danger" : "btn-outline-danger") shadow-sm" style="height: 38px;" @onclick="ToggleIssuePickingMode">
-                        @if (isPickingIssueLocation)
-                        {
-                            <span><i class="bi bi-x-circle"></i> Скасувати вибір</span>
-                        }
-                        else
-                        {
-                            <span><i class="bi bi-exclamation-triangle-fill"></i> Повідомити про проблему</span>
-                        }
-                    </button>
-
-                    <div style="border-left: 1px solid #ccc; height: 30px; margin: 0 5px;"></div>
-
-                    <select class="form-select border-primary shadow-sm" style="width: 220px;" @bind="publicSelectedCategory" @bind:after="FilterMapData">
+                    <select class="form-select border-primary shadow-sm rounded-pill px-3" style="width: 220px;" @bind="publicSelectedCategory" @bind:after="FilterMapData">
                         <option value="">Всі категорії закладів</option>
                         <option value="Продукти / Супермаркет">🛒 Продукти / Супермаркет</option>
                         <option value="Кафе / Ресторан">☕ Кафе / Ресторан</option>
@@ -51,29 +59,25 @@
                         <option value="Інше">📦 Інше</option>
                     </select>
 
-                    <div class="input-group shadow-sm" style="width: 320px;">
-                        <span class="input-group-text bg-white border-primary"><i class="bi bi-search text-primary"></i></span>
-                        <input type="text" class="form-control border-primary" placeholder="Пошук закладу..."
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden" style="width: 300px;">
+                        <span class="input-group-text bg-white border-primary border-end-0"><i class="bi bi-search text-primary"></i></span>
+                        <input type="text" class="form-control border-primary border-start-0 shadow-none" placeholder="Шукати заклад..."
                                @bind="publicSearchQuery" @bind:event="oninput" @onkeyup="FilterMapData" />
                         @if (!string.IsNullOrEmpty(publicSearchQuery))
                         {
-                            <button class="btn btn-outline-primary" @onclick="ClearSearch"><i class="bi bi-x-lg"></i></button>
+                            <button class="btn btn-white border-primary border-start-0 text-muted" @onclick="ClearSearch"><i class="bi bi-x-lg"></i></button>
                         }
                     </div>
                 </div>
                 
-                <div class="d-flex gap-3 mt-2">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="showIssues" @bind="showIssuesOnMap" @bind:after="ToggleIssuesVisibility" />
-                        <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem;" for="showIssues"><i class="bi bi-exclamation-diamond"></i> Показати інциденти</label>
+                <div class="d-flex gap-3 mt-1 bg-white px-3 py-1 rounded shadow-sm border">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="shelterFilter" @bind="filterHasShelter" @bind:after="FilterMapData" />
+                        <label class="form-check-label text-success fw-bold" style="font-size: 0.85rem; cursor: pointer;" for="shelterFilter"><i class="bi bi-shield-shaded"></i> З укриттям</label>
                     </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="shelterFilter" @bind="filterHasShelter" @bind:after="FilterMapData" />
-                        <label class="form-check-label text-success fw-bold" style="font-size: 0.85rem;" for="shelterFilter"><i class="bi bi-shield-shaded"></i> Тільки з укриттям</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="inclusiveFilter" @bind="filterIsInclusive" @bind:after="FilterMapData" />
-                        <label class="form-check-label text-primary fw-bold" style="font-size: 0.85rem;" for="inclusiveFilter"><i class="bi bi-person-wheelchair"></i> Тільки безбар'єрні</label>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="inclusiveFilter" @bind="filterIsInclusive" @bind:after="FilterMapData" />
+                        <label class="form-check-label text-primary fw-bold" style="font-size: 0.85rem; cursor: pointer;" for="inclusiveFilter"><i class="bi bi-person-wheelchair"></i> Безбар'єрні</label>
                     </div>
                 </div>
             </div>
