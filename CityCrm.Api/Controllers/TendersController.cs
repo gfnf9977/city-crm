@@ -29,9 +29,7 @@ namespace CityCrm.Api.Controllers
 
             request.Status = "New";
             request.CreatedAt = DateTime.UtcNow;
-            
-            var random = new Random();
-            request.TrackingNumber = $"TND-{DateTime.UtcNow:yyMM}-{random.Next(1000, 9999)}";
+            request.TrackingNumber = $"TND-{DateTime.UtcNow:yyMM}-{new Random().Next(1000, 9999)}";
 
             _context.TenderRequests.Add(request);
             await _context.SaveChangesAsync();
@@ -43,26 +41,82 @@ namespace CityCrm.Api.Controllers
         public async Task<ActionResult> GetByTrackingNumber(string trackingNumber)
         {
             var req = await _context.TenderRequests
-                .Include(t => t.Premise)
-                .ThenInclude(p => p.Building)
-                .ThenInclude(b => b.Street)
-                .FirstOrDefaultAsync(t => t.TrackingNumber == trackingNumber);
+                .Where(t => t.TrackingNumber == trackingNumber)
+                .Select(t => new {
+                    id = t.Id,
+                    premiseId = t.PremiseId,
+                    applicantName = t.ApplicantName,
+                    edrpou = t.Edrpou,
+                    contactInfo = t.ContactInfo,
+                    message = t.Message,
+                    status = t.Status,
+                    adminResponse = t.AdminResponse,
+                    trackingNumber = t.TrackingNumber,
+                    createdAt = t.CreatedAt,
+                    premise = t.Premise == null ? null : new {
+                        id = t.Premise.Id,
+                        premiseNumber = t.Premise.PremiseNumber,
+                        area = t.Premise.Area,
+                        type = t.Premise.Type,
+                        building = t.Premise.Building == null ? null : new {
+                            id = t.Premise.Building.Id,
+                            buildingNumber = t.Premise.Building.BuildingNumber,
+                            buildingLetter = t.Premise.Building.BuildingLetter,
+                            buildingBlock = t.Premise.Building.BuildingBlock,
+                            buildingType = t.Premise.Building.BuildingType,
+                            street = t.Premise.Building.Street == null ? null : new {
+                                id = t.Premise.Building.Street.Id,
+                                name = t.Premise.Building.Street.Name,
+                                streetType = t.Premise.Building.Street.StreetType
+                            }
+                        }
+                    }
+                })
+                .FirstOrDefaultAsync();
 
             if (req == null) return NotFound(new { message = "Заявку не знайдено" });
-
             return Ok(req);
         }
 
         [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TenderRequest>>> GetAllRequests()
+        public async Task<ActionResult> GetAllRequests()
         {
-            return await _context.TenderRequests
-                .Include(t => t.Premise)
-                .ThenInclude(p => p.Building)
-                .ThenInclude(b => b.Street)
+            var reqs = await _context.TenderRequests
                 .OrderByDescending(t => t.CreatedAt)
+                .Select(t => new {
+                    id = t.Id,
+                    premiseId = t.PremiseId,
+                    applicantName = t.ApplicantName,
+                    edrpou = t.Edrpou,
+                    contactInfo = t.ContactInfo,
+                    message = t.Message,
+                    status = t.Status,
+                    adminResponse = t.AdminResponse,
+                    trackingNumber = t.TrackingNumber,
+                    createdAt = t.CreatedAt,
+                    premise = t.Premise == null ? null : new {
+                        id = t.Premise.Id,
+                        premiseNumber = t.Premise.PremiseNumber,
+                        area = t.Premise.Area,
+                        type = t.Premise.Type,
+                        building = t.Premise.Building == null ? null : new {
+                            id = t.Premise.Building.Id,
+                            buildingNumber = t.Premise.Building.BuildingNumber,
+                            buildingLetter = t.Premise.Building.BuildingLetter,
+                            buildingBlock = t.Premise.Building.BuildingBlock,
+                            buildingType = t.Premise.Building.BuildingType,
+                            street = t.Premise.Building.Street == null ? null : new {
+                                id = t.Premise.Building.Street.Id,
+                                name = t.Premise.Building.Street.Name,
+                                streetType = t.Premise.Building.Street.StreetType
+                            }
+                        }
+                    }
+                })
                 .ToListAsync();
+
+            return Ok(reqs);
         }
 
         [Authorize(Roles = "GrandAdmin, Admin")]

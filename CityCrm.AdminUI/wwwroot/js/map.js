@@ -123,7 +123,11 @@ window.leafletMap = {
 
                         let rentBtnHtml = '';
                         if (!isAdmin && p.status === 'Вільне' && p.ownership === 'Комунальна' && p.type === 'Комерційна') {
-                            rentBtnHtml = `<div class="mt-2"><a href="investors?premiseId=${p.id}" class="btn btn-sm btn-success w-100 fw-bold" style="color: white !important;"><i class="bi bi-hammer"></i> Ініціювати аукціон</a></div>`;
+                            if (p.prozorroLink) {
+                                rentBtnHtml = `<div class="mt-2"><a href="${p.prozorroLink}" target="_blank" class="btn btn-sm btn-primary w-100 fw-bold" style="color: white !important;"><i class="bi bi-box-arrow-up-right"></i> Взяти участь на Prozorro</a></div>`;
+                            } else {
+                                rentBtnHtml = `<div class="mt-2"><a href="investors?premiseId=${p.id}" class="btn btn-sm btn-success w-100 fw-bold" style="color: white !important;"><i class="bi bi-hammer"></i> Ініціювати аукціон</a></div>`;
+                            }
                         }
 
                         let scheduleHtml = '';

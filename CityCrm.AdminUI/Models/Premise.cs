@@ -32,5 +32,6 @@ namespace CityCrm.AdminUI.Models
         public string? WorkingHours { get; set; }     
         public string? BusinessDescription { get; set; } 
         public bool IsPublicVisible { get; set; } = false;
+        public string? ProzorroLink { get; set; }
     }
 }

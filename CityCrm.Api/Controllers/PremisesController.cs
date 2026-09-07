@@ -3,6 +3,7 @@ using CityCrm.Api.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace CityCrm.Api.Controllers
 {
@@ -81,6 +82,35 @@ namespace CityCrm.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "GrandAdmin, Admin")]
+        [HttpPut("{id}/prozorro")]
+        public async Task<IActionResult> SetProzorroLink(int id, [FromBody] ProzorroDto dto)
+        {
+            var premise = await _context.Premises.FindAsync(id);
+            if (premise == null) return NotFound();
+
+            premise.ProzorroLink = dto.Link;
+            premise.IsPublicVisible = true;
+
+            var systemTender = new TenderRequest
+            {
+                PremiseId = premise.Id,
+                ApplicantName = "Фонд комунального майна (Міськрада)",
+                Edrpou = "ЄДРПОУ Міськради",
+                ContactInfo = "Пряма публікація",
+                Message = "Ініційовано містом",
+                Status = "Approved",
+                AdminResponse = $"Посилання на лот: {dto.Link}",
+                TrackingNumber = $"TND-SYS-{DateTime.UtcNow:yyMM}-{new Random().Next(1000, 9999)}",
+                CreatedAt = DateTime.UtcNow
+            };
+            
+            _context.TenderRequests.Add(systemTender);
+            await _context.SaveChangesAsync();
+            
+            return NoContent();
+        }
+
         private string? ValidatePremiseStatusConflicts(Premise p)
         {
             if (p.Ownership == "Приватна" || p.Ownership == "Державна")
@@ -101,5 +131,12 @@ namespace CityCrm.Api.Controllers
             }
             return null;
         }
+    }
+
+    public class ProzorroDto
+    { 
+        [Required(ErrorMessage = "Посилання є обов'язковим.")]
+        [Url(ErrorMessage = "Це має бути коректне веб-посилання (починатися з http:// або https://)")]
+        public string Link { get; set; } = string.Empty; 
     }
 }

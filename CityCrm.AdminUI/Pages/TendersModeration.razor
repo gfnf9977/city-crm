@@ -39,9 +39,12 @@ else
                 </a>
             </li>
         </ul>
-        <div class="pb-2">
+        <div class="d-flex gap-2 pb-2">
             <input type="text" class="form-control form-control-sm border-secondary shadow-sm" placeholder="🔍 Пошук: компанія, адреса..." 
-                   @bind="searchQuery" @bind:event="oninput" style="width: 250px;" />
+                   @bind="searchQuery" @bind:event="oninput" style="width: 200px;" />
+            <button class="btn btn-sm btn-success fw-bold shadow-sm" @onclick="OpenPublishModal">
+                <i class="bi bi-plus-lg"></i> Опублікувати лот
+            </button>
         </div>
     </div>
 
@@ -170,6 +173,56 @@ else
     </div>
 }
 
+@if (showPublishModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-bank"></i> Опублікувати власний лот</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="ClosePublishModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="fw-bold form-label">Вільне комунальне приміщення</label>
+                        @if (freePremisesLoading)
+                        {
+                            <div><span class="spinner-border spinner-border-sm text-success"></span> Завантаження вільних площ...</div>
+                        }
+                        else
+                        {
+                            <select class="form-select" @bind="publishPremiseId">
+                                <option value="0">-- Оберіть об'єкт --</option>
+                                @foreach (var p in freePremisesList)
+                                {
+                                    <option value="@p.Id">@p.Building?.FullAddress, прим. @p.PremiseNumber (@p.Area кв.м)</option>
+                                }
+                            </select>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold form-label">Посилання на аукціон Prozorro</label>
+                        <input type="text" class="form-control" @bind="publishLink" placeholder="https://sale.ueex.com.ua/..." />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(publishError))
+                    {
+                        <div class="alert alert-danger p-2 small">@publishError</div>
+                    }
+
+                    <div class="text-end mt-4">
+                        <button class="btn btn-secondary me-2" @onclick="ClosePublishModal">Скасувати</button>
+                        <button class="btn btn-success fw-bold" disabled="@(publishPremiseId == 0 || string.IsNullOrWhiteSpace(publishLink))" @onclick="SubmitProzorroLink">
+                            Зберегти та опублікувати
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<TenderRequestModel> requests = new();
     private bool isLoading = true;
@@ -180,6 +233,13 @@ else
     private bool showModal = false;
     private string adminResponseText = "";
     private bool isProcessing = false;
+
+    private bool showPublishModal = false;
+    private bool freePremisesLoading = false;
+    private List<Premise> freePremisesList = new();
+    private int publishPremiseId = 0;
+    private string publishLink = "";
+    private string publishError = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -242,5 +302,54 @@ else
             }
         }
         finally { isProcessing = false; }
+    }
+
+    private async Task OpenPublishModal()
+    {
+        publishPremiseId = 0;
+        publishLink = "";
+        publishError = "";
+        showPublishModal = true;
+        freePremisesLoading = true;
+        try
+        {
+            var buildings = await Http.GetFromJsonAsync<List<Building>>("api/buildings?pOwnership=Комунальна&pStatus=Вільне&pType=Комерційна");
+            freePremisesList.Clear();
+            if (buildings != null)
+            {
+                foreach (var b in buildings)
+                {
+                    var premises = b.Premises.Where(p => p.Ownership == "Комунальна" && p.Status == "Вільне" && p.Type == "Комерційна").ToList();
+                    foreach (var p in premises)
+                    {
+                        p.Building = b;
+                        freePremisesList.Add(p);
+                    }
+                }
+            }
+        }
+        catch { publishError = "Помилка завантаження об'єктів."; }
+        finally { freePremisesLoading = false; }
+    }
+
+    private void ClosePublishModal() => showPublishModal = false;
+
+    private async Task SubmitProzorroLink()
+    {
+        try
+        {
+            var payload = new { Link = publishLink };
+            var response = await Http.PutAsJsonAsync($"api/premises/{publishPremiseId}/prozorro", payload);
+            if (response.IsSuccessStatusCode)
+            {
+                ClosePublishModal();
+                await LoadRequests();
+            }
+            else
+            {
+                publishError = "Помилка збереження на сервері.";
+            }
+        }
+        catch { publishError = "Помилка з'єднання."; }
     }
 }
