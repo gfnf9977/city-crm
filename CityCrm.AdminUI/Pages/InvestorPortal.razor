@@ -57,6 +57,13 @@
                         <EditForm Model="requestModel" OnValidSubmit="SubmitRequest">
                             <DataAnnotationsValidator />
                             <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="fw-bold small">Мета ініціації</label>
+                                    <InputSelect class="form-select border-success" @bind-Value="requestModel.RequestType">
+                                        <option value="Оренда">Довгострокова оренда</option>
+                                        <option value="Приватизація">Приватизація (Викуп)</option>
+                                    </InputSelect>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="fw-bold small">ПІБ або Назва компанії</label>
                                     <InputText class="form-control" @bind-Value="requestModel.ApplicantName" placeholder="ФОП Іваненко І.І." />

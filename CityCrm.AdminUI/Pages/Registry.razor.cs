@@ -22,6 +22,10 @@ namespace CityCrm.AdminUI.Pages
 
         [SupplyParameterFromQuery(Name = "highlight")]
         public int? HighlightBuildingId { get; set; }
+
+        [SupplyParameterFromQuery(Name = "editPremise")]
+        public int? EditPremiseId { get; set; }
+
         private int? currentlyHighlightedId = null;
 
         private bool showAdvancedFilters = false;
@@ -110,6 +114,22 @@ namespace CityCrm.AdminUI.Pages
                         currentlyHighlightedId = null;
                         await InvokeAsync(StateHasChanged);
                     });
+
+                    if (EditPremiseId.HasValue)
+                    {
+                        var targetBuilding = buildings.FirstOrDefault(b => b.Id == HighlightBuildingId.Value);
+                        var targetPremise = targetBuilding?.Premises.FirstOrDefault(p => p.Id == EditPremiseId.Value);
+
+                        if (targetPremise != null)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                await Task.Delay(500);
+                                await InvokeAsync(() => ShowEditPremiseModal(targetPremise));
+                                await InvokeAsync(StateHasChanged);
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -178,7 +198,7 @@ namespace CityCrm.AdminUI.Pages
                 RegistrationDate = p.RegistrationDate, RentEndDate = p.RentEndDate, Notes = p.Notes,
                 BusinessCategory = p.BusinessCategory, BusinessName = p.BusinessName,
                 WorkingHours = p.WorkingHours, BusinessDescription = p.BusinessDescription,
-                IsPublicVisible = p.IsPublicVisible
+                IsPublicVisible = p.IsPublicVisible, IsInclusive = p.IsInclusive
             };
             showPremiseModal = true;
         }

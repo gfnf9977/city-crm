@@ -2,6 +2,7 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "GrandAdmin, Admin")]
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
+@inject NavigationManager NavManager
 
 <PageTitle>Аукціони майна</PageTitle>
 
@@ -34,6 +35,11 @@ else
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(activeTab == "Completed" ? "active fw-bold text-primary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Completed")">
+                    Завершені
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link @(activeTab == "Rejected" ? "active fw-bold text-secondary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Rejected")">
                     Відхилені
                 </a>
@@ -62,7 +68,7 @@ else
             <tbody>
                 @foreach (var req in GetFilteredRequests())
                 {
-                    <tr class="@(req.Status == "Approved" ? "table-success text-muted" : req.Status == "Rejected" ? "table-light text-muted" : "")">
+                    <tr class="@(req.Status == "Approved" ? "table-success text-muted" : req.Status == "Rejected" ? "table-light text-muted" : req.Status == "Completed" ? "table-primary text-muted" : "")">
                         <td>
                             <div class="fw-bold">@req.TrackingNumber</div>
                             <small class="text-muted">@req.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
@@ -79,6 +85,7 @@ else
                             @if (req.Status == "New") { <span class="badge bg-danger">Нова заявка</span> }
                             else if (req.Status == "Processing") { <span class="badge bg-warning text-dark">В обробці</span> }
                             else if (req.Status == "Approved") { <span class="badge bg-success">На аукціоні</span> }
+                            else if (req.Status == "Completed") { <span class="badge bg-primary">Завершено</span> }
                             else if (req.Status == "Rejected") { <span class="badge bg-secondary">Відхилено</span> }
                         </td>
                         <td class="text-center">
@@ -134,36 +141,39 @@ else
                         <label class="fw-bold mb-2">Офіційна відповідь інвестору:</label>
                         <textarea class="form-control mb-3" rows="3" @bind="adminResponseText" placeholder="Наприклад: 'Об'єкт виставлено на торги. Посилання на Prozorro: ...'"></textarea>
 
-                        <div class="d-flex justify-content-between gap-2 mt-3">
+                        <div class="mt-3">
                             @if (selectedRequest.Status == "New")
                             {
-                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
-                                    <i class="bi bi-x-circle"></i> Відмовити
-                                </button>
-                                <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("Processing"))" disabled="@isProcessing">
-                                    <i class="bi bi-file-earmark-arrow-up"></i> Почати підготовку документів
-                                </button>
+                                <div class="d-flex justify-content-between gap-2">
+                                    <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">Відмовити</button>
+                                    <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("Processing"))" disabled="@isProcessing">Почати підготовку</button>
+                                </div>
                             }
                             else if (selectedRequest.Status == "Processing")
                             {
-                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
-                                    <i class="bi bi-x-circle"></i> Відхилити (Проблеми з документами)
-                                </button>
-                                <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Approved"))" disabled="@isProcessing">
-                                    <i class="bi bi-check-lg"></i> Виставлено на Prozorro
-                                </button>
+                                <input type="url" class="form-control mb-3 border-primary" @bind="prozorroInputLink" placeholder="https://prozorro.sale/... (Обов'язково для виставлення)" />
+                                <div class="d-flex justify-content-between gap-2">
+                                    <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">Відхилити</button>
+                                    <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Approved"))" disabled="@(isProcessing || string.IsNullOrWhiteSpace(prozorroInputLink))">
+                                        <i class="bi bi-check-lg"></i> Виставлено на Prozorro
+                                    </button>
+                                </div>
                             }
                             else if (selectedRequest.Status == "Approved")
                             {
-                                <button class="btn btn-success w-100 opacity-75" disabled>
-                                    <i class="bi bi-check-all"></i> Об'єкт вже на аукціоні
+                                <button class="btn btn-primary fw-bold w-100 shadow-sm" @onclick="CompleteAndRedirect" disabled="@isProcessing">
+                                    <i class="bi bi-pencil-square"></i> Завершити тендер та оновити Реєстр
                                 </button>
+                            }
+                            else if (selectedRequest.Status == "Completed")
+                            {
+                                <div class="alert alert-primary mb-0 text-center border-primary shadow-sm">
+                                    <i class="bi bi-info-circle-fill"></i> Тендер завершено.
+                                </div>
                             }
                             else if (selectedRequest.Status == "Rejected")
                             {
-                                <button class="btn btn-secondary w-100 opacity-75" disabled>
-                                    <i class="bi bi-slash-circle"></i> Запит відхилено
-                                </button>
+                                <button class="btn btn-secondary w-100 opacity-75" disabled>Запит відхилено</button>
                             }
                         </div>
                     </div>
@@ -232,6 +242,7 @@ else
     private TenderRequestModel? selectedRequest;
     private bool showModal = false;
     private string adminResponseText = "";
+    private string prozorroInputLink = "";
     private bool isProcessing = false;
 
     private bool showPublishModal = false;
@@ -277,6 +288,7 @@ else
     {
         selectedRequest = req;
         adminResponseText = req.AdminResponse ?? "";
+        prozorroInputLink = req.Premise?.ProzorroLink ?? "";
         showModal = true;
     }
 
@@ -292,13 +304,38 @@ else
         isProcessing = true;
         try
         {
-            var payload = new { Status = newStatus, AdminResponse = adminResponseText };
+            var payload = new { 
+                Status = newStatus, 
+                AdminResponse = adminResponseText,
+                ProzorroLink = prozorroInputLink
+            };
             var response = await Http.PutAsJsonAsync($"api/tenders/{selectedRequest.Id}/status", payload);
             
             if (response.IsSuccessStatusCode)
             {
                 await LoadRequests();
                 CloseModal();
+            }
+        }
+        finally { isProcessing = false; }
+    }
+
+    private async Task CompleteAndRedirect()
+    {
+        if (selectedRequest == null) return;
+        isProcessing = true;
+        try
+        {
+            var payload = new { 
+                Status = "Completed", 
+                AdminResponse = adminResponseText,
+                ProzorroLink = ""
+            };
+            var response = await Http.PutAsJsonAsync($"api/tenders/{selectedRequest.Id}/status", payload);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                NavManager.NavigateTo($"registry?highlight={selectedRequest.Premise?.BuildingId}&editPremise={selectedRequest.Premise?.Id}");
             }
         }
         finally { isProcessing = false; }

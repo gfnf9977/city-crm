@@ -18,6 +18,10 @@ namespace CityCrm.AdminUI.Models
         public string ContactInfo { get; set; } = string.Empty;
 
         public string? Message { get; set; }
+
+        [Required]
+        public string RequestType { get; set; } = "Оренда";
+
         public string Status { get; set; } = "New";
         public string? AdminResponse { get; set; }
         public string TrackingNumber { get; set; } = string.Empty;

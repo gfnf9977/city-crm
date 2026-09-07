@@ -81,9 +81,29 @@ namespace CityCrm.Api.Controllers
             bool isAdmin = User.Identity != null && User.Identity.IsAuthenticated && 
                            (User.IsInRole("GrandAdmin") || User.IsInRole("Admin"));
 
+            bool isInvestorQuery = pOwnership == "Комунальна" && pStatus == "Вільне";
+
             if (!isAdmin)
             {
-                buildings = buildings.Where(b => b.Premises.Any(p => p.IsPublicVisible)).ToList();
+                buildings = buildings.Where(b => b.Premises.Any(p => 
+                    p.IsPublicVisible || (isInvestorQuery && p.Ownership == "Комунальна" && p.Status == "Вільне"))).ToList();
+
+                foreach (var b in buildings)
+                {
+                    b.Notes = null;
+                    b.Condition = "В експлуатації";
+
+                    b.Premises = b.Premises.Where(p => 
+                        p.IsPublicVisible || (isInvestorQuery && p.Ownership == "Комунальна" && p.Status == "Вільне")).ToList();
+
+                    foreach (var p in b.Premises)
+                    {
+                        p.OwnerName = null;
+                        p.Notes = null;
+                        p.RegistrationDate = null;
+                        p.RentEndDate = null;
+                    }
+                }
             }
 
             foreach (var b in buildings)
@@ -94,22 +114,6 @@ namespace CityCrm.Api.Controllers
                 if (b.Location != null && b.Location.GeometryType != "Point")
                 {
                     b.GeoJson = writer.Write(b.Location);
-                }
-
-                if (!isAdmin)
-                {
-                    b.Notes = null;
-                    b.Condition = "В експлуатації";
-
-                    b.Premises = b.Premises.Where(p => p.IsPublicVisible).ToList();
-
-                    foreach (var p in b.Premises)
-                    {
-                        p.OwnerName = null;
-                        p.Notes = null;
-                        p.RegistrationDate = null;
-                        p.RentEndDate = null;
-                    }
                 }
             }
 

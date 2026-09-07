@@ -123,11 +123,26 @@ namespace CityCrm.Api.Controllers
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTenderStatusDto dto)
         {
-            var req = await _context.TenderRequests.FindAsync(id);
+            var req = await _context.TenderRequests
+                .Include(t => t.Premise)
+                .FirstOrDefaultAsync(t => t.Id == id);
+                
             if (req == null) return NotFound();
 
             req.Status = dto.Status;
             req.AdminResponse = dto.AdminResponse;
+
+            if (req.Premise != null)
+            {
+                if (dto.Status == "Approved" && !string.IsNullOrWhiteSpace(dto.ProzorroLink))
+                {
+                    req.Premise.ProzorroLink = dto.ProzorroLink;
+                }
+                else if (dto.Status == "Completed")
+                {
+                    req.Premise.ProzorroLink = null;
+                }
+            }
 
             await _context.SaveChangesAsync();
             return NoContent();
@@ -138,5 +153,7 @@ namespace CityCrm.Api.Controllers
     { 
         public string Status { get; set; } = string.Empty; 
         public string? AdminResponse { get; set; } 
+        public string? ProzorroLink { get; set; }
+        public string? FinalPremiseStatus { get; set; }
     }
 }
