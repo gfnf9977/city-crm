@@ -17,6 +17,18 @@ namespace CityCrm.Api.Controllers
             _context = context;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Premise>> GetPremise(int id)
+        {
+            var premise = await _context.Premises
+                .Include(p => p.Building)
+                .ThenInclude(b => b.Street)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (premise == null) return NotFound();
+            return Ok(premise);
+        }
+
         [Authorize(Roles = "GrandAdmin, Admin")]
         [HttpPost]
         public async Task<ActionResult<Premise>> CreatePremise(Premise premise)

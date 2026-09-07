@@ -13,6 +13,7 @@ namespace CityCrm.Api.Data
         public DbSet<User> Users => Set<User>();
         public DbSet<BusinessRequest> BusinessRequests => Set<BusinessRequest>(); 
         public DbSet<CityIssue> CityIssues => Set<CityIssue>();
+        public DbSet<TenderRequest> TenderRequests => Set<TenderRequest>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

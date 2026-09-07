@@ -121,6 +121,11 @@ window.leafletMap = {
                         let bizCat = p.businessCategory ? `<div class="text-muted d-inline-block" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
                         let incBadge = p.isInclusive ? `<span class="badge bg-primary ms-2 shadow-sm" style="font-size: 0.65rem;"><i class="bi bi-person-wheelchair"></i> Безбар'єрно</span>` : "";
 
+                        let rentBtnHtml = '';
+                        if (!isAdmin && p.status === 'Вільне' && p.ownership === 'Комунальна' && p.type === 'Комерційна') {
+                            rentBtnHtml = `<div class="mt-2"><a href="investors?premiseId=${p.id}" class="btn btn-sm btn-success w-100 fw-bold" style="color: white !important;"><i class="bi bi-hammer"></i> Ініціювати аукціон</a></div>`;
+                        }
+
                         let scheduleHtml = '';
                         if (p.workingHours) {
                             try {
@@ -192,6 +197,7 @@ window.leafletMap = {
                                     <div>${bizCat}${incBadge}</div>
                                     ${bizDesc}
                                     ${scheduleHtml}
+                                    ${rentBtnHtml}
                                 </div>
                             </div>
                         `;

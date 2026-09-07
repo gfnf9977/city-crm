@@ -1,0 +1,246 @@
+@page "/tenders-moderation"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "GrandAdmin, Admin")]
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+
+<PageTitle>Аукціони майна</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-bank text-success"></i> Фонд комунального майна (Аукціони)</h1>
+    <button class="btn btn-outline-secondary" @onclick="LoadRequests"><i class="bi bi-arrow-clockwise"></i> Оновити</button>
+</div>
+
+@if (isLoading)
+{
+    <div class="alert alert-info">Завантаження заявок...</div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-end mb-3 border-bottom">
+        <ul class="nav nav-tabs border-bottom-0 mb-0">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "New" ? "active fw-bold" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "New")">
+                    Нові <span class="badge bg-danger ms-1">@requests.Count(r => r.Status == "New")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "Processing" ? "active fw-bold text-warning" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Processing")">
+                    Підготовка документів <span class="badge bg-warning text-dark ms-1">@requests.Count(r => r.Status == "Processing")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "Approved" ? "active fw-bold text-success" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Approved")">
+                    Виставлено на Prozorro
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "Rejected" ? "active fw-bold text-secondary" : "")" style="cursor:pointer;" @onclick="@(() => activeTab = "Rejected")">
+                    Відхилені
+                </a>
+            </li>
+        </ul>
+        <div class="pb-2">
+            <input type="text" class="form-control form-control-sm border-secondary shadow-sm" placeholder="🔍 Пошук: компанія, адреса..." 
+                   @bind="searchQuery" @bind:event="oninput" style="width: 250px;" />
+        </div>
+    </div>
+
+    <div class="table-responsive bg-white rounded shadow-sm border">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Трекінг / Дата</th>
+                    <th>Заявник / ЄДРПОУ</th>
+                    <th>Об'єкт оренди</th>
+                    <th>Статус</th>
+                    <th class="text-center">Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var req in GetFilteredRequests())
+                {
+                    <tr class="@(req.Status == "Approved" ? "table-success text-muted" : req.Status == "Rejected" ? "table-light text-muted" : "")">
+                        <td>
+                            <div class="fw-bold">@req.TrackingNumber</div>
+                            <small class="text-muted">@req.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold">@req.ApplicantName</div>
+                            <div class="small text-muted">@req.Edrpou | @req.ContactInfo</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold"><i class="bi bi-geo-alt"></i> @req.Premise?.Building?.FullAddress</div>
+                            <div class="small text-muted">Прим: @(string.IsNullOrEmpty(req.Premise?.PremiseNumber) ? "Б/Н" : req.Premise?.PremiseNumber) | Площа: @req.Premise?.Area кв.м</div>
+                        </td>
+                        <td>
+                            @if (req.Status == "New") { <span class="badge bg-danger">Нова заявка</span> }
+                            else if (req.Status == "Processing") { <span class="badge bg-warning text-dark">В обробці</span> }
+                            else if (req.Status == "Approved") { <span class="badge bg-success">На аукціоні</span> }
+                            else if (req.Status == "Rejected") { <span class="badge bg-secondary">Відхилено</span> }
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary" @onclick="() => OpenModal(req)">Опрацювати</button>
+                        </td>
+                    </tr>
+                }
+                
+                @if (!GetFilteredRequests().Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">Немає заявок у цій категорії.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (showModal && selectedRequest != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Аукціон #@selectedRequest.TrackingNumber</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6 border-end">
+                            <h6 class="text-muted mb-1 small">Дані інвестора</h6>
+                            <p class="fw-bold mb-1">@selectedRequest.ApplicantName</p>
+                            <p class="mb-1 small">ЄДРПОУ: @selectedRequest.Edrpou</p>
+                            <p class="mb-2 small">Контакт: @selectedRequest.ContactInfo</p>
+                            
+                            @if (!string.IsNullOrEmpty(selectedRequest.Message))
+                            {
+                                <div class="fst-italic border p-2 bg-light rounded small">"@selectedRequest.Message"</div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1 small">Об'єкт оренди</h6>
+                            <p class="fw-bold mb-1">@selectedRequest.Premise?.Building?.FullAddress</p>
+                            <p class="mb-1 small">Приміщення: @(string.IsNullOrEmpty(selectedRequest.Premise?.PremiseNumber) ? "Б/Н" : selectedRequest.Premise?.PremiseNumber)</p>
+                            <p class="mb-1 small">Площа: @selectedRequest.Premise?.Area кв.м.</p>
+                            <p class="mb-2 small">Тип: @selectedRequest.Premise?.Type</p>
+                            <a href="registry?highlight=@selectedRequest.Premise?.BuildingId" class="btn btn-sm btn-outline-info w-100" target="_blank">Відкрити в Реєстрі</a>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary mb-0">
+                        <label class="fw-bold mb-2">Офіційна відповідь інвестору:</label>
+                        <textarea class="form-control mb-3" rows="3" @bind="adminResponseText" placeholder="Наприклад: 'Об'єкт виставлено на торги. Посилання на Prozorro: ...'"></textarea>
+
+                        <div class="d-flex justify-content-between gap-2 mt-3">
+                            @if (selectedRequest.Status == "New")
+                            {
+                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
+                                    <i class="bi bi-x-circle"></i> Відмовити
+                                </button>
+                                <button class="btn btn-warning fw-bold text-dark" @onclick="@(() => UpdateStatus("Processing"))" disabled="@isProcessing">
+                                    <i class="bi bi-file-earmark-arrow-up"></i> Почати підготовку документів
+                                </button>
+                            }
+                            else if (selectedRequest.Status == "Processing")
+                            {
+                                <button class="btn btn-outline-danger" @onclick="@(() => UpdateStatus("Rejected"))" disabled="@isProcessing">
+                                    <i class="bi bi-x-circle"></i> Відхилити (Проблеми з документами)
+                                </button>
+                                <button class="btn btn-success fw-bold" @onclick="@(() => UpdateStatus("Approved"))" disabled="@isProcessing">
+                                    <i class="bi bi-check-lg"></i> Виставлено на Prozorro
+                                </button>
+                            }
+                            else if (selectedRequest.Status == "Approved")
+                            {
+                                <button class="btn btn-success w-100 opacity-75" disabled>
+                                    <i class="bi bi-check-all"></i> Об'єкт вже на аукціоні
+                                </button>
+                            }
+                            else if (selectedRequest.Status == "Rejected")
+                            {
+                                <button class="btn btn-secondary w-100 opacity-75" disabled>
+                                    <i class="bi bi-slash-circle"></i> Запит відхилено
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<TenderRequestModel> requests = new();
+    private bool isLoading = true;
+    private string activeTab = "New";
+    private string searchQuery = "";
+    
+    private TenderRequestModel? selectedRequest;
+    private bool showModal = false;
+    private string adminResponseText = "";
+    private bool isProcessing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRequests();
+    }
+
+    private async Task LoadRequests()
+    {
+        isLoading = true;
+        try
+        {
+            var result = await Http.GetFromJsonAsync<List<TenderRequestModel>>("api/tenders");
+            if (result != null) requests = result;
+        }
+        finally { isLoading = false; }
+    }
+
+    private IEnumerable<TenderRequestModel> GetFilteredRequests()
+    {
+        var filtered = requests.Where(r => r.Status == activeTab);
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.ToLower();
+            filtered = filtered.Where(r => 
+                (r.TrackingNumber.ToLower().Contains(q)) || 
+                (r.ApplicantName.ToLower().Contains(q)) ||
+                (r.Edrpou.Contains(q)) ||
+                (r.Premise?.Building?.Street?.Name != null && r.Premise.Building.Street.Name.ToLower().Contains(q))
+            );
+        }
+        return filtered;
+    }
+
+    private void OpenModal(TenderRequestModel req)
+    {
+        selectedRequest = req;
+        adminResponseText = req.AdminResponse ?? "";
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedRequest = null;
+    }
+
+    private async Task UpdateStatus(string newStatus)
+    {
+        if (selectedRequest == null) return;
+        isProcessing = true;
+        try
+        {
+            var payload = new { Status = newStatus, AdminResponse = adminResponseText };
+            var response = await Http.PutAsJsonAsync($"api/tenders/{selectedRequest.Id}/status", payload);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadRequests();
+                CloseModal();
+            }
+        }
+        finally { isProcessing = false; }
+    }
+}

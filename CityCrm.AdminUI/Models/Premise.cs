@@ -6,6 +6,7 @@ namespace CityCrm.AdminUI.Models
     {
         public int Id { get; set; }
         public int BuildingId { get; set; }
+        public Building? Building { get; set; }
         
         public string? PremiseNumber { get; set; } 
         

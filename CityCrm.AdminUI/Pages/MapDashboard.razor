@@ -4,37 +4,53 @@
 @inject IJSRuntime JSRuntime
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : "Публічна карта міста")</PageTitle>
+<PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : isInvestorMode ? "Карта інвестора" : "Публічна карта міста")</PageTitle>
 
 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start mb-3 gap-3">
     <div class="d-flex flex-column gap-2">
-        <h3 class="fw-bold mb-1 text-dark">@(isAdmin ? "Просторова мапа нерухомості" : "Публічна карта Чернігова")</h3>
+        <h3 class="fw-bold mb-1 text-dark">
+            @(isAdmin ? "Просторова мапа нерухомості" : isInvestorMode ? "Вільні площі для інвестицій" : "Публічна карта Чернігова")
+        </h3>
         
         @if (!isAdmin)
         {
-            <div class="d-flex align-items-center gap-3 mt-1">
-                <button class="btn btn-outline-primary shadow-sm rounded-circle" style="width: 40px; height: 40px; padding: 0;" @onclick="LocateMe" title="Знайти мене">
-                    <i class="bi bi-crosshair"></i>
-                </button>
-
-                <button class="btn @(isPickingIssueLocation ? "btn-danger" : "btn-outline-danger") shadow-sm rounded-pill px-3" @onclick="ToggleIssuePickingMode">
-                    @if (isPickingIssueLocation)
-                    {
-                        <span><i class="bi bi-x-circle"></i> Скасувати вибір</span>
-                    }
-                    else
-                    {
-                        <span><i class="bi bi-exclamation-triangle-fill"></i> Повідомити про проблему</span>
-                    }
-                </button>
-
-                <div class="form-check form-switch mb-0 bg-white px-3 py-1 rounded shadow-sm border">
-                    <input class="form-check-input ms-0 me-2" type="checkbox" id="showIssues" @bind="showIssuesOnMap" @bind:after="ToggleIssuesVisibility" />
-                    <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem; cursor: pointer;" for="showIssues">
-                        Показати інциденти
-                    </label>
+            @if (isInvestorMode)
+            {
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <div class="alert alert-success py-2 px-3 mb-0 shadow-sm d-inline-flex align-items-center border-success border-start border-4">
+                        <i class="bi bi-info-circle-fill me-2 text-success"></i> Відображається лише вільна комуналка
+                    </div>
+                    <button class="btn btn-outline-secondary shadow-sm bg-white" @onclick="ExitInvestorMode">
+                        <i class="bi bi-arrow-left"></i> На звичайну карту
+                    </button>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center gap-3 mt-1">
+                    <button class="btn btn-outline-primary shadow-sm rounded-circle" style="width: 40px; height: 40px; padding: 0;" @onclick="LocateMe" title="Знайти мене">
+                        <i class="bi bi-crosshair"></i>
+                    </button>
+
+                    <button class="btn @(isPickingIssueLocation ? "btn-danger" : "btn-outline-danger") shadow-sm rounded-pill px-3" @onclick="ToggleIssuePickingMode">
+                        @if (isPickingIssueLocation)
+                        {
+                            <span><i class="bi bi-x-circle"></i> Скасувати вибір</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-exclamation-triangle-fill"></i> Повідомити про проблему</span>
+                        }
+                    </button>
+
+                    <div class="form-check form-switch mb-0 bg-white px-3 py-1 rounded shadow-sm border">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="showIssues" @bind="showIssuesOnMap" @bind:after="ToggleIssuesVisibility" />
+                        <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem; cursor: pointer;" for="showIssues">
+                            Показати інциденти
+                        </label>
+                    </div>
+                </div>
+            }
         }
     </div>
     
@@ -48,7 +64,7 @@
                 <button class="btn @(activeFilter == "problems" ? "btn-danger" : "btn-outline-danger")" @onclick="@(() => ApplyFilter("problems"))">Зруйновані / Аварійні</button>
             </div>
         }
-        else
+        else if (!isInvestorMode)
         {
             <div class="d-flex flex-column align-items-end gap-2">
                 <div class="d-flex gap-2 align-items-center">
@@ -179,6 +195,10 @@
     [SupplyParameterFromQuery(Name = "report")]
     public bool ReportIssueParam { get; set; }
 
+    [SupplyParameterFromQuery(Name = "filter")]
+    public string? InitialFilter { get; set; }
+    
+    private bool isInvestorMode = false;
     private bool isMapInitialized = false;
     private bool isLoading = true;
     private string activeFilter = "";
@@ -223,17 +243,28 @@
             await JSRuntime.InvokeVoidAsync("leafletMap.init", "map", objRef);
             isMapInitialized = true;
             
-            await LoadDataFromServer("");
-            if (!isAdmin) 
-            { 
-                await LoadIssuesFromServer(); 
-                
-                if (ReportIssueParam)
-                {
-                    await ToggleIssuePickingMode();
-                }
-            } 
+            if (InitialFilter == "free_communal" && !isAdmin)
+            {
+                isInvestorMode = true;
+                await LoadDataFromServer("free_communal");
+            }
+            else
+            {
+                await LoadDataFromServer("");
+                if (!isAdmin) 
+                { 
+                    await LoadIssuesFromServer(); 
+                    if (ReportIssueParam) await ToggleIssuePickingMode();
+                } 
+            }
         }
+    }
+
+    private async Task ExitInvestorMode()
+    {
+        isInvestorMode = false;
+        await LoadDataFromServer("");
+        await LoadIssuesFromServer();
     }
 
     private async Task LocateMe()
@@ -411,11 +442,22 @@
         .Where(b => !filterHasShelter || b.HasShelter)
         .Select(b => 
         {
-            var visiblePremises = isAdmin
-                ? b.Premises
-                : b.Premises.Where(p => p.IsPublicVisible).ToList();
+            List<Premise> visiblePremises;
 
-            if (isSearchActive)
+            if (isAdmin) 
+            {
+                visiblePremises = b.Premises;
+            }
+            else if (isInvestorMode)
+            {
+                visiblePremises = b.Premises.Where(p => p.Ownership == "Комунальна" && p.Status == "Вільне" && p.Type == "Комерційна").ToList();
+            }
+            else
+            {
+                visiblePremises = b.Premises.Where(p => p.IsPublicVisible).ToList();
+            }
+
+            if (isSearchActive && !isInvestorMode)
             {
                 visiblePremises = visiblePremises.Where(p => 
                     (!filterIsInclusive || p.IsInclusive) &&
@@ -439,6 +481,8 @@
                 geoJson = b.GeoJson,
                 notes = isAdmin ? b.Notes : null,
                 premises = visiblePremises.Select(p => new {
+                    id = p.Id,
+                    ownership = p.Ownership,
                     number = p.PremiseNumber,
                     area = p.Area,
                     type = p.Type,
@@ -455,7 +499,7 @@
         .Where(b => isAdmin || b.premises.Any() || (filterHasShelter && b.hasShelter))
         .ToList();
 
-        if (isSearchActive && !filterHasShelter)
+        if (isSearchActive && !filterHasShelter && !isInvestorMode)
         {
             searchResultsCount = mapData.Sum(b => b.premises.Count);
         }

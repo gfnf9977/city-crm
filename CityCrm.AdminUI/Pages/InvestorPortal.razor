@@ -1,45 +1,240 @@
 @page "/investors"
+@using CityCrm.AdminUI.Models
+@inject HttpClient Http
+@inject NavigationManager NavManager
 
 <PageTitle>Інвесторам | CityCrm</PageTitle>
 
-<div class="container py-4">
-    <div class="p-5 mb-4 bg-white border rounded-3 shadow-sm text-center">
-        <i class="bi bi-buildings text-success display-1 mb-3"></i>
-        <h2 class="fw-bold text-dark">Оренда та приватизація майна</h2>
-        <p class="col-md-8 mx-auto fs-5 text-muted">
-            Муніципалітет Чернігова пропонує прозорі умови для бізнесу. Всі вільні площі комунальної власності доступні для оренди або викупу виключно через систему <strong>Prozorro.Продажі</strong>.
-        </p>
-        <div class="d-flex justify-content-center gap-3 mt-4">
-            <a href="map" class="btn btn-success btn-lg px-4 shadow-sm">
-                <i class="bi bi-search"></i> Знайти на карті міста
-            </a>
-            <button class="btn btn-outline-secondary btn-lg px-4" @onclick="() => showTenderMock = true">
-                <i class="bi bi-clipboard-data"></i> Заявка на ініціацію аукціону
-            </button>
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex align-items-center mb-4">
+        <i class="bi bi-graph-up-arrow text-success display-4 me-3"></i>
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Оренда комунального майна</h2>
+            <p class="text-muted mb-0">Ініціація аукціонів на вільні комерційні площі через Prozorro.Продажі</p>
         </div>
     </div>
-    <div class="text-center mt-3 text-muted small">
-        * Щоб переглянути на карті всі вільні приміщення, відкрийте карту і натисніть фільтр "Вільна комуналка".
-    </div>
-</div>
 
-@if (showTenderMock)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold">Ініціювати аукціон</h5>
-                    <button type="button" class="btn-close" @onclick="() => showTenderMock = false"></button>
+    @if (PremiseId.HasValue)
+    {
+        <div class="card shadow-sm border-0 mb-4 border-top border-success border-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-text"></i> Оформлення заявки на аукціон</h5>
+                
+                @if (isLoadingPremise)
+                {
+                    <div class="text-center"><span class="spinner-border text-success"></span> Отримання даних об'єкта...</div>
+                }
+                else if (targetPremise != null)
+                {
+                    <div class="alert alert-light border shadow-sm mb-4">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="fw-bold text-dark mb-1">@targetPremise.Building?.FullAddress</h6>
+                                <div class="text-muted small">
+                                    Приміщення №: @(string.IsNullOrEmpty(targetPremise.PremiseNumber) ? "Б/Н" : targetPremise.PremiseNumber) | 
+                                    Поверх: @(targetPremise.Floor?.ToString() ?? "-")
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                                <div class="badge bg-success fs-6">Площа: @targetPremise.Area кв.м.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isSubmitted)
+                    {
+                        <div class="text-center p-4">
+                            <i class="bi bi-check-circle-fill text-success display-2 mb-3"></i>
+                            <h4 class="fw-bold">Заявку прийнято Фондом комунального майна!</h4>
+                            <p>Ми розпочали підготовку документації для виставлення об'єкта на аукціон.</p>
+                            <p class="text-muted small">Номер вашої заявки для відстеження:</p>
+                            <h3 class="fw-bold text-success">@trackingNumber</h3>
+                            <button class="btn btn-outline-secondary mt-3" @onclick="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)">Готово</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="requestModel" OnValidSubmit="SubmitRequest">
+                            <DataAnnotationsValidator />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="fw-bold small">ПІБ або Назва компанії</label>
+                                    <InputText class="form-control" @bind-Value="requestModel.ApplicantName" placeholder="ФОП Іваненко І.І." />
+                                    <ValidationMessage For="@(() => requestModel.ApplicantName)" class="text-danger small" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold small">ЄДРПОУ / ІПН</label>
+                                    <InputText class="form-control" @bind-Value="requestModel.Edrpou" placeholder="12345678" />
+                                    <ValidationMessage For="@(() => requestModel.Edrpou)" class="text-danger small" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="fw-bold small">Контактний телефон / Email</label>
+                                    <InputText class="form-control" @bind-Value="requestModel.ContactInfo" placeholder="+380..." />
+                                    <ValidationMessage For="@(() => requestModel.ContactInfo)" class="text-danger small" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="fw-bold small">Опис планованої діяльності (Опціонально)</label>
+                                    <InputTextArea class="form-control" rows="2" @bind-Value="requestModel.Message" placeholder="Під що плануєте орендувати..."></InputTextArea>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(serverError))
+                            {
+                                <div class="alert alert-danger p-2 mt-3 small">@serverError</div>
+                            }
+
+                            <div class="text-end mt-4">
+                                <button type="button" class="btn btn-secondary me-2" @onclick="@(() => NavManager.NavigateTo("/investors"))">Скасувати</button>
+                                <button type="submit" class="btn btn-success fw-bold px-4" disabled="@isSubmitting">
+                                    @if (isSubmitting) { <span class="spinner-border spinner-border-sm"></span> }
+                                    else { <span>Надіслати заявку</span> }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-danger">Об'єкт не знайдено або він вже недоступний.</div>
+                    <a href="map?filter=free_communal" class="btn btn-outline-primary">Повернутися на карту</a>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="background-color: #f1f8f1;">
+                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                        <i class="bi bi-map-fill text-success display-4 mb-3"></i>
+                        <h5 class="fw-bold">Знайти об'єкт</h5>
+                        <p class="text-muted small mb-4">Всі вільні площі міста доступні на інтерактивній карті. Оберіть об'єкт та натисніть "Ініціювати аукціон".</p>
+                        <a href="map?filter=free_communal" class="btn btn-success rounded-pill px-4 mt-auto shadow-sm">Відкрити карту вільних площ</a>
+                    </div>
                 </div>
-                <div class="modal-body p-4 text-center">
-                    <p class="text-muted">Знайшли на карті вільне приміщення, якого ще немає на Prozorro? У Фазі 7 тут ви зможете надіслати запит до Фонду комунального майна на підготовку лоту.</p>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-search text-primary"></i> Статус заявки</h5>
+                        <p class="text-muted small">Введіть номер вашої заявки (TND-...), щоб дізнатися статус підготовки документів.</p>
+                        
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="TND-..." @bind="searchTrackingId" @bind:event="oninput" @onkeyup="HandleTrackingEnter" />
+                            <button class="btn btn-primary" @onclick="CheckStatus" disabled="@isChecking">
+                                @if (isChecking) { <span class="spinner-border spinner-border-sm"></span> }
+                                else { <span>Перевірити</span> }
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+
+        @if (trackingResult != null)
+        {
+            <div class="card border-0 shadow-sm border-start border-4 border-info">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Заявка #@trackingResult.TrackingNumber</h5>
+                        <span class="badge bg-primary fs-6">Статус: @trackingResult.Status</span>
+                    </div>
+                    <div class="mb-2"><strong>Об'єкт:</strong> @trackingResult.Premise?.Building?.FullAddress, прим. @trackingResult.Premise?.PremiseNumber</div>
+                    <div class="mb-3"><strong>Заявник:</strong> @trackingResult.ApplicantName</div>
+                    
+                    @if (!string.IsNullOrEmpty(trackingResult.AdminResponse))
+                    {
+                        <div class="alert alert-info shadow-sm mb-0">
+                            <strong>Відповідь фонду майна:</strong><br/>
+                            @trackingResult.AdminResponse
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(trackingError))
+        {
+            <div class="alert alert-danger shadow-sm text-center">@trackingError</div>
+        }
+    }
+</div>
 
 @code {
-    private bool showTenderMock = false;
+    [SupplyParameterFromQuery(Name = "premiseId")]
+    public int? PremiseId { get; set; }
+
+    private Premise? targetPremise;
+    private TenderRequestModel requestModel = new();
+    private bool isLoadingPremise = false;
+    private bool isSubmitting = false;
+    private bool isSubmitted = false;
+    private string trackingNumber = "";
+    private string serverError = "";
+
+    private string searchTrackingId = "";
+    private TenderRequestModel? trackingResult;
+    private string trackingError = "";
+    private bool isChecking = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (PremiseId.HasValue)
+        {
+            isLoadingPremise = true;
+            try
+            {
+                targetPremise = await Http.GetFromJsonAsync<Premise>($"api/premises/{PremiseId.Value}");
+                if (targetPremise != null)
+                {
+                    requestModel.PremiseId = targetPremise.Id;
+                }
+            }
+            catch { targetPremise = null; }
+            finally { isLoadingPremise = false; }
+        }
+    }
+
+    private async Task SubmitRequest()
+    {
+        isSubmitting = true;
+        serverError = "";
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/tenders", requestModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                trackingNumber = result?["trackingNumber"]?.ToString() ?? "";
+                isSubmitted = true;
+            }
+            else
+            {
+                serverError = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch { serverError = "Помилка сервера."; }
+        finally { isSubmitting = false; }
+    }
+
+    private async Task CheckStatus()
+    {
+        if (string.IsNullOrWhiteSpace(searchTrackingId)) return;
+        isChecking = true;
+        trackingError = "";
+        trackingResult = null;
+        try
+        {
+            var response = await Http.GetAsync($"api/tenders/tracking/{searchTrackingId.Trim()}");
+            if (response.IsSuccessStatusCode)
+                trackingResult = await response.Content.ReadFromJsonAsync<TenderRequestModel>();
+            else
+                trackingError = "Заявку не знайдено.";
+        }
+        catch { trackingError = "Помилка сервера."; }
+        finally { isChecking = false; }
+    }
+
+    private async Task HandleTrackingEnter(KeyboardEventArgs e) { if (e.Key == "Enter") await CheckStatus(); }
 }
