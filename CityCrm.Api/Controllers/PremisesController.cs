@@ -90,7 +90,6 @@ namespace CityCrm.Api.Controllers
             if (premise == null) return NotFound();
 
             premise.ProzorroLink = dto.Link;
-            premise.IsPublicVisible = true;
 
             var systemTender = new TenderRequest
             {
