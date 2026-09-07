@@ -320,26 +320,12 @@ else
         finally { isProcessing = false; }
     }
 
-    private async Task CompleteAndRedirect()
-    {
-        if (selectedRequest == null) return;
-        isProcessing = true;
-        try
-        {
-            var payload = new { 
-                Status = "Completed", 
-                AdminResponse = adminResponseText,
-                ProzorroLink = ""
-            };
-            var response = await Http.PutAsJsonAsync($"api/tenders/{selectedRequest.Id}/status", payload);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                NavManager.NavigateTo($"registry?highlight={selectedRequest.Premise?.BuildingId}&editPremise={selectedRequest.Premise?.Id}");
-            }
-        }
-        finally { isProcessing = false; }
-    }
+    private void CompleteAndRedirect()
+{
+    var bId = selectedRequest?.Premise?.Building?.Id;
+    
+    NavManager.NavigateTo($"registry?highlight={bId}&editPremise={selectedRequest?.Premise?.Id}&pendingTenderId={selectedRequest?.Id}");
+}
 
     private async Task OpenPublishModal()
     {

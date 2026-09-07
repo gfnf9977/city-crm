@@ -10,6 +10,7 @@ namespace CityCrm.AdminUI.Pages
     {
         [Inject] private HttpClient Http { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
+        [Inject] private NavigationManager NavManager { get; set; } = default!;
 
         private List<Building> buildings = new();
         private HashSet<int> expandedBuildings = new();
@@ -20,11 +21,17 @@ namespace CityCrm.AdminUI.Pages
         private Building newBuilding = new();
         private Premise newPremise = new();
 
+        [Parameter]
         [SupplyParameterFromQuery(Name = "highlight")]
         public int? HighlightBuildingId { get; set; }
 
+        [Parameter]
         [SupplyParameterFromQuery(Name = "editPremise")]
         public int? EditPremiseId { get; set; }
+
+        [Parameter]
+        [SupplyParameterFromQuery(Name = "pendingTenderId")]
+        public int? PendingTenderId { get; set; }
 
         private int? currentlyHighlightedId = null;
 
@@ -98,22 +105,11 @@ namespace CityCrm.AdminUI.Pages
             {
                 buildings = result;
 
-                if (HighlightBuildingId.HasValue)
+                if (HighlightBuildingId.HasValue && HighlightBuildingId.Value > 0)
                 {
                     expandedBuildings.Clear();
                     expandedBuildings.Add(HighlightBuildingId.Value);
                     currentlyHighlightedId = HighlightBuildingId.Value;
-
-                    StateHasChanged();
-                    await Task.Delay(100);
-                    await JS.InvokeVoidAsync("scrollToElement", $"building-{currentlyHighlightedId}");
-
-                    _ = Task.Run(async () =>
-                    {
-                        await Task.Delay(3500);
-                        currentlyHighlightedId = null;
-                        await InvokeAsync(StateHasChanged);
-                    });
 
                     if (EditPremiseId.HasValue)
                     {
@@ -125,11 +121,24 @@ namespace CityCrm.AdminUI.Pages
                             _ = Task.Run(async () =>
                             {
                                 await Task.Delay(500);
-                                await InvokeAsync(() => ShowEditPremiseModal(targetPremise));
-                                await InvokeAsync(StateHasChanged);
+                                await InvokeAsync(() => {
+                                    ShowEditPremiseModal(targetPremise);
+                                    StateHasChanged();
+                                });
                             });
                         }
                     }
+
+                    StateHasChanged();
+                    await Task.Delay(300);
+                    await JS.InvokeVoidAsync("scrollToElement", $"building-{currentlyHighlightedId}");
+
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(3500);
+                        currentlyHighlightedId = null;
+                        await InvokeAsync(StateHasChanged);
+                    });
                 }
             }
         }
@@ -221,11 +230,21 @@ namespace CityCrm.AdminUI.Pages
         private async Task HandlePremiseSaved()
         {
             showPremiseModal = false;
+            if (PendingTenderId.HasValue) 
+            {
+                NavManager.NavigateTo("/registry"); 
+                return; 
+            }
             await LoadBuildings();
         }
 
         private void CloseBuildingModal() => showBuildingModal = false;
-        private void ClosePremiseModal() => showPremiseModal = false;
+
+        private void ClosePremiseModal()
+        {
+            showPremiseModal = false;
+            if (PendingTenderId.HasValue) NavManager.NavigateTo("/registry");
+        }
 
         private string GetPremiseColorClass(string status) => status switch
         {

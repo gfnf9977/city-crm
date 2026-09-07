@@ -362,5 +362,6 @@
               Model="newPremise"
               BuildingType="@(buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId)?.BuildingType ?? "")"
               ExistingPremises="@(buildings.FirstOrDefault(b => b.Id == newPremise.BuildingId)?.Premises ?? new List<Premise>())"
+              PendingTenderId="PendingTenderId"
               OnSaved="HandlePremiseSaved"
               OnClosed="ClosePremiseModal" />
