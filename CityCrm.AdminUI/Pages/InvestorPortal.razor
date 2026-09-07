@@ -2,6 +2,7 @@
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
 @inject NavigationManager NavManager
+@inject IJSRuntime JS
 
 <PageTitle>Інвесторам | CityCrm</PageTitle>
 
@@ -47,9 +48,15 @@
                             <i class="bi bi-check-circle-fill text-success display-2 mb-3"></i>
                             <h4 class="fw-bold">Заявку прийнято Фондом комунального майна!</h4>
                             <p>Ми розпочали підготовку документації для виставлення об'єкта на аукціон.</p>
-                            <p class="text-muted small">Номер вашої заявки для відстеження:</p>
-                            <h3 class="fw-bold text-success">@trackingNumber</h3>
-                            <button class="btn btn-outline-secondary mt-3" @onclick="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)">Готово</button>
+                            <p class="text-muted small mb-2">Номер вашої заявки для відстеження (натисніть, щоб скопіювати):</p>
+                            
+                            <div class="mb-4">
+                                <h3 class="fw-bold text-success copyable-text mb-0" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", trackingNumber)'>
+                                    @trackingNumber <i class="bi bi-copy fs-5 ms-2 text-muted"></i>
+                                </h3>
+                            </div>
+                            
+                            <button class="btn btn-outline-secondary px-4 rounded-pill" @onclick='() => NavManager.NavigateTo("/investors")'>Готово</button>
                         </div>
                     }
                     else

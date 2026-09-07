@@ -112,3 +112,43 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.copyable-text {
+    cursor: pointer;
+    transition: color 0.2s, transform 0.1s;
+    display: inline-block;
+}
+
+.copyable-text:hover {
+    color: #0d6efd !important;
+}
+
+.copyable-text:active {
+    transform: scale(0.95);
+}
+
+#clipboard-toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #343a40;
+    color: #fff;
+    text-align: center;
+    border-radius: 50px;
+    padding: 12px 20px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#clipboard-toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 40px;
+}

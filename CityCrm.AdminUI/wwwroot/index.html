@@ -137,6 +137,21 @@
             }
         };
     </script>
+    <script>
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                let toast = document.getElementById("clipboard-toast");
+                if (!toast) {
+                    toast = document.createElement("div");
+                    toast.id = "clipboard-toast";
+                    document.body.appendChild(toast);
+                }
+                toast.innerHTML = '<i class="bi bi-clipboard-check text-success fs-5 me-2"></i> Код скопійовано в буфер обміну';
+                toast.className = "show";
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
+            });
+        }
+    </script>
 </body>
 
 </html>

@@ -2,6 +2,7 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "GrandAdmin, Admin")]
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <PageTitle>Модерація інцидентів</PageTitle>
 
@@ -62,7 +63,9 @@ else
                 {
                     <tr class="@(issue.Status == "Resolved" ? "table-success text-muted" : issue.Status == "Rejected" ? "table-light text-muted" : "")">
                         <td>
-                            <div class="fw-bold">@issue.TrackingNumber</div>
+                            <div class="fw-bold copyable-text text-primary" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", issue.TrackingNumber)'>
+                                @issue.TrackingNumber <i class="bi bi-files text-muted ms-1" style="font-size: 0.8rem;"></i>
+                            </div>
                             <small class="text-muted">@issue.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                         </td>
                         <td>

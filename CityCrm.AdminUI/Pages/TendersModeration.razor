@@ -3,6 +3,7 @@
 @using CityCrm.AdminUI.Models
 @inject HttpClient Http
 @inject NavigationManager NavManager
+@inject IJSRuntime JS
 
 <PageTitle>Аукціони майна</PageTitle>
 
@@ -70,7 +71,9 @@ else
                 {
                     <tr class="@(req.Status == "Approved" ? "table-success text-muted" : req.Status == "Rejected" ? "table-light text-muted" : req.Status == "Completed" ? "table-primary text-muted" : "")">
                         <td>
-                            <div class="fw-bold">@req.TrackingNumber</div>
+                            <div class="fw-bold copyable-text text-success" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", req.TrackingNumber)'>
+                                @req.TrackingNumber <i class="bi bi-files text-muted ms-1" style="font-size: 0.8rem;"></i>
+                            </div>
                             <small class="text-muted">@req.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                         </td>
                         <td>
@@ -321,11 +324,11 @@ else
     }
 
     private void CompleteAndRedirect()
-{
-    var bId = selectedRequest?.Premise?.Building?.Id;
-    
-    NavManager.NavigateTo($"registry?highlight={bId}&editPremise={selectedRequest?.Premise?.Id}&pendingTenderId={selectedRequest?.Id}");
-}
+    {
+        var bId = selectedRequest?.Premise?.Building?.Id;
+        
+        NavManager.NavigateTo($"registry?highlight={bId}&editPremise={selectedRequest?.Premise?.Id}&pendingTenderId={selectedRequest?.Id}");
+    }
 
     private async Task OpenPublishModal()
     {

@@ -135,9 +135,15 @@
                             <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
                             <h4>Дякуємо за небайдужість!</h4>
                             <p>Заявку успішно передано до міських служб.</p>
-                            <p class="text-muted small">Ваш номер для відстеження статусу:</p>
-                            <h3 class="fw-bold text-primary">@createdIssueTrackingNumber</h3>
-                            <button class="btn btn-secondary mt-3" @onclick="CloseIssueModal">Закрити</button>
+                            <p class="text-muted small mb-2">Ваш номер для відстеження статусу (натисніть, щоб скопіювати):</p>
+                            
+                            <div class="mb-4">
+                                <h3 class="fw-bold text-primary copyable-text mb-0" title="Копіювати код" @onclick='() => JSRuntime.InvokeVoidAsync("copyToClipboard", createdIssueTrackingNumber)'>
+                                    @createdIssueTrackingNumber <i class="bi bi-copy fs-5 ms-2 text-muted"></i>
+                                </h3>
+                            </div>
+                            
+                            <button class="btn btn-secondary px-4 rounded-pill" @onclick="CloseIssueModal">Закрити</button>
                         </div>
                     }
                     else
