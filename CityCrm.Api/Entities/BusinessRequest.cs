@@ -22,6 +22,7 @@ namespace CityCrm.Api.Entities
         public string? BuildingLetter { get; set; }
         public string? BuildingBlock { get; set; }
         public string? PremiseNumber { get; set; }
+        public string TrackingNumber { get; set; } = string.Empty;
 
         public string? WorkingHours { get; set; } 
         public bool IsInclusive { get; set; }

@@ -6,6 +6,7 @@ namespace CityCrm.AdminUI.Models
     {
         public int Id { get; set; }
         public string Status { get; set; } = string.Empty;
+        public string TrackingNumber { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public Street? Street { get; set; }
 

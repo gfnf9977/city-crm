@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="input-group" style="max-width: 300px;">
-                <input type="number" class="form-control" placeholder="Номер заявки..." @bind="trackingId" @bind:event="oninput" @onkeyup="HandleTrackingEnter" />
+                <input type="text" class="form-control" placeholder="BIZ-..." @bind="trackingId" @bind:event="oninput" @onkeyup="HandleTrackingEnter" />
                 <button class="btn btn-primary" @onclick="CheckStatus">
                     @if (isCheckingStatus) { <span class="spinner-border spinner-border-sm"></span> }
                     else { <span>Перевірити</span> }
@@ -35,7 +35,7 @@
                 <div class="alert @GetStatusAlertClass(trackingResult.Status) mb-0 py-2 d-flex align-items-center">
                     <i class="bi @GetStatusIconClass(trackingResult.Status) fs-5 me-2"></i>
                     <div>
-                        <strong>Заявка #@trackingResult.Id</strong> — @trackingResult.Name
+                        <strong>Заявка #@trackingResult.TrackingNumber</strong> — @trackingResult.Name
                         <br/>
                         Статус: <strong>@GetStatusText(trackingResult.Status)</strong>
                     </div>
@@ -56,8 +56,8 @@
             <i class="bi bi-check-circle-fill text-success display-1 d-block mb-3"></i>
             <h3 class="fw-bold">Заявку успішно прийнято!</h3>
             <p class="fs-5 mb-2">Ваш номер для відстеження:</p>
-            <div class="display-4 fw-bold text-success mb-4 copyable-text" style="letter-spacing: 2px;" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", submittedRequestId.ToString())'>
-                #@submittedRequestId <i class="bi bi-copy fs-4 ms-2 text-muted"></i>
+            <div class="display-4 fw-bold text-success mb-4 copyable-text" style="letter-spacing: 2px;" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", submittedTrackingNumber)'>
+                @submittedTrackingNumber <i class="bi bi-copy fs-4 ms-2 text-muted"></i>
             </div>
             <p class="text-muted mb-4">Збережіть цей номер. Ви зможете перевірити статус обробки заявки на цій же сторінці.</p>
             <button class="btn btn-success px-4 rounded-pill" @onclick="ResetForm">Подати ще одну заявку</button>
@@ -270,7 +270,7 @@
     private bool isSubmitted = false;
     private bool isSubmitting = false;
     private string serverError = "";
-    private int submittedRequestId = 0;
+    private string submittedTrackingNumber = "";
 
     private string streetSearchQuery = "";
     private List<Street> streetSuggestions = new();
@@ -279,7 +279,7 @@
     private readonly string[] daysOfWeek = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд" };
     private Dictionary<string, DaySchedule> weeklySchedule = new();
 
-    private int? trackingId;
+    private string trackingId = "";
     private TrackingResponse? trackingResult;
     private string trackingError = "";
     private bool isCheckingStatus = false;
@@ -291,8 +291,8 @@
         public TimeOnly? Close { get; set; } = new TimeOnly(18, 0);
     }
 
-    public class CreateResponse { public int Id { get; set; } }
-    public class TrackingResponse { public int Id { get; set; } public string Status { get; set; } = ""; public string Name { get; set; } = ""; }
+    public class CreateResponse { public string TrackingNumber { get; set; } = ""; }
+    public class TrackingResponse { public string TrackingNumber { get; set; } = ""; public string Status { get; set; } = ""; public string Name { get; set; } = ""; }
 
     protected override void OnInitialized()
     {
@@ -305,7 +305,7 @@
         streetSearchQuery = "";
         isSubmitted = false;
         is24_7 = false;
-        submittedRequestId = 0;
+        submittedTrackingNumber = "";
         weeklySchedule = daysOfWeek.ToDictionary(d => d, d => new DaySchedule { IsWorking = d != "Сб" && d != "Нд" });
     }
 
@@ -351,7 +351,7 @@
 
     private async Task CheckStatus()
     {
-        if (trackingId == null || trackingId <= 0) return;
+        if (string.IsNullOrWhiteSpace(trackingId)) return;
         
         isCheckingStatus = true;
         trackingError = "";
@@ -359,7 +359,7 @@
 
         try
         {
-            var response = await Http.GetAsync($"api/businessrequests/{trackingId}/status");
+            var response = await Http.GetAsync($"api/businessrequests/tracking/{trackingId.Trim()}");
             if (response.IsSuccessStatusCode)
             {
                 trackingResult = await response.Content.ReadFromJsonAsync<TrackingResponse>();
@@ -433,10 +433,10 @@
             var response = await Http.PostAsJsonAsync("api/businessrequests", requestModel);
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<CreateResponse>();
-                if (result != null)
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                if (result != null && result.ContainsKey("trackingNumber"))
                 {
-                    submittedRequestId = result.Id;
+                    submittedTrackingNumber = result["trackingNumber"].ToString()!;
                 }
                 isSubmitted = true;
             }

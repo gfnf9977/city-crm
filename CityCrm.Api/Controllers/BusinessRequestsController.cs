@@ -22,22 +22,23 @@ namespace CityCrm.Api.Controllers
         {
             request.Status = "Pending";
             request.CreatedAt = DateTime.UtcNow;
+            request.TrackingNumber = $"BIZ-{DateTime.UtcNow:yyMM}-{new Random().Next(1000, 9999)}";
             
             _context.BusinessRequests.Add(request);
             await _context.SaveChangesAsync();
             
-            return Ok(new { id = request.Id });
+            return Ok(new { id = request.Id, trackingNumber = request.TrackingNumber });
         }
 
-        [HttpGet("{id}/status")]
-        public async Task<ActionResult> GetRequestStatus(int id)
+        [HttpGet("tracking/{trackingNumber}")]
+        public async Task<ActionResult> GetRequestStatus(string trackingNumber)
         {
-            var req = await _context.BusinessRequests.FindAsync(id);
+            var req = await _context.BusinessRequests.FirstOrDefaultAsync(b => b.TrackingNumber == trackingNumber);
             if (req == null) return NotFound(new { message = "Заявку не знайдено" });
 
             return Ok(new 
             { 
-                id = req.Id,
+                trackingNumber = req.TrackingNumber,
                 status = req.Status,
                 name = req.IsNetwork ? $"{req.NetworkName} ({req.LocalName})" : req.LocalName
             });
