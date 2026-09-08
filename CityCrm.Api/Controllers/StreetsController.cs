@@ -115,5 +115,48 @@ namespace CityCrm.Api.Controllers
 
             return NoContent();
         }
+
+        [AllowAnonymous]
+        [HttpGet("export/json")]
+        public async Task<IActionResult> ExportJson()
+        {
+            var streets = await _context.Streets
+                .OrderBy(s => s.Name)
+                .Select(s => new {
+                    s.Id,
+                    s.StreetType,
+                    s.Name,
+                    s.OldNames
+                })
+                .ToListAsync();
+
+            var json = System.Text.Json.JsonSerializer.Serialize(streets, new System.Text.Json.JsonSerializerOptions { 
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping 
+            });
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            return File(bytes, "application/json", "chernihiv_streets.json");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("export/csv")]
+        public async Task<IActionResult> ExportCsv()
+        {
+            var streets = await _context.Streets.OrderBy(s => s.Name).ToListAsync();
+            var builder = new System.Text.StringBuilder();
+            
+            builder.Append('\uFEFF');
+            builder.AppendLine("Id,StreetType,Name,OldNames");
+            
+            foreach (var s in streets)
+            {
+                var oldNames = s.OldNames != null ? $"\"{s.OldNames.Replace("\"", "\"\"")}\"" : "";
+                builder.AppendLine($"{s.Id},{s.StreetType},\"{s.Name}\",{oldNames}");
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(builder.ToString());
+            return File(bytes, "text/csv", "chernihiv_streets.csv");
+        }
     }
 }
