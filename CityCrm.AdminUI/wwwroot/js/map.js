@@ -72,9 +72,22 @@ window.leafletMap = {
                 }
             }
 
+            let streetViewBtn = (loc.lat && loc.lng && loc.lat !== 0) 
+                ? `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}" 
+                      target="_blank" 
+                      class="btn btn-sm btn-light border shadow-sm px-2 py-1 ms-2" 
+                      title="Відкрити панораму (Street View)"
+                      style="flex-shrink: 0;">
+                      <i class="bi bi-eye-fill text-primary"></i>
+                   </a>` 
+                : '';
+
             let popupContent = `
                 <div style="min-width: 220px; max-width: 300px;">
-                    <h6 class="mb-1 text-primary border-bottom pb-1">${loc.address}</h6>
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
+                        <h6 class="mb-0 text-primary pe-1" style="line-height: 1.3;">${loc.address}</h6>
+                        ${streetViewBtn}
+                    </div>
             `;
 
             let badges = '';
@@ -105,7 +118,7 @@ window.leafletMap = {
                 } else {
                     popupContent += `<div class="text-muted fst-italic mb-2" style="font-size: 0.8rem;">Немає зареєстрованих приміщень</div>`;
                 }
-                popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100" style="color: white !important;">Відкрити в реєстрі</a>`;
+                popupContent += `<a href="registry?highlight=${loc.id}" class="btn btn-sm btn-primary w-100 mb-1" style="color: white !important;">Відкрити в реєстрі</a>`;
             } else {
                 if (loc.premises && loc.premises.length > 0) {
                     popupContent += `<div class="mt-2 d-flex flex-column gap-2">`;
@@ -211,6 +224,7 @@ window.leafletMap = {
                     popupContent += `<div class="text-muted fst-italic mt-2" style="font-size: 0.8rem;">Інформація про заклади відсутня</div>`;
                 }
             }
+
             popupContent += `</div>`;
 
             let iconEmoji = "📍";
@@ -281,6 +295,23 @@ window.leafletMap = {
             let marker = L.marker([issue.lat, issue.lng], { icon: issueIcon }).addTo(this.issueMarkersLayer);
             marker.bindPopup(popupContent);
         });
+    },
+
+    drawStreetLine: function (geoJsonStr) {
+        if (!this.mapInstance) return;
+
+        let geoJson = JSON.parse(geoJsonStr);
+        
+        let streetLayer = L.geoJSON(geoJson, {
+            style: { color: '#8a2be2', weight: 6, opacity: 0.8 }
+        }).addTo(this.mapInstance);
+
+        this.mapInstance.fitBounds(streetLayer.getBounds(), { padding: [50, 50], maxZoom: 16 });
+        
+        setTimeout(() => {
+            streetLayer.setStyle({ color: '#ff00ff', weight: 8 });
+            setTimeout(() => streetLayer.setStyle({ color: '#8a2be2', weight: 6 }), 500);
+        }, 500);
     },
 
     locateUser: function () {
