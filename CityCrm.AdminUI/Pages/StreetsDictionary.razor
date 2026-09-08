@@ -59,7 +59,12 @@ else
                         <tr>
                             @if (isAdmin) { <td class="text-muted">@street.Id</td> }
                             <td><span class="badge bg-secondary">@street.StreetType</span></td>
-                            <td class="fw-bold">@street.Name</td>
+                            <td class="fw-bold">
+                                @street.Name
+                                <a href="map?street=@street.Name" class="btn btn-sm btn-link text-decoration-none ms-2 p-0" title="Показати об'єкти на карті">
+                                    <i class="bi bi-geo-alt text-danger fs-5"></i>
+                                </a>
+                            </td>
                             <td class="text-muted">@street.OldNames</td>
                             @if (isAdmin)
                             {

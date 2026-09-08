@@ -177,27 +177,27 @@
                                 <InputFile class="form-control" OnChange="UploadPhoto" accept="image/*" disabled="@isUploadingPhoto" />
                                 
                                 @if (isUploadingPhoto)
-    {
-        <div class="form-text text-primary mt-1">
-            <span class="spinner-border spinner-border-sm"></span> Завантаження на сервер...
-        </div>
-    }
-    else if (!string.IsNullOrEmpty(newIssue.PhotoUrl))
-    {
-        <div class="mt-2 position-relative d-inline-block">
-            <a href="@newIssue.PhotoUrl" target="_blank" title="Відкрити повне фото">
-                <img src="@newIssue.PhotoUrl" alt="Завантажене фото" class="img-thumbnail shadow-sm" style="max-height: 120px; border-radius: 8px;" />
-            </a>
-            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 start-100 translate-middle rounded-circle" 
-                    style="width: 24px; height: 24px; padding: 0; line-height: 1;"
-                    @onclick="() => newIssue.PhotoUrl = null" title="Видалити фото">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-        <div class="form-text text-success mt-1">
-            <i class="bi bi-check-circle-fill"></i> Фото прикріплено (натисніть, щоб збільшити)
-        </div>
-    }
+                                {
+                                    <div class="form-text text-primary mt-1">
+                                        <span class="spinner-border spinner-border-sm"></span> Завантаження на сервер...
+                                    </div>
+                                }
+                                else if (!string.IsNullOrEmpty(newIssue.PhotoUrl))
+                                {
+                                    <div class="mt-2 position-relative d-inline-block">
+                                        <a href="@newIssue.PhotoUrl" target="_blank" title="Відкрити повне фото">
+                                            <img src="@newIssue.PhotoUrl" alt="Завантажене фото" class="img-thumbnail shadow-sm" style="max-height: 120px; border-radius: 8px;" />
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 start-100 translate-middle rounded-circle" 
+                                                style="width: 24px; height: 24px; padding: 0; line-height: 1;"
+                                                @onclick="() => newIssue.PhotoUrl = null" title="Видалити фото">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text text-success mt-1">
+                                        <i class="bi bi-check-circle-fill"></i> Фото прикріплено (натисніть, щоб збільшити)
+                                    </div>
+                                }
                             </div>
 
                             @if (!string.IsNullOrEmpty(issueSubmitError))
@@ -226,6 +226,9 @@
 
     [SupplyParameterFromQuery(Name = "filter")]
     public string? InitialFilter { get; set; }
+
+    [SupplyParameterFromQuery(Name = "street")]
+    public string? StreetNameParam { get; set; }
     
     private bool isInvestorMode = false;
     private bool isMapInitialized = false;
@@ -461,6 +464,11 @@
         {
             var queryParams = new List<string>();
             
+            if (!string.IsNullOrWhiteSpace(StreetNameParam))
+            {
+                queryParams.Add($"search={Uri.EscapeDataString(StreetNameParam)}");
+            }
+
             if (filterType == "free_communal")
             {
                 queryParams.Add("pOwnership=" + Uri.EscapeDataString("Комунальна"));
