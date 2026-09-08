@@ -173,8 +173,31 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Посилання на фото (якщо є)</label>
-                                <InputText class="form-control" @bind-Value="newIssue.PhotoUrl" placeholder="Google Drive / Telegram лінк" />
+                                <label class="form-label fw-bold">Фото проблеми (опціонально)</label>
+                                <InputFile class="form-control" OnChange="UploadPhoto" accept="image/*" disabled="@isUploadingPhoto" />
+                                
+                                @if (isUploadingPhoto)
+    {
+        <div class="form-text text-primary mt-1">
+            <span class="spinner-border spinner-border-sm"></span> Завантаження на сервер...
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(newIssue.PhotoUrl))
+    {
+        <div class="mt-2 position-relative d-inline-block">
+            <a href="@newIssue.PhotoUrl" target="_blank" title="Відкрити повне фото">
+                <img src="@newIssue.PhotoUrl" alt="Завантажене фото" class="img-thumbnail shadow-sm" style="max-height: 120px; border-radius: 8px;" />
+            </a>
+            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 start-100 translate-middle rounded-circle" 
+                    style="width: 24px; height: 24px; padding: 0; line-height: 1;"
+                    @onclick="() => newIssue.PhotoUrl = null" title="Видалити фото">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        <div class="form-text text-success mt-1">
+            <i class="bi bi-check-circle-fill"></i> Фото прикріплено (натисніть, щоб збільшити)
+        </div>
+    }
                             </div>
 
                             @if (!string.IsNullOrEmpty(issueSubmitError))
@@ -228,6 +251,8 @@
     private string issueSubmitError = "";
     
     private DotNetObjectReference<MapDashboard>? objRef;
+    private bool isUploadingPhoto = false;
+    private readonly string imgbbApiKey = "2fb9072b3c81a47a873c863967a29e51";
 
     protected override void OnInitialized()
     {
@@ -306,6 +331,62 @@
     private void CloseIssueModal()
     {
         showIssueModal = false;
+    }
+
+    private async Task UploadPhoto(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        isUploadingPhoto = true;
+        issueSubmitError = "";
+        StateHasChanged();
+
+        try
+        {
+            var maxAllowedSize = 10 * 1024 * 1024;
+            using var stream = file.OpenReadStream(maxAllowedSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            
+            var fileBytes = memoryStream.ToArray();
+            var base64String = Convert.ToBase64String(fileBytes);
+
+            var parameters = new Dictionary<string, string>
+            {
+                { "image", base64String }
+            };
+            var content = new FormUrlEncodedContent(parameters);
+
+            using var externalClient = new HttpClient();
+            var response = await externalClient.PostAsync($"https://api.imgbb.com/1/upload?key={imgbbApiKey}", content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<ImgBBResponse>();
+                if (result != null && result.Success)
+                {
+                    newIssue.PhotoUrl = result.Data.Url;
+                }
+                else
+                {
+                    issueSubmitError = "Не вдалося отримати посилання від ImgBB.";
+                }
+            }
+            else
+            {
+                issueSubmitError = $"Помилка сервера зображень (Код: {response.StatusCode}).";
+            }
+        }
+        catch (Exception ex)
+        {
+            issueSubmitError = $"Помилка завантаження: {ex.Message}";
+        }
+        finally
+        {
+            isUploadingPhoto = false;
+            StateHasChanged();
+        }
     }
 
     private async Task SubmitIssue()
@@ -517,5 +598,16 @@
     public void Dispose()
     {
         objRef?.Dispose();
+    }
+
+    public class ImgBBResponse
+    {
+        public bool Success { get; set; }
+        public ImgBBData Data { get; set; } = new();
+    }
+
+    public class ImgBBData
+    {
+        public string Url { get; set; } = string.Empty;
     }
 }

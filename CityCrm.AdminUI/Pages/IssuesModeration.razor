@@ -69,12 +69,12 @@ else
                             <small class="text-muted">@issue.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                         </td>
                         <td>
-                            <span class="badge bg-secondary">@issue.Category</span>
-                            @if (issue.UserRating.HasValue)
+                            @issue.Category
+                            @if (!string.IsNullOrEmpty(issue.PhotoUrl))
                             {
-                                <div class="text-warning small mt-1">
-                                    @for (int i = 0; i < issue.UserRating.Value; i++) { <i class="bi bi-star-fill"></i> }
-                                </div>
+                                <a href="@issue.PhotoUrl" target="_blank" title="Переглянути фото" @onclick:stopPropagation="true">
+                                    <i class="bi bi-image text-primary ms-2 fs-5"></i>
+                                </a>
                             }
                         </td>
                         <td>
@@ -137,6 +137,17 @@ else
                             }
                         </div>
                     </div>
+
+                    @if (!string.IsNullOrEmpty(selectedIssue.PhotoUrl))
+                    {
+                        <div class="mb-3 p-3 bg-light rounded border">
+                            <label class="fw-bold d-block mb-2"><i class="bi bi-camera-fill text-muted me-2"></i>Фото фіксація:</label>
+                            <a href="@selectedIssue.PhotoUrl" target="_blank" title="Відкрити повний розмір">
+                                <img src="@selectedIssue.PhotoUrl" alt="Фото інциденту" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: contain;" />
+                            </a>
+                            <div class="form-text mt-1">Натисніть на фото для збільшення</div>
+                        </div>
+                    }
 
                     <div class="alert alert-secondary mb-0">
                         <label class="fw-bold mb-2">Відповідь міськради (публічна):</label>
