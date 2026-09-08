@@ -57,10 +57,24 @@ namespace CityCrm.Api.Controllers
         }
 
         [HttpGet("map")]
-        public async Task<ActionResult> GetIssuesForMap()
+        public async Task<ActionResult> GetIssuesForMap([FromQuery] string? bbox)
         {
-            var issues = await _context.CityIssues
-                .Where(i => i.Status != "Rejected") 
+            var query = _context.CityIssues.Where(i => i.Status != "Rejected").AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(bbox))
+            {
+                var coords = bbox.Split(',');
+                if (coords.Length == 4 &&
+                    double.TryParse(coords[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minLng) &&
+                    double.TryParse(coords[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minLat) &&
+                    double.TryParse(coords[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxLng) &&
+                    double.TryParse(coords[3], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxLat))
+                {
+                    query = query.Where(i => i.Lat >= minLat && i.Lat <= maxLat && i.Lng >= minLng && i.Lng <= maxLng);
+                }
+            }
+
+            var issues = await query
                 .Select(i => new {
                     i.Id, i.Lat, i.Lng, i.Category, i.Status, i.Description, i.CreatedAt
                 })

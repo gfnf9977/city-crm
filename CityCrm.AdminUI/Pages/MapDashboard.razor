@@ -294,6 +294,17 @@
         }
     }
 
+    [JSInvokable]
+    public async Task OnMapMoved(string bbox)
+    {
+        await LoadDataFromServer(activeFilter, bbox);
+
+        if (showIssuesOnMap && !isAdmin)
+        {
+            await LoadIssuesFromServer(bbox);
+        }
+    }
+
     private async Task ExitInvestorMode()
     {
         isInvestorMode = false;
@@ -426,12 +437,20 @@
         }
     }
 
-    private async Task LoadIssuesFromServer()
+    private async Task LoadIssuesFromServer(string? bbox = null)
     {
         try
         {
-            var issues = await Http.GetFromJsonAsync<List<CityIssueModel>>("api/cityissues/map");
+            var url = "api/cityissues/map";
+            if (!string.IsNullOrWhiteSpace(bbox)) url += $"?bbox={Uri.EscapeDataString(bbox)}";
+
+            var issues = await Http.GetFromJsonAsync<List<CityIssueModel>>(url);
             if (issues != null) cachedIssues = issues;
+            
+            if (!string.IsNullOrWhiteSpace(bbox) && showIssuesOnMap)
+            {
+                await JSRuntime.InvokeVoidAsync("leafletMap.loadIssues", cachedIssues);
+            }
         }
         catch { }
     }
@@ -455,10 +474,15 @@
         await LoadDataFromServer(activeFilter);
     }
 
-    private async Task LoadDataFromServer(string filterType)
+    private async Task LoadDataFromServer(string filterType, string? bbox = null)
     {
-        isLoading = true;
-        StateHasChanged();
+        bool isBackgroundUpdate = !string.IsNullOrWhiteSpace(bbox);
+
+        if (!isBackgroundUpdate)
+        {
+            isLoading = true;
+            StateHasChanged();
+        }
 
         try
         {
@@ -467,6 +491,11 @@
             if (!string.IsNullOrWhiteSpace(StreetNameParam))
             {
                 queryParams.Add($"search={Uri.EscapeDataString(StreetNameParam)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(bbox))
+            {
+                queryParams.Add($"bbox={Uri.EscapeDataString(bbox)}");
             }
 
             if (filterType == "free_communal")
@@ -500,8 +529,11 @@
         }
         finally
         {
-            isLoading = false;
-            StateHasChanged();
+            if (!isBackgroundUpdate)
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
     }
 

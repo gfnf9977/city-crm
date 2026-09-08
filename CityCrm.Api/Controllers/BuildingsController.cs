@@ -26,9 +26,33 @@ namespace CityCrm.Api.Controllers
             [FromQuery] string? pStatus,
             [FromQuery] string? pOwnership,
             [FromQuery] double? minArea,
-            [FromQuery] double? maxArea)
+            [FromQuery] double? maxArea,
+            [FromQuery] string? bbox)
         {
             var query = _context.Buildings.Include(b => b.Street).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(bbox))
+            {
+                var coords = bbox.Split(',');
+                if (coords.Length == 4 &&
+                    double.TryParse(coords[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minLng) &&
+                    double.TryParse(coords[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double minLat) &&
+                    double.TryParse(coords[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxLng) &&
+                    double.TryParse(coords[3], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double maxLat))
+                {
+                    var factory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+                    var bboxPolygon = factory.CreatePolygon(new[]
+                    {
+                        new NetTopologySuite.Geometries.Coordinate(minLng, minLat),
+                        new NetTopologySuite.Geometries.Coordinate(minLng, maxLat),
+                        new NetTopologySuite.Geometries.Coordinate(maxLng, maxLat),
+                        new NetTopologySuite.Geometries.Coordinate(maxLng, minLat),
+                        new NetTopologySuite.Geometries.Coordinate(minLng, minLat)
+                    });
+
+                    query = query.Where(b => b.Location != null && b.Location.Intersects(bboxPolygon));
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {

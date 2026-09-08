@@ -1,17 +1,15 @@
 window.leafletMap = {
     mapInstance: null,
-    markersLayer: null,
-    issueMarkersLayer: null,
+    buildingsCluster: null,
+    issuesCluster: null,
     dotNetRef: null,
     pickingMode: false,
+    moveTimeout: null,
 
     init: function (elementId, dotNetObj) {
         if (this.mapInstance !== null) {
             this.mapInstance.off();
             this.mapInstance.remove();
-            this.mapInstance = null;
-            this.markersLayer = null;
-            this.issueMarkersLayer = null;
         }
 
         this.dotNetRef = dotNetObj;
@@ -20,11 +18,36 @@ window.leafletMap = {
             maxZoom: 19, attribution: '© OpenStreetMap'
         }).addTo(this.mapInstance);
 
+        this.buildingsCluster = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            maxClusterRadius: 40
+        }).addTo(this.mapInstance);
+
+        this.issuesCluster = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            maxClusterRadius: 40,
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({ html: '<div style="background-color:rgba(220,53,69,0.8); color:white; border-radius:15px; text-align:center; line-height:30px; font-weight:bold;">' + cluster.getChildCount() + '</div>', className: 'issue-cluster', iconSize: L.point(30, 30) });
+            }
+        }).addTo(this.mapInstance);
+
         this.mapInstance.on('click', (e) => {
             if (this.pickingMode && this.dotNetRef) {
                 this.disableIssuePicker();
                 this.dotNetRef.invokeMethodAsync('OnMapClicked', e.latlng.lat, e.latlng.lng);
             }
+        });
+
+        this.mapInstance.on('moveend', () => {
+            if (this.moveTimeout) clearTimeout(this.moveTimeout);
+
+            this.moveTimeout = setTimeout(() => {
+                if (this.dotNetRef) {
+                    let bounds = this.mapInstance.getBounds();
+                    let bboxStr = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+                    this.dotNetRef.invokeMethodAsync('OnMapMoved', bboxStr);
+                }
+            }, 400);
         });
     },
 
@@ -41,10 +64,8 @@ window.leafletMap = {
     loadData: function (locations, isAdmin, isSearchActive = false) {
         if (!this.mapInstance) return;
 
-        if (this.markersLayer) {
-            this.mapInstance.removeLayer(this.markersLayer);
-        }
-        this.markersLayer = L.featureGroup().addTo(this.mapInstance);
+        this.buildingsCluster.clearLayers();
+        let newLayers = [];
 
         locations.forEach(loc => {
             let tooltipContent = "";
@@ -105,9 +126,7 @@ window.leafletMap = {
 
                 let statusSummary = {};
                 if (loc.premises) {
-                    loc.premises.forEach(p => {
-                        statusSummary[p.status] = (statusSummary[p.status] || 0) + 1;
-                    });
+                    loc.premises.forEach(p => { statusSummary[p.status] = (statusSummary[p.status] || 0) + 1; });
                 }
                 if (Object.keys(statusSummary).length > 0) {
                     popupContent += `<div class="mb-2" style="font-size: 0.85rem;"><strong>Приміщення:</strong><ul class="mb-0 ps-3">`;
@@ -202,7 +221,7 @@ window.leafletMap = {
                                         ${fullScheduleHtml}
                                     </div>
                                 `;
-                            } catch (e) { console.error("Parse error schedule:", e); }
+                            } catch (e) { console.error("Parse error:", e); }
                         }
 
                         popupContent += `
@@ -224,7 +243,6 @@ window.leafletMap = {
                     popupContent += `<div class="text-muted fst-italic mt-2" style="font-size: 0.8rem;">Інформація про заклади відсутня</div>`;
                 }
             }
-
             popupContent += `</div>`;
 
             let iconEmoji = "📍";
@@ -245,30 +263,35 @@ window.leafletMap = {
                 let polyColor = loc.condition === 'В експлуатації' ? '#28a745' : '#007bff';
                 if (loc.condition === 'Зруйновано (бойові дії)' || loc.condition === 'Аварійне') polyColor = '#dc3545';
 
-                let polygon = L.geoJSON(geoJsonData, { style: { color: polyColor, weight: 2, fillOpacity: 0.4 } }).addTo(this.markersLayer);
+                let polygon = L.geoJSON(geoJsonData, { style: { color: polyColor, weight: 2, fillOpacity: 0.4 } });
                 polygon.on('mouseover', function () { this.setStyle({ fillOpacity: 0.7 }); });
                 polygon.on('mouseout', function () { this.setStyle({ fillOpacity: 0.4 }); });
                 polygon.bindTooltip(tooltipContent, tooltipOptions);
                 polygon.bindPopup(popupContent);
+                newLayers.push(polygon);
             }
             else if (loc.lat !== undefined && loc.lng !== undefined && loc.lat !== 0) {
-                let marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(this.markersLayer);
+                let marker = L.marker([loc.lat, loc.lng], { icon: customIcon });
                 marker.bindTooltip(tooltipContent, tooltipOptions);
                 marker.bindPopup(popupContent);
+                newLayers.push(marker);
             }
         });
 
-        if (locations.length > 0) {
-            this.mapInstance.fitBounds(this.markersLayer.getBounds(), { padding: [50, 50], maxZoom: 17 });
+        if (newLayers.length > 0) {
+            this.buildingsCluster.addLayers(newLayers);
+            
+            if (isSearchActive || !this.mapInstance.hasMoved) {
+                this.mapInstance.fitBounds(this.buildingsCluster.getBounds(), { padding: [50, 50], maxZoom: 17 });
+                this.mapInstance.hasMoved = true;
+            }
         }
     },
 
     loadIssues: function (issues) {
         if (!this.mapInstance) return;
-        if (this.issueMarkersLayer) {
-            this.mapInstance.removeLayer(this.issueMarkersLayer);
-        }
-        this.issueMarkersLayer = L.featureGroup().addTo(this.mapInstance);
+        this.issuesCluster.clearLayers();
+        let newLayers = [];
 
         issues.forEach(issue => {
             let emoji = "⚠️";
@@ -292,9 +315,14 @@ window.leafletMap = {
                 </div>
             `;
 
-            let marker = L.marker([issue.lat, issue.lng], { icon: issueIcon }).addTo(this.issueMarkersLayer);
+            let marker = L.marker([issue.lat, issue.lng], { icon: issueIcon });
             marker.bindPopup(popupContent);
+            newLayers.push(marker);
         });
+
+        if (newLayers.length > 0) {
+            this.issuesCluster.addLayers(newLayers);
+        }
     },
 
     drawStreetLine: function (geoJsonStr) {
@@ -316,16 +344,13 @@ window.leafletMap = {
 
     locateUser: function () {
         if (!this.mapInstance) return;
-        
         this.mapInstance.locate({ setView: true, maxZoom: 17, enableHighAccuracy: true });
-        
         this.mapInstance.once('locationfound', (e) => {
             let radius = e.accuracy / 2;
             L.circle(e.latlng, { radius: radius, color: '#007bff', fillOpacity: 0.2 }).addTo(this.mapInstance);
             L.circleMarker(e.latlng, { radius: 6, color: 'white', weight: 2, fillColor: '#007bff', fillOpacity: 1 }).addTo(this.mapInstance)
                 .bindTooltip("Ви знаходитесь приблизно тут", { permanent: false, direction: "top" });
         });
-        
         this.mapInstance.once('locationerror', (e) => {
             alert("Не вдалося визначити вашу локацію. Перевірте дозволи в браузері (GPS).");
         });
