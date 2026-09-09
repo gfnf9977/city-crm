@@ -168,6 +168,8 @@ window.leafletMap = {
                         let bizCat = p.businessCategory ? `<div class="text-muted d-inline-block" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
                         let incBadge = p.isInclusive ? `<span class="badge bg-primary ms-2 shadow-sm" style="font-size: 0.65rem;"><i class="bi bi-person-wheelchair"></i> Безбар'єрно</span>` : "";
 
+                        let webLinkHtml = p.referenceLink ? `<div class="mt-2"><a href="${p.referenceLink}" target="_blank" class="btn btn-sm btn-outline-info w-100 fw-bold"><i class="bi bi-globe"></i> Відвідати сайт / соцмережу</a></div>` : "";
+
                         let rentBtnHtml = '';
                         if (!isAdmin && p.status === 'Вільне' && p.ownership === 'Комунальна' && p.type === 'Комерційна') {
                             if (p.prozorroLink) {
@@ -248,6 +250,7 @@ window.leafletMap = {
                                     <div>${bizCat}${incBadge}</div>
                                     ${bizDesc}
                                     ${scheduleHtml}
+                                    ${webLinkHtml}
                                     ${rentBtnHtml}
                                 </div>
                             </div>

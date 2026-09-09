@@ -200,8 +200,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Посилання на об'єкт для верифікації</label>
-                        <InputText class="form-control" @bind-Value="requestModel.ReferenceLink" placeholder="Посилання на Google Maps, Instagram закладу або фото фасаду" />
+                        <label class="form-label fw-bold">ПВеб-сайт або соцмережа (Опціонально)</label>
+                        <InputText class="form-control" @bind-Value="requestModel.ReferenceLink" placeholder="Наприклад: https://instagram.com/..., або сайт закладу" />
                         <ValidationMessage For="@(() => requestModel.ReferenceLink)" class="text-danger small" />
                     </div>
 
