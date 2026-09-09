@@ -103,12 +103,20 @@ window.leafletMap = {
 
             let actionButtons = (loc.lat && loc.lng && loc.lat !== 0) 
                 ? `<div class="d-flex gap-1 ms-2" style="flex-shrink: 0;">
-                       <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" 
-                          target="_blank" 
-                          class="btn btn-sm btn-light border shadow-sm px-2 py-1" 
-                          title="Прокласти маршрут (Google Maps)">
-                          <i class="bi bi-sign-turn-right-fill text-success"></i>
-                       </a>
+                       <div class="btn-group shadow-sm" role="group">
+                           <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" 
+                              target="_blank" 
+                              class="btn btn-sm btn-light border px-2 py-1" 
+                              title="Прокласти маршрут (Google Maps)">
+                              <i class="bi bi-google text-success"></i>
+                           </a>
+                           <a href="https://www.waze.com/ul?ll=${loc.lat},${loc.lng}&navigate=yes" 
+                              target="_blank" 
+                              class="btn btn-sm btn-light border-top border-bottom border-end px-2 py-1" 
+                              title="Прокласти маршрут (Waze)">
+                              <i class="bi bi-car-front-fill text-info"></i>
+                           </a>
+                       </div>
                        <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}" 
                           target="_blank" 
                           class="btn btn-sm btn-light border shadow-sm px-2 py-1" 
