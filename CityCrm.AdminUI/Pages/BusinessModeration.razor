@@ -158,13 +158,32 @@ else
                         }
                         else
                         {
-                            <select class="form-select border-primary" @bind="selectedBuildingId">
+                            <select class="form-select border-primary mb-2" @bind="selectedBuildingId" @bind:after="OnBuildingSelected">
                                 <option value="0">-- Оберіть будівлю --</option>
                                 @foreach (var b in streetBuildings)
                                 {
                                     <option value="@b.Id">@b.FullAddress (@b.BuildingType)</option>
                                 }
                             </select>
+
+                            @if (selectedBuildingId > 0)
+                            {
+                                var targetBuilding = streetBuildings.FirstOrDefault(b => b.Id == selectedBuildingId);
+                                if (targetBuilding != null && targetBuilding.Premises.Any())
+                                {
+                                    <label class="fw-bold mb-1 mt-2 text-primary">Дія з приміщенням</label>
+                                    <select class="form-select border-warning shadow-sm" @bind="selectedExistingPremiseId">
+                                        <option value="0">➕ Створити НОВЕ приміщення</option>
+                                        @foreach (var p in targetBuilding.Premises.OrderBy(p => p.PremiseNumber))
+                                        {
+                                            <option value="@p.Id">
+                                                Оновити існуюче: прим. @(string.IsNullOrEmpty(p.PremiseNumber) ? "Б/Н" : p.PremiseNumber) (@p.Type, @p.Area кв.м) - @(string.IsNullOrEmpty(p.BusinessName) ? "Порожнє" : p.BusinessName)
+                                            </option>
+                                        }
+                                    </select>
+                                    <div class="form-text">Ви можете замінити дані попереднього орендаря, щоб не створювати дублікати.</div>
+                                }
+                            }
                         }
                     </div>
 
@@ -203,6 +222,7 @@ else
     private bool showRequestModal = false;
     private List<Building> streetBuildings = new();
     private int selectedBuildingId = 0;
+    private int selectedExistingPremiseId = 0;
     private bool isBuildingsLoading = false;
     private bool isProcessing = false;
     private string errorMessage = "";
@@ -235,6 +255,7 @@ else
     {
         selectedRequest = req;
         selectedBuildingId = 0;
+        selectedExistingPremiseId = 0;
         errorMessage = "";
         showRequestModal = true;
         
@@ -265,6 +286,11 @@ else
         selectedRequest = null;
     }
 
+    private void OnBuildingSelected()
+    {
+        selectedExistingPremiseId = 0;
+    }
+
     private void PreparePremiseModal()
     {
         if (selectedBuildingId == 0)
@@ -285,24 +311,57 @@ else
                 : $"{selectedRequest.NetworkName} ({selectedRequest.LocalName})") 
             : selectedRequest.LocalName;
 
-        newPremise = new Premise
+        if (selectedExistingPremiseId == 0)
         {
-            BuildingId = selectedBuildingId,
-            PremiseNumber = selectedRequest.PremiseNumber ?? "",
-            Area = 0, 
-            Type = "Комерційна",
-            Status = "В експлуатації",
-            Ownership = "Приватна",
-            OwnerName = selectedRequest.LegalName,
-            BusinessCategory = selectedRequest.BusinessCategory,
-            BusinessName = premiseName,
-            BusinessDescription = selectedRequest.Description,
-            WorkingHours = selectedRequest.WorkingHours,
-            IsInclusive = selectedRequest.IsInclusive,
-            IsPublicVisible = true, 
-            ReferenceLink = selectedRequest.ReferenceLink,
-            Notes = $"Заявка з порталу.\nЄДРПОУ: {selectedRequest.Edrpou}\nКонтакт: {selectedRequest.ContactInfo}"
-        };
+            newPremise = new Premise
+            {
+                BuildingId = selectedBuildingId,
+                PremiseNumber = selectedRequest.PremiseNumber ?? "",
+                Area = 0, 
+                Type = "Комерційна",
+                Status = "В експлуатації",
+                Ownership = "Приватна",
+                OwnerName = selectedRequest.LegalName,
+                BusinessCategory = selectedRequest.BusinessCategory,
+                BusinessName = premiseName,
+                BusinessDescription = selectedRequest.Description,
+                WorkingHours = selectedRequest.WorkingHours,
+                IsInclusive = selectedRequest.IsInclusive,
+                IsPublicVisible = true,
+                ReferenceLink = selectedRequest.ReferenceLink,
+                Notes = $"Заявка з порталу.\nЄДРПОУ: {selectedRequest.Edrpou}\nКонтакт: {selectedRequest.ContactInfo}"
+            };
+        }
+        else
+        {
+            var existing = targetBuilding.Premises.First(p => p.Id == selectedExistingPremiseId);
+            newPremise = new Premise
+            {
+                Id = existing.Id,
+                BuildingId = existing.BuildingId,
+                PremiseNumber = existing.PremiseNumber,
+                Entrance = existing.Entrance,
+                Floor = existing.Floor,
+                Area = existing.Area,
+                Type = existing.Type,
+                Status = existing.Status,
+                Ownership = existing.Ownership,
+                OwnerName = selectedRequest.LegalName,
+                RegistrationDate = existing.RegistrationDate,
+                RentEndDate = existing.RentEndDate,
+                BusinessCategory = selectedRequest.BusinessCategory,
+                BusinessName = premiseName,
+                BusinessDescription = selectedRequest.Description,
+                WorkingHours = selectedRequest.WorkingHours,
+                IsInclusive = selectedRequest.IsInclusive,
+                IsPublicVisible = true,
+                ProzorroLink = existing.ProzorroLink,
+                ReferenceLink = selectedRequest.ReferenceLink,
+                Notes = string.IsNullOrEmpty(existing.Notes) 
+                    ? $"Оновлено з порталу. Новий орендар (ЄДРПОУ: {selectedRequest.Edrpou})" 
+                    : existing.Notes + $"\n[Оновлено з порталу. Новий орендар: {selectedRequest.Edrpou}]"
+            };
+        }
 
         showRequestModal = false; 
         showPremiseModal = true;  
