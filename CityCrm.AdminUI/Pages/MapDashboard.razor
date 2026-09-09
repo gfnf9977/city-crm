@@ -1,5 +1,6 @@
 @page "/map"
 @using CityCrm.AdminUI.Models
+@using CityCrm.AdminUI.Components
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
@@ -119,106 +120,12 @@
 
 <div id="map" style="height: calc(100vh - 160px); min-height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
 
-@if (showIssueModal)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); z-index: 2000;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-cone-striped"></i> Фіксація проблеми</h5>
-                    <button type="button" class="btn-close btn-close-white" @onclick="CloseIssueModal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    @if (issueSubmitted)
-                    {
-                        <div class="text-center">
-                            <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
-                            <h4>Дякуємо за небайдужість!</h4>
-                            <p>Заявку успішно передано до міських служб.</p>
-                            <p class="text-muted small mb-2">Ваш номер для відстеження статусу (натисніть, щоб скопіювати):</p>
-                            
-                            <div class="mb-4">
-                                <h3 class="fw-bold text-primary copyable-text mb-0" title="Копіювати код" @onclick='() => JSRuntime.InvokeVoidAsync("copyToClipboard", createdIssueTrackingNumber)'>
-                                    @createdIssueTrackingNumber <i class="bi bi-copy fs-5 ms-2 text-muted"></i>
-                                </h3>
-                            </div>
-                            
-                            <button class="btn btn-secondary px-4 rounded-pill" @onclick="CloseIssueModal">Закрити</button>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted small"><i class="bi bi-geo-alt-fill text-danger"></i> Координати: @newIssue.Lat, @newIssue.Lng</p>
-                        
-                        <EditForm Model="newIssue" OnValidSubmit="SubmitIssue">
-                            <DataAnnotationsValidator />
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Категорія проблеми</label>
-                                <InputSelect class="form-select" @bind-Value="newIssue.Category">
-                                    <option value="">Оберіть...</option>
-                                    <option value="Дороги і тротуари">Дороги і тротуари (ями, люки)</option>
-                                    <option value="Освітлення">Зовнішнє освітлення (ліхтарі)</option>
-                                    <option value="Благоустрій">Благоустрій (парки, лавки)</option>
-                                    <option value="Сміття">Вивіз сміття / Стихійні звалища</option>
-                                    <option value="ЖКГ (Труби/Тепло)">Аварії мереж ЖКГ</option>
-                                </InputSelect>
-                                <ValidationMessage For="@(() => newIssue.Category)" class="text-danger small" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Опис проблеми</label>
-                                <InputTextArea class="form-control" rows="3" @bind-Value="newIssue.Description" placeholder="Наприклад: Глибока яма на переході, неможливо проїхати з візочком." />
-                                <ValidationMessage For="@(() => newIssue.Description)" class="text-danger small" />
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Фото проблеми (опціонально)</label>
-                                <InputFile class="form-control" OnChange="UploadPhoto" accept="image/*" disabled="@isUploadingPhoto" />
-                                
-                                @if (isUploadingPhoto)
-                                {
-                                    <div class="form-text text-primary mt-1">
-                                        <span class="spinner-border spinner-border-sm"></span> Завантаження на сервер...
-                                    </div>
-                                }
-                                else if (!string.IsNullOrEmpty(newIssue.PhotoUrl))
-                                {
-                                    <div class="mt-2 position-relative d-inline-block">
-                                        <a href="@newIssue.PhotoUrl" target="_blank" title="Відкрити повне фото">
-                                            <img src="@newIssue.PhotoUrl" alt="Завантажене фото" class="img-thumbnail shadow-sm" style="max-height: 120px; border-radius: 8px;" />
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 start-100 translate-middle rounded-circle" 
-                                                style="width: 24px; height: 24px; padding: 0; line-height: 1;"
-                                                @onclick="() => newIssue.PhotoUrl = null" title="Видалити фото">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                    <div class="form-text text-success mt-1">
-                                        <i class="bi bi-check-circle-fill"></i> Фото прикріплено (натисніть, щоб збільшити)
-                                    </div>
-                                }
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(issueSubmitError))
-                            {
-                                <div class="alert alert-danger p-2 small">@issueSubmitError</div>
-                            }
-
-                            <div class="text-end">
-                                <button type="button" class="btn btn-secondary me-2" @onclick="CloseIssueModal">Скасувати</button>
-                                <button type="submit" class="btn btn-danger" disabled="@isSubmittingIssue">
-                                    @if (isSubmittingIssue) { <span class="spinner-border spinner-border-sm"></span> }
-                                    else { <span>Відправити</span> }
-                                </button>
-                            </div>
-                        </EditForm>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<IssueReportModal 
+    IsVisible="showIssueModal" 
+    Lat="targetIssueLat" 
+    Lng="targetIssueLng" 
+    OnClosed="CloseIssueModal" 
+    OnIssueSubmitted="HandleIssueSubmitted" />
 
 @code {
     [SupplyParameterFromQuery(Name = "report")]
@@ -247,15 +154,10 @@
 
     private bool isPickingIssueLocation = false;
     private bool showIssueModal = false;
-    private CityIssueModel newIssue = new();
-    private bool isSubmittingIssue = false;
-    private bool issueSubmitted = false;
-    private string createdIssueTrackingNumber = "";
-    private string issueSubmitError = "";
+    private double targetIssueLat;
+    private double targetIssueLng;
     
     private DotNetObjectReference<MapDashboard>? objRef;
-    private bool isUploadingPhoto = false;
-    private readonly string imgbbApiKey = "2fb9072b3c81a47a873c863967a29e51";
 
     protected override void OnInitialized()
     {
@@ -334,10 +236,8 @@
     public void OnMapClicked(double lat, double lng)
     {
         isPickingIssueLocation = false;
-        newIssue = new CityIssueModel { Lat = lat, Lng = lng };
-        issueSubmitted = false;
-        createdIssueTrackingNumber = "";
-        issueSubmitError = "";
+        targetIssueLat = lat;
+        targetIssueLng = lng;
         showIssueModal = true;
         StateHasChanged();
     }
@@ -347,94 +247,10 @@
         showIssueModal = false;
     }
 
-    private async Task UploadPhoto(InputFileChangeEventArgs e)
+    private async Task HandleIssueSubmitted()
     {
-        var file = e.File;
-        if (file == null) return;
-
-        isUploadingPhoto = true;
-        issueSubmitError = "";
-        StateHasChanged();
-
-        try
-        {
-            var maxAllowedSize = 10 * 1024 * 1024;
-            using var stream = file.OpenReadStream(maxAllowedSize);
-            using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
-            
-            var fileBytes = memoryStream.ToArray();
-            var base64String = Convert.ToBase64String(fileBytes);
-
-            var parameters = new Dictionary<string, string>
-            {
-                { "image", base64String }
-            };
-            var content = new FormUrlEncodedContent(parameters);
-
-            using var externalClient = new HttpClient();
-            var response = await externalClient.PostAsync($"https://api.imgbb.com/1/upload?key={imgbbApiKey}", content);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<ImgBBResponse>();
-                if (result != null && result.Success)
-                {
-                    newIssue.PhotoUrl = result.Data.Url;
-                }
-                else
-                {
-                    issueSubmitError = "Не вдалося отримати посилання від ImgBB.";
-                }
-            }
-            else
-            {
-                issueSubmitError = $"Помилка сервера зображень (Код: {response.StatusCode}).";
-            }
-        }
-        catch (Exception ex)
-        {
-            issueSubmitError = $"Помилка завантаження: {ex.Message}";
-        }
-        finally
-        {
-            isUploadingPhoto = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task SubmitIssue()
-    {
-        isSubmittingIssue = true;
-        issueSubmitError = "";
-        
-        try
-        {
-            var response = await Http.PostAsJsonAsync("api/cityissues", newIssue);
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-                if (result != null && result.ContainsKey("trackingNumber"))
-                {
-                    createdIssueTrackingNumber = result["trackingNumber"].ToString()!;
-                    issueSubmitted = true;
-                    await LoadIssuesFromServer();
-                    if (showIssuesOnMap) await ToggleIssuesVisibility();
-                }
-            }
-            else
-            {
-                issueSubmitError = "Помилка сервера. Спробуйте пізніше.";
-            }
-        }
-        catch
-        {
-            issueSubmitError = "Проблема з'єднання.";
-        }
-        finally
-        {
-            isSubmittingIssue = false;
-        }
+        await LoadIssuesFromServer();
+        if (showIssuesOnMap) await ToggleIssuesVisibility();
     }
 
     private async Task LoadIssuesFromServer(string? bbox = null)
@@ -638,16 +454,5 @@
     public void Dispose()
     {
         objRef?.Dispose();
-    }
-
-    public class ImgBBResponse
-    {
-        public bool Success { get; set; }
-        public ImgBBData Data { get; set; } = new();
-    }
-
-    public class ImgBBData
-    {
-        public string Url { get; set; } = string.Empty;
     }
 }

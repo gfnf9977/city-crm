@@ -14,8 +14,6 @@ namespace CityCrm.AdminUI.Pages
 
         private List<Building> buildings = new();
         private HashSet<int> expandedBuildings = new();
-        private Dictionary<int, int> selectedEntrances = new();
-
         private bool showBuildingModal = false;
         private bool showPremiseModal = false;
         private Building newBuilding = new();
@@ -147,11 +145,6 @@ namespace CityCrm.AdminUI.Pages
         {
             if (expandedBuildings.Contains(id)) expandedBuildings.Remove(id);
             else { expandedBuildings.Clear(); expandedBuildings.Add(id); }
-        }
-
-        private void SelectEntrance(int buildingId, int entrance)
-        {
-            selectedEntrances[buildingId] = entrance;
         }
 
         private void ShowAddBuildingModal()

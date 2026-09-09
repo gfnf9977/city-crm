@@ -1,0 +1,197 @@
+@using CityCrm.AdminUI.Models
+
+<div class="p-3 bg-white border-start border-3 border-primary shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0 text-primary">
+            @(Building.BuildingType == "Багатоповерхівка" || Building.BuildingType == "Офісний/Бізнес центр" ? "Візуалізація під'їздів та поверхів:" : Building.BuildingType == "Гаражний кооператив" ? "Схема гаражних рядів:" : "Приміщення у цій будівлі:")
+        </h6>
+        <AuthorizeView Roles="GrandAdmin, Admin">
+            <Authorized>
+                <button class="btn btn-sm btn-primary" @onclick="() => OnAddPremise.InvokeAsync(Building.Id)">
+                    <i class="bi bi-plus"></i> Додати приміщення
+                </button>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+
+    @if (Building.BuildingType == "Багатоповерхівка" || Building.BuildingType == "Офісний/Бізнес центр")
+    {
+        var entrances = Building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.GetValueOrDefault()).Distinct().OrderBy(e => e).ToList();
+
+        if (!entrances.Any())
+        {
+            <div class="alert alert-info">Додайте першу квартиру і вкажіть її під'їзд та поверх, щоб побачити сітку.</div>
+        }
+        else
+        {
+            if (!activeEntrance.HasValue || !entrances.Contains(activeEntrance.Value))
+            {
+                activeEntrance = entrances.First();
+            }
+
+            <ul class="nav nav-tabs mb-3">
+                @foreach (var ent in entrances)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(activeEntrance == ent ? "active fw-bold" : "")"
+                           style="cursor:pointer;"
+                           @onclick="() => activeEntrance = ent">Під'їзд @ent</a>
+                    </li>
+                }
+            </ul>
+
+            var floors = Building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor.HasValue).Select(p => p.Floor.GetValueOrDefault()).Distinct().OrderByDescending(f => f);
+
+            <div class="bg-light p-3 rounded border">
+                @foreach (var floor in floors)
+                {
+                    <div class="d-flex align-items-center mb-2 border-bottom pb-2">
+                        <div class="me-3 text-muted fw-bold" style="width: 70px;">Пов. @floor</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var premise in Building.Premises.Where(p => p.Entrance == activeEntrance && p.Floor == floor).OrderBy(p => p.PremiseNumber))
+                            {
+                                <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
+                                     style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                                     @onclick="() => OnEditPremise.InvokeAsync(premise)"
+                                     title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                                    <div class="card-body p-2">
+                                        @if (!string.IsNullOrEmpty(premise.Notes))
+                                        {
+                                            <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                                        }
+                                        <div class="fw-bold fs-5">@premise.PremiseNumber</div>
+                                        <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        var noEntrancePremises = Building.Premises.Where(p => !p.Entrance.HasValue).OrderBy(p => p.PremiseNumber).ToList();
+        if (noEntrancePremises.Any())
+        {
+            <h6 class="mt-4 mb-3 text-secondary">Приміщення без прив'язки до під'їзду (Окремий вхід / Комерція):</h6>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var premise in noEntrancePremises)
+                {
+                    <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
+                         style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                         @onclick="() => OnEditPremise.InvokeAsync(premise)"
+                         title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                        <div class="card-body p-2">
+                            @if (!string.IsNullOrEmpty(premise.Notes))
+                            {
+                                <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                            }
+                            <div class="fw-bold fs-6">@premise.PremiseNumber</div>
+                            <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else if (Building.BuildingType == "Гаражний кооператив")
+    {
+        var lines = Building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.GetValueOrDefault()).Distinct().OrderBy(l => l).ToList();
+
+        if (!lines.Any())
+        {
+            <div class="alert alert-info">Додайте перший гараж і вкажіть його лінію/ряд.</div>
+        }
+        else
+        {
+            <div class="bg-light p-3 rounded border">
+                @foreach (var line in lines)
+                {
+                    <h6 class="text-secondary border-bottom pb-1 mb-2">Лінія (Ряд) @line</h6>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        @foreach (var premise in Building.Premises.Where(p => p.Entrance == line).OrderBy(p => p.PremiseNumber))
+                        {
+                            <div class="card shadow-sm text-center text-white position-relative @GetPremiseColorClass(premise.Status)"
+                                 style="width: 80px; cursor:pointer; transition: transform 0.2s;"
+                                 @onclick="() => OnEditPremise.InvokeAsync(premise)"
+                                 title="@premise.Type | @premise.Area кв.м | Власність: @premise.Ownership">
+                                <div class="card-body p-2">
+                                    @if (!string.IsNullOrEmpty(premise.Notes))
+                                    {
+                                        <div style="position: absolute; top: 2px; right: 4px; font-size: 0.6rem;" title="@premise.Notes">📝</div>
+                                    }
+                                    <div class="fw-bold">№ @premise.PremiseNumber</div>
+                                    <div style="font-size: 0.65rem;" class="text-uppercase">@premise.Status</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <table class="table table-sm table-bordered mb-0">
+            <thead class="table-light">
+                <tr><th>№ / Назва</th><th>Площа</th><th>Тип</th><th>Статус</th><th>Дії</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var premise in Building.Premises)
+                {
+                    <tr>
+                        <td>
+                            @premise.PremiseNumber
+                            @if (!string.IsNullOrEmpty(premise.Notes))
+                            {
+                                <span class="ms-1" title="@premise.Notes">📝</span>
+                            }
+                        </td>
+                        <td>@premise.Area кв.м</td>
+                        <td>@premise.Type</td>
+                        <td><span class="badge bg-secondary">@premise.Status</span></td>
+                        <td>
+                            <AuthorizeView Roles="GrandAdmin, Admin">
+                                <Authorized>
+                                    <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OnEditPremise.InvokeAsync(premise)"><i class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => OnDeletePremise.InvokeAsync(premise.Id)"><i class="bi bi-trash"></i></button>
+                                </Authorized>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    [Parameter] public Building Building { get; set; } = default!;
+    [Parameter] public EventCallback<int> OnAddPremise { get; set; }
+    [Parameter] public EventCallback<Premise> OnEditPremise { get; set; }
+    [Parameter] public EventCallback<int> OnDeletePremise { get; set; }
+
+    private int? activeEntrance;
+
+    protected override void OnParametersSet()
+    {
+        if (Building != null && (Building.BuildingType == "Багатоповерхівка" || Building.BuildingType == "Офісний/Бізнес центр"))
+        {
+            var entrances = Building.Premises.Where(p => p.Entrance.HasValue).Select(p => p.Entrance.GetValueOrDefault()).Distinct().OrderBy(e => e).ToList();
+            if (entrances.Any() && (!activeEntrance.HasValue || !entrances.Contains(activeEntrance.Value)))
+            {
+                activeEntrance = entrances.First();
+            }
+        }
+    }
+
+    private string GetPremiseColorClass(string status) => status switch
+    {
+        "Вільне" => "bg-success border-success",
+        "Аварійне" => "bg-danger border-danger",
+        "Орендоване (Комерція)" => "bg-primary border-primary",
+        "Орендоване (Соціальне)" => "bg-info border-info text-dark",
+        "Службове" => "bg-warning border-warning text-dark",
+        _ => "bg-secondary border-secondary"
+    };
+}
