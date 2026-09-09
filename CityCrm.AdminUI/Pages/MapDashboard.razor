@@ -520,7 +520,7 @@
             if (buildings != null)
             {
                 cachedBuildings = buildings;
-                await RenderMap();
+                await RenderMap(isBackgroundUpdate);
             }
         }
         catch (Exception ex)
@@ -539,13 +539,13 @@
 
     private async Task FilterMapData()
     {
-        await RenderMap();
+        await RenderMap(false);
     }
 
     private async Task ClearSearch()
     {
         publicSearchQuery = "";
-        await RenderMap();
+        await RenderMap(false);
     }
 
     private string NormalizeStr(string? input)
@@ -555,7 +555,7 @@
         return new string(chars).ToLower();
     }
 
-    private async Task RenderMap()
+    private async Task RenderMap(bool isBackgroundUpdate = false)
     {
         if (!isMapInitialized || cachedBuildings == null) return;
 
@@ -632,7 +632,7 @@
             searchResultsCount = mapData.Sum(b => b.premises.Count);
         }
 
-        await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive || filterHasShelter);
+        await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive || filterHasShelter, isBackgroundUpdate);
     }
     
     public void Dispose()

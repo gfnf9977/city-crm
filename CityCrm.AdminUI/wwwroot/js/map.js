@@ -2,6 +2,7 @@ window.leafletMap = {
     mapInstance: null,
     buildingsCluster: null,
     issuesCluster: null,
+    polygonsLayer: null,
     dotNetRef: null,
     pickingMode: false,
     moveTimeout: null,
@@ -30,6 +31,8 @@ window.leafletMap = {
                 return L.divIcon({ html: '<div style="background-color:rgba(220,53,69,0.8); color:white; border-radius:15px; text-align:center; line-height:30px; font-weight:bold;">' + cluster.getChildCount() + '</div>', className: 'issue-cluster', iconSize: L.point(30, 30) });
             }
         }).addTo(this.mapInstance);
+
+        this.polygonsLayer = L.featureGroup().addTo(this.mapInstance);
 
         this.mapInstance.on('click', (e) => {
             if (this.pickingMode && this.dotNetRef) {
@@ -61,11 +64,16 @@ window.leafletMap = {
         document.getElementById('map').style.cursor = 'grab';
     },
 
-    loadData: function (locations, isAdmin, isSearchActive = false) {
+    loadData: function (locations, isAdmin, isSearchActive = false, isBackgroundUpdate = false) {
         if (!this.mapInstance) return;
 
         this.buildingsCluster.clearLayers();
-        let newLayers = [];
+        
+        if (this.polygonsLayer) {
+            this.polygonsLayer.clearLayers();
+        }
+
+        let newMarkerLayers = [];
 
         locations.forEach(loc => {
             let tooltipContent = "";
@@ -93,21 +101,28 @@ window.leafletMap = {
                 }
             }
 
-            let streetViewBtn = (loc.lat && loc.lng && loc.lat !== 0) 
-                ? `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}" 
-                      target="_blank" 
-                      class="btn btn-sm btn-light border shadow-sm px-2 py-1 ms-2" 
-                      title="Відкрити панораму (Street View)"
-                      style="flex-shrink: 0;">
-                      <i class="bi bi-eye-fill text-primary"></i>
-                   </a>` 
+            let actionButtons = (loc.lat && loc.lng && loc.lat !== 0) 
+                ? `<div class="d-flex gap-1 ms-2" style="flex-shrink: 0;">
+                       <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" 
+                          target="_blank" 
+                          class="btn btn-sm btn-light border shadow-sm px-2 py-1" 
+                          title="Прокласти маршрут (Google Maps)">
+                          <i class="bi bi-sign-turn-right-fill text-success"></i>
+                       </a>
+                       <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}" 
+                          target="_blank" 
+                          class="btn btn-sm btn-light border shadow-sm px-2 py-1" 
+                          title="Відкрити панораму (Street View)">
+                          <i class="bi bi-eye-fill text-primary"></i>
+                       </a>
+                   </div>` 
                 : '';
 
             let popupContent = `
                 <div style="min-width: 220px; max-width: 300px;">
                     <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
                         <h6 class="mb-0 text-primary pe-1" style="line-height: 1.3;">${loc.address}</h6>
-                        ${streetViewBtn}
+                        ${actionButtons}
                     </div>
             `;
 
@@ -268,21 +283,29 @@ window.leafletMap = {
                 polygon.on('mouseout', function () { this.setStyle({ fillOpacity: 0.4 }); });
                 polygon.bindTooltip(tooltipContent, tooltipOptions);
                 polygon.bindPopup(popupContent);
-                newLayers.push(polygon);
+                
+                polygon.addTo(this.polygonsLayer);
             }
             else if (loc.lat !== undefined && loc.lng !== undefined && loc.lat !== 0) {
                 let marker = L.marker([loc.lat, loc.lng], { icon: customIcon });
                 marker.bindTooltip(tooltipContent, tooltipOptions);
                 marker.bindPopup(popupContent);
-                newLayers.push(marker);
+                
+                newMarkerLayers.push(marker);
             }
         });
 
-        if (newLayers.length > 0) {
-            this.buildingsCluster.addLayers(newLayers);
+        if (newMarkerLayers.length > 0) {
+            this.buildingsCluster.addLayers(newMarkerLayers);
+        }
+
+        if (!isBackgroundUpdate && (isSearchActive || !this.mapInstance.hasMoved)) {
+            let bounds = L.latLngBounds();
+            if (newMarkerLayers.length > 0) bounds.extend(this.buildingsCluster.getBounds());
+            if (this.polygonsLayer.getLayers().length > 0) bounds.extend(this.polygonsLayer.getBounds());
             
-            if (isSearchActive || !this.mapInstance.hasMoved) {
-                this.mapInstance.fitBounds(this.buildingsCluster.getBounds(), { padding: [50, 50], maxZoom: 17 });
+            if (bounds.isValid()) {
+                this.mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
                 this.mapInstance.hasMoved = true;
             }
         }
