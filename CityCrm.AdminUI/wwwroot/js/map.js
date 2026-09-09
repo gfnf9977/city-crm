@@ -106,20 +106,20 @@ window.leafletMap = {
                        <div class="btn-group shadow-sm" role="group">
                            <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" 
                               target="_blank" 
-                              class="btn btn-sm btn-light border px-2 py-1" 
+                              class="btn btn-sm btn-light border px-2 py-1 d-flex align-items-center" 
                               title="Прокласти маршрут (Google Maps)">
-                              <i class="bi bi-google text-success"></i>
+                              <img src="https://www.google.com/s2/favicons?domain=maps.google.com&sz=32" alt="Google Maps" style="width:16px; height:16px;" />
                            </a>
                            <a href="https://www.waze.com/ul?ll=${loc.lat},${loc.lng}&navigate=yes" 
                               target="_blank" 
-                              class="btn btn-sm btn-light border-top border-bottom border-end px-2 py-1" 
+                              class="btn btn-sm btn-light border-top border-bottom border-end px-2 py-1 d-flex align-items-center" 
                               title="Прокласти маршрут (Waze)">
-                              <i class="bi bi-car-front-fill text-info"></i>
+                              <img src="https://www.google.com/s2/favicons?domain=waze.com&sz=32" alt="Waze" style="width:16px; height:16px;" />
                            </a>
                        </div>
                        <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}" 
                           target="_blank" 
-                          class="btn btn-sm btn-light border shadow-sm px-2 py-1" 
+                          class="btn btn-sm btn-light border shadow-sm px-2 py-1 d-flex align-items-center" 
                           title="Відкрити панораму (Street View)">
                           <i class="bi bi-eye-fill text-primary"></i>
                        </a>
