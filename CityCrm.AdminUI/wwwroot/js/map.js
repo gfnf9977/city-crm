@@ -7,6 +7,11 @@ window.leafletMap = {
     pickingMode: false,
     moveTimeout: null,
 
+    networkLogos: {
+        "АТБ-Маркет": "img/networks/atb.png",
+        "Нова Пошта": "img/networks/novaposhta.png",
+    },
+
     init: function (elementId, dotNetObj) {
         if (this.mapInstance !== null) {
             this.mapInstance.off();
@@ -165,13 +170,46 @@ window.leafletMap = {
                 if (loc.premises && loc.premises.length > 0) {
                     popupContent += `<div class="mt-2 d-flex flex-column gap-2">`;
                     loc.premises.forEach(p => {
-                        let catIcon = "bi-shop";
-                        if (p.businessCategory === "Продукти / Супермаркет") catIcon = "bi-basket";
-                        else if (p.businessCategory === "Кафе / Ресторан") catIcon = "bi-cup-hot";
-                        else if (p.businessCategory === "СТО / Автомийка") catIcon = "bi-tools";
-                        else if (p.businessCategory === "Аптека / Медицина") catIcon = "bi-capsule";
+                        const networkLogos = {
+                            "атб": "/img/networks/atb.png",
+                            "сільпо": "/img/networks/silpo.png",
+                            "нова пошта": "/img/networks/novaposhta.png",
+                            "розетка": "/img/networks/rozetka.png",
+                            "rozетка": "/img/networks/rozetka.png",
+                            "wog": "/img/networks/wog.png",
+                            "окко": "/img/networks/okko.png"
+                        };
 
+                        let brandLogoUrl = null;
                         let bizName = p.businessName ? p.businessName : "Заклад / Послуги";
+
+                        if (p.businessName) {
+                            let bNameLower = p.businessName.toLowerCase().trim();
+                            console.log("🔎 Шукаємо лого для:", bNameLower);
+
+                            for (let brandKey in networkLogos) {
+                                if (bNameLower.includes(brandKey)) {
+                                    brandLogoUrl = networkLogos[brandKey];
+                                    console.log("✅ Лого ЗНАЙДЕНО:", brandLogoUrl);
+                                    break;
+                                }
+                            }
+                        }
+
+                        let titleIconHtml = "";
+                        if (brandLogoUrl) {
+                            titleIconHtml = `<img src="${brandLogoUrl}" alt="Лого" style="width: 24px; height: 24px; object-fit: contain; margin-right: 8px; border-radius: 4px;" />`;
+                        } else {
+                            console.log("❌ Ставимо дефолтну іконку");
+                            let catIcon = "bi-shop";
+                            if (p.businessCategory === "Продукти / Супермаркет") catIcon = "bi-basket";
+                            else if (p.businessCategory === "Кафе / Ресторан") catIcon = "bi-cup-hot";
+                            else if (p.businessCategory === "СТО / Автомийка") catIcon = "bi-tools";
+                            else if (p.businessCategory === "Аптека / Медицина") catIcon = "bi-capsule";
+                            
+                            titleIconHtml = `<i class="bi ${catIcon} text-primary me-2 fs-5"></i>`;
+                        }
+
                         let bizDesc = p.businessDescription ? `<div class="mt-1 text-secondary" style="font-size: 0.8rem; line-height: 1.2;">${p.businessDescription}</div>` : "";
                         let bizCat = p.businessCategory ? `<div class="text-muted d-inline-block" style="font-size: 0.75rem;">${p.businessCategory}</div>` : "";
                         let incBadge = p.isInclusive ? `<span class="badge bg-primary ms-2 shadow-sm" style="font-size: 0.65rem;"><i class="bi bi-person-wheelchair"></i> Безбар'єрно</span>` : "";
@@ -253,7 +291,7 @@ window.leafletMap = {
                             <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
                                 <div class="card-body p-2">
                                     <div class="fw-bold text-dark d-flex align-items-center mb-1" style="font-size: 0.9rem;">
-                                        <i class="bi ${catIcon} text-primary me-2 fs-5"></i> ${bizName}
+                                        ${titleIconHtml} ${bizName}
                                     </div>
                                     <div>${bizCat}${incBadge}</div>
                                     ${bizDesc}
@@ -271,17 +309,50 @@ window.leafletMap = {
             }
             popupContent += `</div>`;
 
-            let iconEmoji = "📍";
-            if (loc.buildingType.includes("Багатоповерхівка") || loc.buildingType.includes("Гуртожиток") || loc.buildingType.includes("Офісний")) iconEmoji = "🏢";
-            else if (loc.buildingType.includes("Приватний")) iconEmoji = "🏠";
-            else if (loc.buildingType.includes("Гараж")) iconEmoji = "🚗";
-            else if (loc.buildingType.includes("Промисловий")) iconEmoji = "🏭";
-            else if (loc.buildingType.includes("Комерційна") || loc.buildingType.includes("Громадська")) iconEmoji = "🏪";
+            let brandLogoUrl = null;
+
+            if (!isAdmin && loc.premises && loc.premises.length > 0) {
+                for (let p of loc.premises) {
+                    if (p.businessName) {
+                        let bNameLower = p.businessName.toLowerCase();
+                        for (let brandKey in this.networkLogos) {
+                            if (bNameLower.includes(brandKey)) {
+                                brandLogoUrl = this.networkLogos[brandKey];
+                                break;
+                            }
+                        }
+                    }
+                    if (brandLogoUrl) break;
+                }
+            }
+
+            let iconHtml = '';
+            
+            if (brandLogoUrl) {
+                iconHtml = `
+                    <div style="background: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 2px solid #28a745; box-shadow: 0 3px 6px rgba(0,0,0,0.4); overflow: hidden; z-index: 1000;">
+                        <img src="${brandLogoUrl}" style="width: 24px; height: 24px; object-fit: contain;" />
+                    </div>`;
+            } else {
+                let iconEmoji = "📍";
+                if (loc.buildingType.includes("Багатоповерхівка") || loc.buildingType.includes("Гуртожиток") || loc.buildingType.includes("Офісний")) iconEmoji = "🏢";
+                else if (loc.buildingType.includes("Приватний")) iconEmoji = "🏠";
+                else if (loc.buildingType.includes("Гараж")) iconEmoji = "🚗";
+                else if (loc.buildingType.includes("Промисловий")) iconEmoji = "🏭";
+                else if (loc.buildingType.includes("Комерційна") || loc.buildingType.includes("Громадська")) iconEmoji = "🏪";
+
+                iconHtml = `
+                    <div style="font-size: 18px; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                        ${iconEmoji}
+                    </div>`;
+            }
 
             let customIcon = L.divIcon({
                 className: 'custom-map-icon',
-                html: `<div style="font-size: 18px; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${iconEmoji}</div>`,
-                iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16]
+                html: iconHtml,
+                iconSize: brandLogoUrl ? [36, 36] : [32, 32], 
+                iconAnchor: brandLogoUrl ? [18, 18] : [16, 16], 
+                popupAnchor: [0, -16]
             });
 
             if (loc.geoJson) {
