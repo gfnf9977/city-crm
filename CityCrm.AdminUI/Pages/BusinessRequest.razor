@@ -1,5 +1,5 @@
 @page "/business-request"
-@using CityCrm.AdminUI.Models
+@using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 @inject IJSRuntime JS
 
@@ -8,7 +8,7 @@
 <div class="container py-4" style="max-width: 850px;">
     <h2 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-warning"></i> Додати бізнес на карту міста</h2>
     <p class="text-muted mb-4">
-        Заповніть форму нижче, щоб додати ваш заклад до міського реєстру. Після перевірки модератором, він з'явиться на публічній карті Чернігова.
+        Заповніть форму нижче. Якщо ви представляєте мережу, ви можете додати одразу кілька відділень в одній заявці.
     </p>
 
     <div class="card bg-light border-0 shadow-sm mb-4">
@@ -17,7 +17,7 @@
                 <i class="bi bi-search fs-3 text-primary me-3"></i>
                 <div>
                     <h6 class="mb-0 fw-bold">Перевірити статус заявки</h6>
-                    <small class="text-muted">Введіть трекінг-номер, який ви отримали раніше</small>
+                    <small class="text-muted">Введіть трекінг-номер (BIZ-...)</small>
                 </div>
             </div>
             <div class="input-group" style="max-width: 300px;">
@@ -32,13 +32,27 @@
         @if (trackingResult != null)
         {
             <div class="card-footer bg-white border-top-0 pt-0 pb-3">
-                <div class="alert @GetStatusAlertClass(trackingResult.Status) mb-0 py-2 d-flex align-items-center">
-                    <i class="bi @GetStatusIconClass(trackingResult.Status) fs-5 me-2"></i>
-                    <div>
-                        <strong>Заявка #@trackingResult.TrackingNumber</strong> — @trackingResult.Name
-                        <br/>
-                        Статус: <strong>@GetStatusText(trackingResult.Status)</strong>
-                    </div>
+                <h6 class="fw-bold mb-2">Заявка #@trackingResult.TrackingNumber — @trackingResult.Name</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead class="bg-light text-muted small">
+                            <tr><th>Відділення</th><th>Адреса</th><th>Статус</th></tr>
+                        </thead>
+                        <tbody class="small">
+                            @foreach(var b in trackingResult.Branches)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@b.Name</td>
+                                    <td>@b.Address</td>
+                                    <td>
+                                        <span class="badge @GetStatusAlertClass(b.Status)">
+                                            <i class="bi @GetStatusIconClass(b.Status)"></i> @GetStatusText(b.Status)
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         }
@@ -55,17 +69,16 @@
         <div class="alert alert-success shadow-sm p-5 text-center border-0" style="background-color: #e6ffe6;">
             <i class="bi bi-check-circle-fill text-success display-1 d-block mb-3"></i>
             <h3 class="fw-bold">Заявку успішно прийнято!</h3>
-            <p class="fs-5 mb-2">Ваш номер для відстеження:</p>
+            <p class="fs-5 mb-2">Ваш загальний номер для відстеження:</p>
             <div class="display-4 fw-bold text-success mb-4 copyable-text" style="letter-spacing: 2px;" title="Копіювати код" @onclick='() => JS.InvokeVoidAsync("copyToClipboard", submittedTrackingNumber)'>
                 @submittedTrackingNumber <i class="bi bi-copy fs-4 ms-2 text-muted"></i>
             </div>
-            <p class="text-muted mb-4">Збережіть цей номер. Ви зможете перевірити статус обробки заявки на цій же сторінці.</p>
             <button class="btn btn-success px-4 rounded-pill" @onclick="ResetForm">Подати ще одну заявку</button>
         </div>
     }
     else
     {
-        <EditForm Model="requestModel" OnValidSubmit="SubmitRequest">
+        <EditForm Model="bulkModel" OnValidSubmit="SubmitRequest">
             <DataAnnotationsValidator />
 
             <div class="card shadow-sm border-0 mb-4">
@@ -75,30 +88,37 @@
                 <div class="card-body row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">ЄДРПОУ / ІПН</label>
-                        <InputText class="form-control" @bind-Value="requestModel.Edrpou" placeholder="12345678" />
-                        <ValidationMessage For="@(() => requestModel.Edrpou)" class="text-danger small" />
+                        <InputText class="form-control" @bind-Value="bulkModel.Edrpou" placeholder="12345678" />
+                        <ValidationMessage For="@(() => bulkModel.Edrpou)" class="text-danger small" />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Офіційна назва ФОП/ТОВ</label>
-                        <InputText class="form-control" @bind-Value="requestModel.LegalName" placeholder="ТОВ 'Сільпо'" />
-                        <ValidationMessage For="@(() => requestModel.LegalName)" class="text-danger small" />
+                        <InputText class="form-control" @bind-Value="bulkModel.LegalName" placeholder="ТОВ 'Сільпо'" />
+                        <ValidationMessage For="@(() => bulkModel.LegalName)" class="text-danger small" />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Контакт (Телефон/Email)</label>
-                        <InputText class="form-control" @bind-Value="requestModel.ContactInfo" placeholder="Для модератора" />
-                        <ValidationMessage For="@(() => requestModel.ContactInfo)" class="text-danger small" />
+                        <InputText class="form-control" @bind-Value="bulkModel.ContactInfo" placeholder="Для модератора" />
+                        <ValidationMessage For="@(() => bulkModel.ContactInfo)" class="text-danger small" />
                     </div>
                 </div>
             </div>
 
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-light fw-bold text-secondary">
-                    <i class="bi bi-shop"></i> Публічні дані закладу
+                    <i class="bi bi-shop"></i> Загальні публічні дані
                 </div>
                 <div class="card-body row g-3">
+                    <div class="col-12">
+                        <div class="form-check form-switch mb-2">
+                            <InputCheckbox class="form-check-input" id="isNet" @bind-Value="bulkModel.IsNetwork" @bind-Value:after="OnNetworkToggleAfter" />
+                            <label class="form-check-label fw-bold text-primary" for="isNet">Це мережевий заклад (супермаркет, пошта, банк)?</label>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Сфера діяльності</label>
-                        <InputSelect class="form-select" @bind-Value="requestModel.BusinessCategory">
+                        <InputSelect class="form-select" @bind-Value="bulkModel.BusinessCategory">
                             <option value="">Оберіть категорію...</option>
                             <option value="Продукти / Супермаркет">🛒 Продукти / Супермаркет</option>
                             <option value="Кафе / Ресторан">☕ Кафе / Ресторан</option>
@@ -108,147 +128,153 @@
                             <option value="Офіс / Відділення">🏢 Офіс / Відділення</option>
                             <option value="Інше">📦 Інше</option>
                         </InputSelect>
-                        <ValidationMessage For="@(() => requestModel.BusinessCategory)" class="text-danger small" />
+                        <ValidationMessage For="@(() => bulkModel.BusinessCategory)" class="text-danger small" />
                     </div>
                     
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Назва закладу (вивіска)</label>
-                        @if (requestModel.IsNetwork)
+                        @if (bulkModel.IsNetwork)
                         {
-                            <InputText class="form-control" @bind-Value="requestModel.LocalName" placeholder="Опціонально: Номер відділення / ТЦ" />
+                            <label class="form-label fw-bold text-primary">Загальна назва мережі</label>
+                            <InputText class="form-control border-primary" @bind-Value="bulkModel.NetworkName" placeholder="Напр. 'Нова Пошта' або 'АТБ'" />
                         }
                         else
                         {
-                            <InputText class="form-control" @bind-Value="requestModel.LocalName" placeholder="Напр: Кав'ярня 'У Ані'" required />
-                        }
-                        <ValidationMessage For="@(() => requestModel.LocalName)" class="text-danger small" />
-                    </div>
-
-                    <div class="col-12">
-                        <div class="form-check form-switch mb-2">
-                            <InputCheckbox class="form-check-input" id="isNet" @bind-Value="requestModel.IsNetwork" />
-                            <label class="form-check-label fw-bold text-primary" for="isNet">Це мережевий заклад (супермаркет, пошта, банк)?</label>
-                        </div>
-                        @if (requestModel.IsNetwork)
-                        {
-                            <InputText class="form-control border-primary" @bind-Value="requestModel.NetworkName" placeholder="Назва мережі (напр. 'Нова Пошта' або 'АТБ')" />
-                            <div class="form-text">Ми автоматично об'єднаємо назву мережі з назвою відділення.</div>
+                            <label class="form-label fw-bold">Назва закладу (Вивіска)</label>
+                            <InputText class="form-control" @bind-Value="bulkModel.NetworkName" placeholder="Напр. Кав'ярня 'У Ані'" />
                         }
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label fw-bold">Короткий опис</label>
-                        <InputTextArea class="form-control" @bind-Value="requestModel.Description" rows="2" placeholder="Що ви пропонуєте містянам?"></InputTextArea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-light fw-bold text-secondary">
-                    <i class="bi bi-geo-alt"></i> Адреса розташування
-                </div>
-                <div class="card-body row g-3">
-                    <div class="col-12 position-relative">
-                        <label class="form-label fw-bold">Вулиця</label>
-                        <input type="text" class="form-control @(requestModel.StreetId == 0 ? "border-warning" : "is-valid")"
-                               @bind="streetSearchQuery"
-                               @oninput="SearchStreet"
-                               placeholder="Почніть вводити назву вулиці..."
-                               autocomplete="off" />
-                        <ValidationMessage For="@(() => requestModel.StreetId)" class="text-danger small" />
-
-                        @if (streetSuggestions.Any())
-                        {
-                            <ul class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
-                                @foreach (var s in streetSuggestions)
-                                {
-                                    <li class="list-group-item list-group-item-action text-primary" style="cursor: pointer;" @onclick="() => SelectStreet(s)">
-                                        @s.DisplayName
-                                    </li>
-                                }
-                            </ul>
-                        }
+                        <label class="form-label fw-bold">Короткий загальний опис послуг</label>
+                        <InputTextArea class="form-control" @bind-Value="bulkModel.GeneralDescription" rows="2" placeholder="Що ви пропонуєте містянам?"></InputTextArea>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Будинок / Літера / Корпус</label>
-                        <div class="input-group">
-                            <InputNumber class="form-control" @bind-Value="requestModel.BuildingNumber" placeholder="№" />
-                            <span class="input-group-text">-</span>
-                            <InputText class="form-control" @bind-Value="requestModel.BuildingLetter" placeholder="Літера (А)" />
-                            <span class="input-group-text">корп.</span>
-                            <InputText class="form-control" @bind-Value="requestModel.BuildingBlock" placeholder="Корп." />
+                        <div class="form-check form-switch mt-2">
+                            <InputCheckbox class="form-check-input" id="isIncl" @bind-Value="bulkModel.IsInclusive" />
+                            <label class="form-check-label fw-bold" for="isIncl"><i class="bi bi-person-wheelchair"></i> Безбар'єрний доступ</label>
                         </div>
-                        <ValidationMessage For="@(() => requestModel.BuildingNumber)" class="text-danger small" />
                     </div>
-
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">№ приміщення (якщо є)</label>
-                        <InputText class="form-control" @bind-Value="requestModel.PremiseNumber" placeholder="Кв. / Офіс / Бутік" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-light fw-bold text-secondary">
-                    <i class="bi bi-info-circle"></i> Додаткові деталі
-                </div>
-                <div class="card-body">
-                    <div class="form-check form-switch mb-3">
-                        <InputCheckbox class="form-check-input" id="isIncl" @bind-Value="requestModel.IsInclusive" />
-                        <label class="form-check-label fw-bold text-primary" for="isIncl"><i class="bi bi-person-wheelchair"></i> Безбар'єрний доступ (наявний пандус / рівний вхід)</label>
+                        <InputText class="form-control form-control-sm" @bind-Value="bulkModel.ReferenceLink" placeholder="Веб-сайт або соцмережа (опціонально)" />
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">ПВеб-сайт або соцмережа (Опціонально)</label>
-                        <InputText class="form-control" @bind-Value="requestModel.ReferenceLink" placeholder="Наприклад: https://instagram.com/..., або сайт закладу" />
-                        <ValidationMessage For="@(() => requestModel.ReferenceLink)" class="text-danger small" />
-                    </div>
-
-                    <div class="border rounded p-3 bg-white">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <label class="fw-bold mb-0">Графік роботи</label>
-                            <div class="form-check form-switch mb-0">
-                                <input type="checkbox" class="form-check-input" id="is247" @bind="is24_7" />
-                                <label class="form-check-label text-success fw-bold" for="is247">Цілодобово (24/7)</label>
+                    <div class="col-12 mt-3">
+                        <div class="border rounded p-3 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="fw-bold mb-0">Графік роботи</label>
+                                <div class="form-check form-switch mb-0">
+                                    <input type="checkbox" class="form-check-input" id="is247" @bind="is24_7" />
+                                    <label class="form-check-label text-success fw-bold" for="is247">Цілодобово (24/7)</label>
+                                </div>
                             </div>
-                        </div>
-
-                        @if (!is24_7)
-                        {
-                            <div class="row g-2">
-                                @foreach (var day in daysOfWeek)
-                                {
-                                    if (weeklySchedule.TryGetValue(day, out var schedule))
+                            @if (!is24_7)
+                            {
+                                <div class="row g-2">
+                                    @foreach (var day in daysOfWeek)
                                     {
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="d-flex align-items-center border rounded p-1">
-                                                <div style="width: 35px;" class="fw-bold text-center @(schedule.IsWorking ? "text-dark" : "text-muted")">@day</div>
-                                                <div class="form-check form-switch ms-1 me-2 mb-0">
-                                                    <input type="checkbox" class="form-check-input" @bind="schedule.IsWorking" />
+                                        if (weeklySchedule.TryGetValue(day, out var schedule))
+                                        {
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="d-flex align-items-center border rounded p-1">
+                                                    <div style="width: 35px;" class="fw-bold text-center @(schedule.IsWorking ? "text-dark" : "text-muted")">@day</div>
+                                                    <div class="form-check form-switch ms-1 me-2 mb-0">
+                                                        <input type="checkbox" class="form-check-input" @bind="schedule.IsWorking" />
+                                                    </div>
+                                                    @if (schedule.IsWorking)
+                                                    {
+                                                        <input type="time" class="form-control form-control-sm px-1 text-center" @bind="schedule.Open" />
+                                                        <span class="mx-1">-</span>
+                                                        <input type="time" class="form-control form-control-sm px-1 text-center" @bind="schedule.Close" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted fst-italic flex-grow-1 text-center small">Вихідний</span>
+                                                    }
                                                 </div>
-                                                @if (schedule.IsWorking)
-                                                {
-                                                    <input type="time" class="form-control form-control-sm px-1 text-center" @bind="schedule.Open" />
-                                                    <span class="mx-1">-</span>
-                                                    <input type="time" class="form-control form-control-sm px-1 text-center" @bind="schedule.Close" />
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted fst-italic flex-grow-1 text-center small">Вихідний</span>
-                                                }
                                             </div>
-                                        </div>
+                                        }
                                     }
-                                }
-                            </div>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none mt-2" @onclick="CopyMondayToWeekdays">
-                                <i class="bi bi-files"></i> Скопіювати час Пн на Вт-Пт
-                            </button>
-                        }
+                                </div>
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none mt-2" @onclick="CopyMondayToWeekdays">
+                                    <i class="bi bi-files"></i> Скопіювати час Пн на Вт-Пт
+                                </button>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-geo-alt-fill text-danger"></i> Локації (Адреси)</h5>
+            
+            @foreach (var (branch, index) in bulkModel.Branches.Select((b, i) => (b, i)))
+            {
+                <div class="card shadow-sm border-0 mb-3 border-start border-4 border-warning">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">Адреса @(bulkModel.IsNetwork ? $"відділення #{index + 1}" : "закладу")</span>
+                        @if (bulkModel.IsNetwork && bulkModel.Branches.Count > 1)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => RemoveBranch(branch)"><i class="bi bi-trash"></i></button>
+                        }
+                    </div>
+                    <div class="card-body row g-3">
+                        <div class="col-md-12 position-relative">
+                            <label class="form-label fw-bold small">Вулиця <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @(branch.StreetId == 0 ? "border-warning" : "is-valid")"
+                                   value="@branch.StreetSearchQuery"
+                                   @oninput="(e) => SearchStreet(e, branch)"
+                                   placeholder="Почніть вводити назву вулиці..." autocomplete="off" />
+                            
+                            @if (branch.StreetSuggestions.Any())
+                            {
+                                <ul class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                                    @foreach (var s in branch.StreetSuggestions)
+                                    {
+                                        <li class="list-group-item list-group-item-action text-primary" style="cursor: pointer;" @onclick="() => SelectStreet(s, branch)">
+                                            @s.DisplayName
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Будинок / Літера / Корп <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <InputNumber class="form-control" @bind-Value="branch.BuildingNumber" placeholder="№" />
+                                <span class="input-group-text">-</span>
+                                <InputText class="form-control" @bind-Value="branch.BuildingLetter" placeholder="Літ(А)" />
+                                <span class="input-group-text">корп.</span>
+                                <InputText class="form-control" @bind-Value="branch.BuildingBlock" placeholder="Корп." />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">№ приміщення</label>
+                            <InputText class="form-control" @bind-Value="branch.PremiseNumber" placeholder="Кв. / Офіс" />
+                        </div>
+
+                        @if (bulkModel.IsNetwork)
+                        {
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">Уточнення назви (опціонально)</label>
+                                <InputText class="form-control form-control-sm border-primary" @bind-Value="branch.LocalName" placeholder="напр. Відділення №5" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">Індивідуальний опис (опціонально)</label>
+                                <InputText class="form-control form-control-sm" @bind-Value="branch.Description" placeholder="напр. Вантажне відділення до 1000 кг" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (bulkModel.IsNetwork)
+            {
+                <button type="button" class="btn btn-outline-primary mb-4 w-100 fw-bold" style="border-style: dashed;" @onclick="AddBranch">
+                    <i class="bi bi-plus-circle"></i> Додати ще одну адресу (відділення)
+                </button>
+            }
 
             @if (!string.IsNullOrEmpty(serverError))
             {
@@ -266,14 +292,39 @@
 </div>
 
 @code {
-    private BusinessRequestModel requestModel = new();
+    public class BulkRequestModel
+    {
+        [Required(ErrorMessage = "Введіть ЄДРПОУ або ІПН")] public string Edrpou { get; set; } = "";
+        [Required(ErrorMessage = "Введіть юридичну назву")] public string LegalName { get; set; } = "";
+        [Required(ErrorMessage = "Введіть контакт")] public string ContactInfo { get; set; } = "";
+        [Required(ErrorMessage = "Оберіть сферу")] public string BusinessCategory { get; set; } = "";
+        public bool IsNetwork { get; set; }
+        public string? NetworkName { get; set; }
+        public string? GeneralDescription { get; set; }
+        public bool IsInclusive { get; set; }
+        public string? ReferenceLink { get; set; }
+        public string? WorkingHours { get; set; }
+        public List<BranchModel> Branches { get; set; } = new() { new BranchModel() };
+    }
+
+    public class BranchModel
+    {
+        public string? LocalName { get; set; }
+        public string? Description { get; set; }
+        public int StreetId { get; set; }
+        public int BuildingNumber { get; set; }
+        public string? BuildingLetter { get; set; }
+        public string? BuildingBlock { get; set; }
+        public string? PremiseNumber { get; set; }
+        public string StreetSearchQuery { get; set; } = "";
+        public List<CityCrm.AdminUI.Models.Street> StreetSuggestions { get; set; } = new();
+    }
+
+    private BulkRequestModel bulkModel = new();
     private bool isSubmitted = false;
     private bool isSubmitting = false;
     private string serverError = "";
     private string submittedTrackingNumber = "";
-
-    private string streetSearchQuery = "";
-    private List<Street> streetSuggestions = new();
 
     private bool is24_7 = false;
     private readonly string[] daysOfWeek = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд" };
@@ -284,66 +335,63 @@
     private string trackingError = "";
     private bool isCheckingStatus = false;
 
-    public class DaySchedule
-    {
-        public bool IsWorking { get; set; } = true;
-        public TimeOnly? Open { get; set; } = new TimeOnly(9, 0);
-        public TimeOnly? Close { get; set; } = new TimeOnly(18, 0);
-    }
+    public class DaySchedule { public bool IsWorking { get; set; } = true; public TimeOnly? Open { get; set; } = new TimeOnly(9, 0); public TimeOnly? Close { get; set; } = new TimeOnly(18, 0); }
+    public class TrackingResponse { public string TrackingNumber { get; set; } = ""; public string Name { get; set; } = ""; public List<BranchStatus> Branches { get; set; } = new(); }
+    public class BranchStatus { public string Name { get; set; } = ""; public string Address { get; set; } = ""; public string Status { get; set; } = ""; }
 
-    public class CreateResponse { public string TrackingNumber { get; set; } = ""; }
-    public class TrackingResponse { public string TrackingNumber { get; set; } = ""; public string Status { get; set; } = ""; public string Name { get; set; } = ""; }
-
-    protected override void OnInitialized()
-    {
-        ResetForm();
-    }
+    protected override void OnInitialized() => ResetForm();
 
     private void ResetForm()
     {
-        requestModel = new BusinessRequestModel();
-        streetSearchQuery = "";
+        bulkModel = new BulkRequestModel();
         isSubmitted = false;
         is24_7 = false;
         submittedTrackingNumber = "";
         weeklySchedule = daysOfWeek.ToDictionary(d => d, d => new DaySchedule { IsWorking = d != "Сб" && d != "Нд" });
     }
 
-    private async Task SearchStreet(ChangeEventArgs e)
+    private void OnNetworkToggleAfter()
     {
-        streetSearchQuery = e.Value?.ToString() ?? "";
-        requestModel.StreetId = 0;
-
-        if (streetSearchQuery.Length >= 2)
+        if (!bulkModel.IsNetwork && bulkModel.Branches.Count > 1)
         {
-            var result = await Http.GetFromJsonAsync<List<Street>>($"api/streets/search?q={streetSearchQuery}");
-            if (result != null) streetSuggestions = result;
-        }
-        else
-        {
-            streetSuggestions.Clear();
+            var first = bulkModel.Branches.First();
+            bulkModel.Branches.Clear();
+            bulkModel.Branches.Add(first);
         }
     }
 
-    private void SelectStreet(Street street)
+    private void AddBranch() => bulkModel.Branches.Add(new BranchModel());
+    private void RemoveBranch(BranchModel b) => bulkModel.Branches.Remove(b);
+
+    private async Task SearchStreet(ChangeEventArgs e, BranchModel branch)
     {
-        requestModel.StreetId = street.Id;
-        streetSearchQuery = street.DisplayName;
-        streetSuggestions.Clear();
+        branch.StreetSearchQuery = e.Value?.ToString() ?? "";
+        branch.StreetId = 0;
+
+        if (branch.StreetSearchQuery.Length >= 2)
+        {
+            var result = await Http.GetFromJsonAsync<List<CityCrm.AdminUI.Models.Street>>($"api/streets/search?q={branch.StreetSearchQuery}");
+            if (result != null) branch.StreetSuggestions = result;
+        }
+        else branch.StreetSuggestions.Clear();
+    }
+
+    private void SelectStreet(CityCrm.AdminUI.Models.Street street, BranchModel branch)
+    {
+        branch.StreetId = street.Id;
+        branch.StreetSearchQuery = street.DisplayName;
+        branch.StreetSuggestions.Clear();
     }
 
     private void CopyMondayToWeekdays()
     {
         if (weeklySchedule.TryGetValue("Пн", out var mon) && mon.IsWorking)
         {
-            string[] weekdays = { "Вт", "Ср", "Чт", "Пт" };
-            foreach (var day in weekdays)
+            foreach (var day in new[] { "Вт", "Ср", "Чт", "Пт" })
             {
                 if (weeklySchedule.TryGetValue(day, out var target))
                 {
-                    target.IsWorking = true;
-                    target.Open = mon.Open;
-                    target.Close = mon.Close;
+                    target.IsWorking = true; target.Open = mon.Open; target.Close = mon.Close;
                 }
             }
         }
@@ -352,66 +400,36 @@
     private async Task CheckStatus()
     {
         if (string.IsNullOrWhiteSpace(trackingId)) return;
-        
-        isCheckingStatus = true;
-        trackingError = "";
-        trackingResult = null;
-
+        isCheckingStatus = true; trackingError = ""; trackingResult = null;
         try
         {
             var response = await Http.GetAsync($"api/businessrequests/tracking/{trackingId.Trim()}");
-            if (response.IsSuccessStatusCode)
-            {
-                trackingResult = await response.Content.ReadFromJsonAsync<TrackingResponse>();
-            }
-            else
-            {
-                trackingError = "Заявку з таким номером не знайдено.";
-            }
+            if (response.IsSuccessStatusCode) trackingResult = await response.Content.ReadFromJsonAsync<TrackingResponse>();
+            else trackingError = "Заявку з таким номером не знайдено.";
         }
-        catch
-        {
-            trackingError = "Помилка з'єднання з сервером.";
-        }
-        finally
-        {
-            isCheckingStatus = false;
-        }
+        catch { trackingError = "Помилка з'єднання з сервером."; }
+        finally { isCheckingStatus = false; }
     }
 
-    private async Task HandleTrackingEnter(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") await CheckStatus();
-    }
+    private async Task HandleTrackingEnter(KeyboardEventArgs e) { if (e.Key == "Enter") await CheckStatus(); }
 
-    private string GetStatusText(string status) => status switch {
-        "Pending" => "Очікує модерації (В обробці)",
-        "Approved" => "Схвалено та опубліковано на карті",
-        "Rejected" => "Відхилено модератором (Спам або помилка)",
-        _ => "Невідомо"
-    };
-
-    private string GetStatusAlertClass(string status) => status switch {
-        "Pending" => "alert-warning text-dark border-warning",
-        "Approved" => "alert-success border-success",
-        "Rejected" => "alert-danger border-danger",
-        _ => "alert-secondary"
-    };
-
-    private string GetStatusIconClass(string status) => status switch {
-        "Pending" => "bi-hourglass-split",
-        "Approved" => "bi-check-circle-fill",
-        "Rejected" => "bi-x-circle-fill",
-        _ => "bi-question-circle"
-    };
+    private string GetStatusText(string status) => status switch { "Pending" => "В обробці", "Approved" => "Опубліковано", "Rejected" => "Відхилено", _ => "Невідомо" };
+    private string GetStatusAlertClass(string status) => status switch { "Pending" => "bg-warning text-dark", "Approved" => "bg-success", "Rejected" => "bg-danger", _ => "bg-secondary" };
+    private string GetStatusIconClass(string status) => status switch { "Pending" => "bi-hourglass-split", "Approved" => "bi-check-circle", "Rejected" => "bi-x-circle", _ => "bi-question-circle" };
 
     private async Task SubmitRequest()
     {
         serverError = "";
-
-        if (requestModel.StreetId == 0)
+        
+        if (string.IsNullOrWhiteSpace(bulkModel.NetworkName))
         {
-            serverError = "Будь ласка, оберіть вулицю з випадаючого списку.";
+            serverError = bulkModel.IsNetwork ? "Заповніть назву мережі." : "Заповніть назву закладу.";
+            return;
+        }
+
+        if (bulkModel.Branches.Any(b => b.StreetId == 0 || b.BuildingNumber <= 0))
+        {
+            serverError = "У всіх адрес має бути обрана вулиця з довідника та вказаний номер будинку.";
             return;
         }
 
@@ -426,32 +444,21 @@
                 weeklySchedule[day].Close = new TimeOnly(23, 59);
             }
         }
-        requestModel.WorkingHours = System.Text.Json.JsonSerializer.Serialize(weeklySchedule);
+        bulkModel.WorkingHours = System.Text.Json.JsonSerializer.Serialize(weeklySchedule);
 
         try
         {
-            var response = await Http.PostAsJsonAsync("api/businessrequests", requestModel);
+            var response = await Http.PostAsJsonAsync("api/businessrequests", bulkModel);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
                 if (result != null && result.ContainsKey("trackingNumber"))
-                {
                     submittedTrackingNumber = result["trackingNumber"].ToString()!;
-                }
                 isSubmitted = true;
             }
-            else
-            {
-                serverError = "Помилка при відправці на сервер. Спробуйте пізніше.";
-            }
+            else serverError = "Помилка при відправці на сервер. Спробуйте пізніше.";
         }
-        catch
-        {
-            serverError = "Помилка з'єднання з сервером.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
+        catch { serverError = "Помилка з'єднання з сервером."; }
+        finally { isSubmitting = false; }
     }
 }
