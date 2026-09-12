@@ -1,8 +1,16 @@
+window.markMuralVisited = (id) => {
+    if (window.leafletMap && window.leafletMap.dotNetRef) {
+        window.leafletMap.dotNetRef.invokeMethodAsync('MarkMuralVisited', id);
+    }
+};
+
 window.leafletMap = {
     mapInstance: null,
     buildingsCluster: null,
     issuesCluster: null,
     polygonsLayer: null,
+    muralsLayer: null,
+    routeLayer: null,
     dotNetRef: null,
     pickingMode: false,
     moveTimeout: null,
@@ -459,5 +467,87 @@ window.leafletMap = {
         this.mapInstance.once('locationerror', (e) => {
             alert("Не вдалося визначити вашу локацію. Перевірте дозволи в браузері (GPS).");
         });
+    },
+
+    loadMurals: function (murals, visitedIds) {
+        if (!this.mapInstance) return;
+        if (this.muralsLayer) { this.muralsLayer.clearLayers(); }
+        else { this.muralsLayer = L.layerGroup().addTo(this.mapInstance); }
+
+        let bounds = L.latLngBounds();
+
+        murals.forEach(m => {
+            let isVisited = visitedIds.includes(m.id);
+            let color = isVisited ? "#28a745" : "#6f42c1";
+            let emoji = isVisited ? "✅" : "🎨";
+
+            let icon = L.divIcon({
+                className: 'mural-icon',
+                html: `<div style="font-size:18px; background:white; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid ${color}; box-shadow:0 2px 5px rgba(0,0,0,0.4); z-index: 1000;">${emoji}</div>`,
+                iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16]
+            });
+
+            let btnHtml = isVisited
+                ? `<div class="badge bg-success w-100 p-2 mt-2" style="font-size: 0.85rem;"><i class="bi bi-check-all"></i> Відвідано</div>`
+                : `<button class="btn btn-sm text-white w-100 mt-2 fw-bold" style="background-color: #6f42c1;" onclick="window.markMuralVisited(${m.id})"><i class="bi bi-geo-alt-fill"></i> Я тут був!</button>`;
+
+            let popupContent = `
+                <div style="width: 220px;">
+                    <img src="${m.photoUrl}" alt="${m.title}" style="width:100%; height:140px; object-fit:cover; border-radius:6px; margin-bottom: 8px;" />
+                    <h6 class="fw-bold mb-1" style="color: ${color};">${m.title}</h6>
+                    <div class="text-muted small mb-1"><i class="bi bi-brush"></i> ${m.artist || 'Невідомо'}</div>
+                    <div class="small fst-italic mb-2" style="line-height: 1.2;">${m.description}</div>
+                    ${btnHtml}
+                </div>
+            `;
+
+            let marker = L.marker([m.lat, m.lng], { icon: icon });
+            marker.bindPopup(popupContent);
+            this.muralsLayer.addLayer(marker);
+            bounds.extend([m.lat, m.lng]);
+        });
+
+        if (bounds.isValid() && murals.length > 0) {
+            this.mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+    },
+
+    clearMurals: function () {
+        if (this.muralsLayer) this.muralsLayer.clearLayers();
+        if (this.routeLayer) this.mapInstance.removeLayer(this.routeLayer);
+    },
+
+    getUserLocationForRoute: function () {
+        if (!this.mapInstance) return;
+        
+        this.mapInstance.off('locationfound');
+        this.mapInstance.off('locationerror');
+
+        this.mapInstance.locate({ setView: false, maxZoom: 16 });
+        
+        this.mapInstance.once('locationfound', (e) => {
+            this.dotNetRef.invokeMethodAsync('OnLocationFoundForRoute', e.latlng.lat, e.latlng.lng);
+        });
+        
+        this.mapInstance.once('locationerror', (e) => {
+            alert("Помилка геолокації. Буде використано центр Чернігова (Красна площа) для старту.");
+            this.dotNetRef.invokeMethodAsync('OnLocationFoundForRoute', 51.4938, 31.2953);
+        });
+    },
+
+    drawMuralRoute: function (startLat, startLng, routeMurals) {
+        if (this.routeLayer) { this.mapInstance.removeLayer(this.routeLayer); }
+        
+        let latlngs = [[startLat, startLng]];
+        routeMurals.forEach(m => latlngs.push([m.lat, m.lng]));
+
+        this.routeLayer = L.polyline(latlngs, {
+            color: '#6f42c1', 
+            weight: 4, 
+            dashArray: '10, 10', 
+            opacity: 0.8
+        }).addTo(this.mapInstance);
+        
+        this.mapInstance.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
     }
 };

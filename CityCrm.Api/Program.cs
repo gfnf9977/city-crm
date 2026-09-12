@@ -115,6 +115,40 @@ using (var scope = app.Services.CreateScope())
         context.Buildings.Add(testBuilding);
         context.SaveChanges();
     }
+
+    if (!context.Murals.Any())
+    {
+        context.Murals.AddRange(
+            new CityCrm.Api.Entities.Mural 
+            { 
+                Title = "Осінь - новий старт", 
+                Artist = "Невідомий", 
+                Description = "Мурал на паркані біля Чернігівської політехніки.", 
+                Address = "вул. Шевченка, 95", 
+                Lat = 51.5030, Lng = 31.3000, 
+                PhotoUrl = "https://placehold.co/600x400/2b2b2b/FFFFFF?text=Polytech+Mural" 
+            },
+            new CityCrm.Api.Entities.Mural 
+            { 
+                Title = "Дівчина з квітами", 
+                Artist = "Місцеві художники", 
+                Description = "Один з найвідоміших стінописів у центрі міста.", 
+                Address = "просп. Миру, 35", 
+                Lat = 51.4935, Lng = 31.2950, 
+                PhotoUrl = "https://placehold.co/600x400/2b2b2b/FFFFFF?text=Center+Mural" 
+            },
+            new CityCrm.Api.Entities.Mural 
+            { 
+                Title = "Історичний Чернігів", 
+                Artist = "Студія Art", 
+                Description = "Мурал із зображенням стародавньої архітектури.", 
+                Address = "вул. Козацька, 12", 
+                Lat = 51.5120, Lng = 31.2800, 
+                PhotoUrl = "https://placehold.co/600x400/2b2b2b/FFFFFF?text=Kozatska+Mural" 
+            }
+        );
+        context.SaveChanges();
+    }
 }
 
 app.Run();

@@ -4,6 +4,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : isInvestorMode ? "Карта інвестора" : "Публічна карта міста")</PageTitle>
 
@@ -50,6 +51,12 @@
                             Показати інциденти
                         </label>
                     </div>
+
+                    <button class="btn @(isMuralsMode ? "text-white" : "") shadow-sm rounded-pill px-3" 
+                            style="@(isMuralsMode ? "background-color: #6f42c1; border-color: #6f42c1;" : "color: #6f42c1; border-color: #6f42c1;")" 
+                            @onclick="ToggleMuralsMode">
+                        <i class="bi bi-palette-fill"></i> Мурали
+                    </button>
                 </div>
             }
         }
@@ -106,6 +113,27 @@
     </div>
 </div>
 
+@if (isMuralsMode)
+{
+    <div class="alert alert-light border shadow-sm mb-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="border-left: 5px solid #6f42c1 !important;">
+        <div class="flex-grow-1">
+            <h5 class="fw-bold text-dark mb-1"><i class="bi bi-map text-secondary"></i> Квест "Стінописи міста"</h5>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted">Відвідано: <strong style="color: #6f42c1;">@visitedMuralIds.Count</strong> з <strong>@muralsList.Count</strong></span>
+                <div class="progress flex-grow-1" style="height: 8px; max-width: 250px;">
+                    <div class="progress-bar" role="progressbar" style="background-color: #6f42c1; width: @(muralsList.Count > 0 ? (visitedMuralIds.Count * 100 / muralsList.Count) : 0)%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn text-white fw-bold px-4 rounded-pill shadow-sm" style="background-color: #6f42c1;" @onclick="BuildOptimalRoute" disabled="@(isBuildingRoute || visitedMuralIds.Count == muralsList.Count)">
+            @if (isBuildingRoute) { <span class="spinner-border spinner-border-sm"></span> <span> Обчислення...</span> }
+            else if (visitedMuralIds.Count == muralsList.Count) { <span><i class="bi bi-check2-circle"></i> Квест пройдено!</span> }
+            else { <span><i class="bi bi-bicycle"></i> Оптимальний веломаршрут</span> }
+        </button>
+    </div>
+}
+
 @if (isPickingIssueLocation)
 {
     <div class="alert alert-danger shadow fw-bold text-center mb-3">
@@ -158,6 +186,11 @@
     private double targetIssueLng;
     
     private DotNetObjectReference<MapDashboard>? objRef;
+
+    private bool isMuralsMode = false;
+    private List<MuralModel> muralsList = new();
+    private List<int> visitedMuralIds = new();
+    private bool isBuildingRoute = false;
 
     protected override void OnInitialized()
     {
@@ -450,6 +483,73 @@
         }
 
         await JSRuntime.InvokeVoidAsync("leafletMap.loadData", mapData, isAdmin, isSearchActive || filterHasShelter, isBackgroundUpdate);
+    }
+
+    private async Task ToggleMuralsMode()
+    {
+        isMuralsMode = !isMuralsMode;
+        if (isMuralsMode)
+        {
+            showIssuesOnMap = false;
+            await ToggleIssuesVisibility();
+
+            var storedVisited = await LocalStorage.GetItemAsync<List<int>>("visited_murals");
+            if (storedVisited != null) visitedMuralIds = storedVisited;
+
+            muralsList = await Http.GetFromJsonAsync<List<MuralModel>>("api/murals") ?? new();
+            await JSRuntime.InvokeVoidAsync("leafletMap.loadMurals", muralsList, visitedMuralIds);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("leafletMap.clearMurals");
+        }
+    }
+
+    [JSInvokable]
+    public async Task MarkMuralVisited(int id)
+    {
+        if (!visitedMuralIds.Contains(id))
+        {
+            visitedMuralIds.Add(id);
+            await LocalStorage.SetItemAsync("visited_murals", visitedMuralIds);
+            StateHasChanged();
+            
+            await JSRuntime.InvokeVoidAsync("leafletMap.loadMurals", muralsList, visitedMuralIds);
+        }
+    }
+
+    private async Task BuildOptimalRoute()
+    {
+        isBuildingRoute = true;
+        await JSRuntime.InvokeVoidAsync("leafletMap.getUserLocationForRoute");
+    }
+
+    [JSInvokable]
+    public async Task OnLocationFoundForRoute(double lat, double lng)
+    {
+        var unvisited = muralsList.Where(m => !visitedMuralIds.Contains(m.Id)).Select(m => m.Id).ToList();
+        
+        if (!unvisited.Any()) 
+        {
+            isBuildingRoute = false;
+            StateHasChanged();
+            return;
+        }
+
+        var request = new { StartLat = lat, StartLng = lng, UnvisitedMuralIds = unvisited };
+        var response = await Http.PostAsJsonAsync("api/murals/optimize-route", request);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var route = await response.Content.ReadFromJsonAsync<List<MuralModel>>();
+            if (route != null)
+            {
+                await JSRuntime.InvokeVoidAsync("leafletMap.drawMuralRoute", lat, lng, route);
+            }
+        }
+        
+        isBuildingRoute = false;
+        StateHasChanged();
     }
     
     public void Dispose()
