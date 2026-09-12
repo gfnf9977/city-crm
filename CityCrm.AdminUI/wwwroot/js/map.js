@@ -495,6 +495,7 @@ window.leafletMap = {
                 <div style="width: 220px;">
                     <img src="${m.photoUrl}" alt="${m.title}" style="width:100%; height:140px; object-fit:cover; border-radius:6px; margin-bottom: 8px;" />
                     <h6 class="fw-bold mb-1" style="color: ${color};">${m.title}</h6>
+                    <div class="text-muted small mb-1"><i class="bi bi-geo-alt-fill text-danger"></i> ${m.address}</div>
                     <div class="text-muted small mb-1"><i class="bi bi-brush"></i> ${m.artist || 'Невідомо'}</div>
                     <div class="small fst-italic mb-2" style="line-height: 1.2;">${m.description}</div>
                     ${btnHtml}
