@@ -11,6 +11,7 @@ window.leafletMap = {
     polygonsLayer: null,
     muralsLayer: null,
     routeLayer: null,
+    routingControl: null,
     dotNetRef: null,
     pickingMode: false,
     moveTimeout: null,
@@ -520,7 +521,8 @@ window.leafletMap = {
 
     clearMurals: function () {
         if (this.muralsLayer) this.muralsLayer.clearLayers();
-        if (this.routeLayer) this.mapInstance.removeLayer(this.routeLayer);
+        if (this.routingControl) { this.mapInstance.removeControl(this.routingControl); this.routingControl = null; }
+        if (this.routeLayer) { this.mapInstance.removeLayer(this.routeLayer); this.routeLayer = null; }
     },
 
     getUserLocationForRoute: function () {
@@ -542,34 +544,58 @@ window.leafletMap = {
     },
 
     drawMuralRoute: function (startLat, startLng, routeMurals) {
-        if (this.routeLayer) { 
-            this.mapInstance.removeLayer(this.routeLayer); 
+        if (this.routingControl) {
+            this.mapInstance.removeControl(this.routingControl);
+            this.routingControl = null;
+        }
+        if (this.routeLayer) {
+            this.mapInstance.removeLayer(this.routeLayer);
+            this.routeLayer = null;
         }
         
         this.routeLayer = L.featureGroup().addTo(this.mapInstance);
 
-        let latlngs = [[startLat, startLng]];
-        routeMurals.forEach(m => latlngs.push([m.lat, m.lng]));
-
-        L.polyline(latlngs, {
-            color: '#6f42c1', 
-            weight: 4, 
-            dashArray: '10, 10', 
-            opacity: 0.8
-        }).addTo(this.routeLayer);
-        
         let startIcon = L.divIcon({
             className: 'start-marker',
             html: `<div style="background-color: #0dcaf0; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); font-size: 18px; z-index: 2000;">🏃</div>`,
-            iconSize: [36, 36], 
-            iconAnchor: [18, 18], 
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
             popupAnchor: [0, -18]
         });
-
         L.marker([startLat, startLng], { icon: startIcon })
          .bindPopup("<div class='fw-bold text-center mb-0'>📍 Точка старту</div>")
          .addTo(this.routeLayer);
 
-        this.mapInstance.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
+        let waypoints = [ L.latLng(startLat, startLng) ];
+        routeMurals.forEach(m => {
+            waypoints.push(L.latLng(m.lat, m.lng));
+        });
+
+        this.routingControl = L.Routing.control({
+            waypoints: waypoints,
+            router: L.Routing.osrmv1({
+                language: 'uk',
+                profile: 'driving'
+            }),
+            lineOptions: {
+                styles: [{ color: '#6f42c1', opacity: 0.8, weight: 6 }]
+            },
+            createMarker: function(i, waypoint, n) {
+                if (i === 0) return null; 
+                
+                let numberIcon = L.divIcon({
+                    className: 'route-number-marker',
+                    html: `<div style="background-color: #ffc107; color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-size: 14px; z-index: 1000;">${i}</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                
+                return L.marker(waypoint.latLng, { icon: numberIcon, interactive: false });
+            },
+            show: false,
+            addWaypoints: false,
+            routeWhileDragging: false,
+            fitSelectedRoutes: true
+        }).addTo(this.mapInstance);
     }
 };
