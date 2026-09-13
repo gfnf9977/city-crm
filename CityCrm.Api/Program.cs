@@ -122,10 +122,10 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Льодовиковий період", 
                 Address = "просп. Левка Лук'яненка, 14 (на стіні при заїзді у двір)", 
-                Lat = 51.510706, Lng = 31.328251, 
+                Lat = 51.510455, Lng = 31.328997, 
                 Artist = "Віталій Гідеван (@vitaliy_gide1)",
                 Description = "Вуличний арт.",
-                PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Ice+Age" 
+                PhotoUrl = "https://i.ibb.co/QFttpptk/image.jpg" 
             },
             new CityCrm.Api.Entities.Mural { 
                 Title = "Сови", 
@@ -138,7 +138,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Котики", 
                 Address = "м-н Ремзавод, просп. Миру, 198 (кав’ярня Coffee Boss)", 
-                Lat = 51.523422, Lng = 31.272127, 
+                Lat = 51.523233, Lng = 31.271866, 
                 Artist = "Андрій Козир",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Cats" 
             },
@@ -175,7 +175,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Леонід Каденюк", 
                 Address = "м-н Ялівщина, вул. Льотна, 4", 
-                Lat = 51.516126, Lng = 31.277242, 
+                Lat = 51.516166, Lng = 31.276946, 
                 Artist = "Дмитро Адеріхо (@Ader_One)",
                 Description = "Створено у 2017 р. Зображений Леонід Каденюк – перший космонавт незалежної України. Робота створена в рамках проекту «До тебе моє місто промовляє».",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Kadenyuk" 
@@ -190,7 +190,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Тигрята", 
                 Address = "м-н Градецький, просп. Миру, 61", 
-                Lat = 51.501957, Lng = 31.284239, 
+                Lat = 51.502274, Lng = 31.284833, 
                 Artist = "Роман Синенко, Олексій Бичек",
                 Description = "Натюрморт з апельсинами та тиграми. Мурал виконаний в техніці плоскої графіки.",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Tigers" 
@@ -243,7 +243,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Янголятко з котиком", 
                 Address = "парк Б. Хмельницького, вул. Гетьмана Полуботка, 16/6", 
-                Lat = 51.493631, Lng = 31.301799, 
+                Lat = 51.493995, Lng = 31.302426, 
                 Artist = "Євгенія Гапчинська, Віталій Гідеван",
                 Description = "Створено у 2017 р. Героями муралу стали допитлива дівчинка та її котик, що виконані в характерному стилі Гапчинської.",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Angel" 
@@ -251,7 +251,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "As Flowers", 
                 Address = "парк Б. Хмельницького, вул. Гетьмана Полуботка, 12", 
-                Lat = 51.492838, Lng = 31.300600, 
+                Lat = 51.492911, Lng = 31.300327, 
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=As+Flowers" 
             },
             new CityCrm.Api.Entities.Mural { 
@@ -281,7 +281,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = " Мати з дитиною", 
                 Address = "вул. 1-го Травня, 1 (Пологовий будинок)", 
-                Lat = 51.517453, Lng = 31.310603, 
+                Lat = 51.518393, Lng = 31.310119, 
                 Artist = "Дмитро Адеріхо (@Ader_One)",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Maternity" 
             },
@@ -360,7 +360,7 @@ using (var scope = app.Services.CreateScope())
                 Title = "АЗОВці", 
                 Address = "вул. Тероборони, 15 (колишній магазин «Квартал»)", 
                 Lat = 51.498800, Lng = 31.253855, 
-                PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Azov" 
+                PhotoUrl = "https://i.ibb.co/9H1NJZW6/image.jpg" 
             },
             new CityCrm.Api.Entities.Mural { 
                 Title = "Акваріум", 
@@ -417,7 +417,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Херсон - це Україна", 
                 Address = "біля ТЦ ЦУМ", 
-                Lat = 51.499106, Lng = 31.291636, 
+                Lat = 51.499174, Lng = 31.291610, 
                 Artist = "Дмитро Адеріхо (@Ader_One)",
                 Description = "Створено у 2022 р. Серія патріотичних графіті. Меседж – підтримка мешканців окупованих рашистами міст.",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Kherson" 
@@ -432,7 +432,7 @@ using (var scope = app.Services.CreateScope())
             new CityCrm.Api.Entities.Mural { 
                 Title = "Біцуха", 
                 Address = "вул. Козацька 4б (школа №15)", 
-                Lat = 51.511500, Lng = 31.275000, 
+                Lat = 51.513090, Lng = 31.273800, 
                 Artist = "Дмитро Адеріхо (@Ader_One)",
                 Description = "Створено у 2022 р. Мурал-пам'ять захиснику України Віталію Трухану на псевдо «Біцуха». Зроблено, щоб діти бачили, що тут вчився Герой, а не просто чорну меморіальну дошку.",
                 PhotoUrl = "https://placehold.co/600x400/6f42c1/FFFFFF?text=Bitsukha" 

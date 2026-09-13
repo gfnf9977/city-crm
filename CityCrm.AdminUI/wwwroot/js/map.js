@@ -1,6 +1,6 @@
-window.markMuralVisited = (id) => {
+window.toggleMuralVisited = (id) => {
     if (window.leafletMap && window.leafletMap.dotNetRef) {
-        window.leafletMap.dotNetRef.invokeMethodAsync('MarkMuralVisited', id);
+        window.leafletMap.dotNetRef.invokeMethodAsync('ToggleMuralVisited', id);
     }
 };
 
@@ -488,12 +488,17 @@ window.leafletMap = {
             });
 
             let btnHtml = isVisited
-                ? `<div class="badge bg-success w-100 p-2 mt-2" style="font-size: 0.85rem;"><i class="bi bi-check-all"></i> Відвідано</div>`
-                : `<button class="btn btn-sm text-white w-100 mt-2 fw-bold" style="background-color: #6f42c1;" onclick="window.markMuralVisited(${m.id})"><i class="bi bi-geo-alt-fill"></i> Я тут був!</button>`;
+                ? `<button class="btn btn-sm btn-success w-100 mt-2 fw-bold" onclick="window.toggleMuralVisited(${m.id})"><i class="bi bi-check-all"></i> Відвідано (скасувати)</button>`
+                : `<button class="btn btn-sm text-white w-100 mt-2 fw-bold" style="background-color: #6f42c1;" onclick="window.toggleMuralVisited(${m.id})"><i class="bi bi-geo-alt-fill"></i> Я тут був!</button>`;
 
             let popupContent = `
                 <div style="width: 220px;">
-                    <img src="${m.photoUrl}" alt="${m.title}" style="width:100%; height:140px; object-fit:cover; border-radius:6px; margin-bottom: 8px;" />
+                    <a href="${m.photoUrl}" target="_blank" title="Відкрити на весь екран">
+                        <img src="${m.photoUrl}" alt="${m.title}" 
+                             style="width:100%; height:140px; object-fit:cover; border-radius:6px; margin-bottom: 8px; cursor:zoom-in; transition: opacity 0.2s;" 
+                             onmouseover="this.style.opacity=0.85" 
+                             onmouseout="this.style.opacity=1" />
+                    </a>
                     <h6 class="fw-bold mb-1" style="color: ${color};">${m.title}</h6>
                     <div class="text-muted small mb-1"><i class="bi bi-geo-alt-fill text-danger"></i> ${m.address}</div>
                     <div class="text-muted small mb-1"><i class="bi bi-brush"></i> ${m.artist || 'Невідомо'}</div>

@@ -55,7 +55,7 @@
                     <button class="btn @(isMuralsMode ? "text-white" : "") shadow-sm rounded-pill px-3" 
                             style="@(isMuralsMode ? "background-color: #6f42c1; border-color: #6f42c1;" : "color: #6f42c1; border-color: #6f42c1;")" 
                             @onclick="ToggleMuralsMode">
-                        <i class="bi bi-palette-fill"></i> Мурали
+                        <i class="bi @(isMuralsMode ? "bi-x-lg" : "bi-palette-fill")"></i> @(isMuralsMode ? "Вимкнути квест" : "Мурали")
                     </button>
                 </div>
             }
@@ -307,6 +307,13 @@
     private async Task ToggleIssuesVisibility()
     {
         if (!isMapInitialized) return;
+
+        if (showIssuesOnMap && isMuralsMode)
+        {
+            isMuralsMode = false;
+            await JSRuntime.InvokeVoidAsync("leafletMap.clearMurals");
+        }
+
         if (showIssuesOnMap)
         {
             await JSRuntime.InvokeVoidAsync("leafletMap.loadIssues", cachedIssues);
@@ -490,8 +497,11 @@
         isMuralsMode = !isMuralsMode;
         if (isMuralsMode)
         {
-            showIssuesOnMap = false;
-            await ToggleIssuesVisibility();
+            if (showIssuesOnMap)
+            {
+                showIssuesOnMap = false;
+                await JSRuntime.InvokeVoidAsync("leafletMap.loadIssues", new List<CityIssueModel>());
+            }
 
             var storedVisited = await LocalStorage.GetItemAsync<List<int>>("visited_murals");
             if (storedVisited != null) visitedMuralIds = storedVisited;
@@ -506,16 +516,17 @@
     }
 
     [JSInvokable]
-    public async Task MarkMuralVisited(int id)
+    public async Task ToggleMuralVisited(int id)
     {
-        if (!visitedMuralIds.Contains(id))
-        {
+        if (visitedMuralIds.Contains(id))
+            visitedMuralIds.Remove(id);
+        else
             visitedMuralIds.Add(id);
-            await LocalStorage.SetItemAsync("visited_murals", visitedMuralIds);
-            StateHasChanged();
-            
-            await JSRuntime.InvokeVoidAsync("leafletMap.loadMurals", muralsList, visitedMuralIds);
-        }
+
+        await LocalStorage.SetItemAsync("visited_murals", visitedMuralIds);
+        StateHasChanged();
+        
+        await JSRuntime.InvokeVoidAsync("leafletMap.loadMurals", muralsList, visitedMuralIds);
     }
 
     private async Task BuildOptimalRoute()
