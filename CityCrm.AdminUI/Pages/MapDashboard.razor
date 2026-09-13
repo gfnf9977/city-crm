@@ -127,11 +127,73 @@
             </div>
         </div>
         
-        <button class="btn text-white fw-bold px-4 rounded-pill shadow-sm" style="background-color: #6f42c1;" @onclick="BuildOptimalRoute" disabled="@(isBuildingRoute || visitedMuralIds.Count == muralsList.Count)">
+        <button class="btn text-white fw-bold px-4 rounded-pill shadow-sm" style="background-color: #6f42c1;" @onclick="OpenRouteModal" disabled="@(isBuildingRoute || visitedMuralIds.Count == muralsList.Count)">
             @if (isBuildingRoute) { <span class="spinner-border spinner-border-sm"></span> <span> Обчислення...</span> }
             else if (visitedMuralIds.Count == muralsList.Count) { <span><i class="bi bi-check2-circle"></i> Квест пройдено!</span> }
-            else { <span><i class="bi bi-bicycle"></i> Оптимальний веломаршрут</span> }
+            else { <span><i class="bi bi-bicycle"></i> Оптимальний маршрут</span> }
         </button>
+    </div>
+}
+
+@if (isRouteModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header text-white" style="background-color: #6f42c1; border-radius: 12px 12px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-signpost-split"></i> Побудова маршруту</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseRouteModal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">ПОЧАТКОВА ТОЧКА</label>
+                        <select class="form-select shadow-sm" @bind="routeStartOption">
+                            <option value="geolocation">📍 Моя поточна геолокація</option>
+                            @foreach (var m in muralsList)
+                            {
+                                <option value="@m.Id">🎨 Мурал: @m.Title</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold small text-muted mb-0">ЯКІ МУРАЛИ ВІДВІДАТИ?</label>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary py-0" @onclick="SelectUnvisitedMurals">Невідвідані</button>
+                                <button class="btn btn-sm btn-outline-secondary py-0" @onclick="SelectAllMurals">Всі</button>
+                            </div>
+                        </div>
+                        
+                        <div class="border rounded shadow-sm p-2" style="max-height: 200px; overflow-y: auto;">
+                            @foreach (var m in muralsList)
+                            {
+                                bool isChecked = selectedForRoute.Contains(m.Id);
+                                bool isVisited = visitedMuralIds.Contains(m.Id);
+                                <div class="form-check form-switch mb-1">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="mural_@m.Id" 
+                                           checked="@isChecked" @onchange="@(e => ToggleRouteMural(m.Id, (bool)e.Value!))">
+                                    <label class="form-check-label w-100 d-flex justify-content-between" for="mural_@m.Id">
+                                        <span style="@(isVisited ? "text-decoration: line-through; color: #aaa;" : "")">@m.Title</span>
+                                        @if(isVisited) { <i class="bi bi-check-circle-fill text-success small"></i> }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-light border shadow-sm" @onclick="CloseRouteModal">Скасувати</button>
+                    <button type="button" class="btn text-white shadow-sm fw-bold px-4" style="background-color: #6f42c1;" 
+                            @onclick="CalculateRoute" disabled="@(!selectedForRoute.Any() || isBuildingRoute)">
+                        @if (isBuildingRoute) { <span class="spinner-border spinner-border-sm"></span> }
+                        else { <span><i class="bi bi-geo-alt"></i> Побудувати</span> }
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -192,6 +254,10 @@
     private List<MuralModel> muralsList = new();
     private List<int> visitedMuralIds = new();
     private bool isBuildingRoute = false;
+
+    private bool isRouteModalOpen = false;
+    private string routeStartOption = "geolocation"; 
+    private HashSet<int> selectedForRoute = new();
 
     protected override void OnInitialized()
     {
@@ -536,25 +602,69 @@
         await JSRuntime.InvokeVoidAsync("leafletMap.loadMurals", muralsList, visitedMuralIds);
     }
 
-    private async Task BuildOptimalRoute()
+    private void OpenRouteModal()
+    {
+        isRouteModalOpen = true;
+        SelectUnvisitedMurals();
+    }
+
+    private void CloseRouteModal()
+    {
+        isRouteModalOpen = false;
+    }
+
+    private void SelectUnvisitedMurals()
+    {
+        selectedForRoute = new HashSet<int>(muralsList.Select(m => m.Id).Except(visitedMuralIds));
+    }
+
+    private void SelectAllMurals()
+    {
+        selectedForRoute = new HashSet<int>(muralsList.Select(m => m.Id));
+    }
+
+    private void ToggleRouteMural(int id, bool isSelected)
+    {
+        if (isSelected) selectedForRoute.Add(id);
+        else selectedForRoute.Remove(id);
+    }
+
+    private async Task CalculateRoute()
     {
         isBuildingRoute = true;
-        await JSRuntime.InvokeVoidAsync("leafletMap.getUserLocationForRoute");
+        
+        if (routeStartOption == "geolocation")
+        {
+            await JSRuntime.InvokeVoidAsync("leafletMap.getUserLocationForRoute");
+        }
+        else
+        {
+            int startMuralId = int.Parse(routeStartOption);
+            var startMural = muralsList.First(m => m.Id == startMuralId);
+            
+            selectedForRoute.Remove(startMuralId);
+            
+            await ExecuteRouteAlgorithm(startMural.Lat, startMural.Lng, selectedForRoute.ToList());
+        }
     }
 
     [JSInvokable]
     public async Task OnLocationFoundForRoute(double lat, double lng)
     {
-        var unvisited = muralsList.Where(m => !visitedMuralIds.Contains(m.Id)).Select(m => m.Id).ToList();
-        
-        if (!unvisited.Any()) 
+        await ExecuteRouteAlgorithm(lat, lng, selectedForRoute.ToList());
+    }
+
+    private async Task ExecuteRouteAlgorithm(double startLat, double startLng, List<int> waypoints)
+    {
+        if (!waypoints.Any()) 
         {
             isBuildingRoute = false;
+            CloseRouteModal();
             StateHasChanged();
             return;
         }
 
-        var request = new { StartLat = lat, StartLng = lng, UnvisitedMuralIds = unvisited };
+        var request = new { StartLat = startLat, StartLng = startLng, UnvisitedMuralIds = waypoints };
         var response = await Http.PostAsJsonAsync("api/murals/optimize-route", request);
         
         if (response.IsSuccessStatusCode)
@@ -562,11 +672,12 @@
             var route = await response.Content.ReadFromJsonAsync<List<MuralModel>>();
             if (route != null)
             {
-                await JSRuntime.InvokeVoidAsync("leafletMap.drawMuralRoute", lat, lng, route);
+                await JSRuntime.InvokeVoidAsync("leafletMap.drawMuralRoute", startLat, startLng, route);
             }
         }
         
         isBuildingRoute = false;
+        CloseRouteModal();
         StateHasChanged();
     }
     

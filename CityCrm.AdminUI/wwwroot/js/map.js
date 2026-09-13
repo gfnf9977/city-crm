@@ -542,18 +542,34 @@ window.leafletMap = {
     },
 
     drawMuralRoute: function (startLat, startLng, routeMurals) {
-        if (this.routeLayer) { this.mapInstance.removeLayer(this.routeLayer); }
+        if (this.routeLayer) { 
+            this.mapInstance.removeLayer(this.routeLayer); 
+        }
         
+        this.routeLayer = L.featureGroup().addTo(this.mapInstance);
+
         let latlngs = [[startLat, startLng]];
         routeMurals.forEach(m => latlngs.push([m.lat, m.lng]));
 
-        this.routeLayer = L.polyline(latlngs, {
+        L.polyline(latlngs, {
             color: '#6f42c1', 
             weight: 4, 
             dashArray: '10, 10', 
             opacity: 0.8
-        }).addTo(this.mapInstance);
+        }).addTo(this.routeLayer);
         
+        let startIcon = L.divIcon({
+            className: 'start-marker',
+            html: `<div style="background-color: #0dcaf0; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); font-size: 18px; z-index: 2000;">🏃</div>`,
+            iconSize: [36, 36], 
+            iconAnchor: [18, 18], 
+            popupAnchor: [0, -18]
+        });
+
+        L.marker([startLat, startLng], { icon: startIcon })
+         .bindPopup("<div class='fw-bold text-center mb-0'>📍 Точка старту</div>")
+         .addTo(this.routeLayer);
+
         this.mapInstance.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
     }
 };
