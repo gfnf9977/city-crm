@@ -5,6 +5,7 @@
 @inject IJSRuntime JSRuntime
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager NavManager
 
 <PageTitle>@(isAdmin ? "Карта нерухомості (Адмін)" : isInvestorMode ? "Карта інвестора" : "Публічна карта міста")</PageTitle>
 
@@ -225,6 +226,12 @@
                     await LoadIssuesFromServer(); 
                     if (ReportIssueParam) await ToggleIssuePickingMode();
                 } 
+            }
+
+            if (!isAdmin && NavManager.Uri.Contains("mode=murals"))
+            {
+                await ToggleMuralsMode();
+                StateHasChanged();
             }
         }
     }
